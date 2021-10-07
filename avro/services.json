@@ -1,0 +1,140 @@
+{
+  "name": "services",
+  "type": "record",
+  "namespace": "dto",
+  "doc": "Kafka JS schema for cosmos api container 'services'",
+  "fields": [
+    {
+      "name": "op",
+      "type": {
+        "type": "enum",
+        "name": "CrudOperation",
+        "symbols": [
+          "CREATE",
+          "UPDATE",
+          "REMOVE"
+        ]
+      }
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "version",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "departmentName",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "isVisible",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "maxAllowedPaymentAmount",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "organizationFiscalCode",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "organizationName",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "requireSecureChannels",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "serviceId",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "serviceName",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_scope",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_address",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_appAndroid",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_appIos",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_cta",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_description",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_email",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_pec",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_phone",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_privacyUrl",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_supportUrl",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_tokenName",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_tosUrl",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "metadata_webUrl",
+      "type": "string",
+      "default": "undefined"
+    }
+  ]
+}
