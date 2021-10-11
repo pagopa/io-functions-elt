@@ -12,10 +12,8 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as R from "fp-ts/Record";
 import * as S from "fp-ts/string";
 import { set } from "lodash";
-import {
-  ValidableKafkaProducerConfig,
-  KafkaProducerTopicConfig
-} from "../generated/kafka/IoKafkaTypes";
+
+import { KafkaProducerCompactConfig } from "./IoKafkaTypes";
 
 const isRecordOfString = (i: unknown): i is Record<string, unknown> =>
   typeof i === "object" &&
@@ -61,17 +59,17 @@ export const nestifyPrefixedType = (
     )
   );
 
-export type ValidableKafkaProducerConfig = t.TypeOf<
-  typeof ValidableKafkaProducerConfig
+export type KafkaProducerCompactConfig = t.TypeOf<
+  typeof KafkaProducerCompactConfig
 >;
-export const ValidableKafkaProducerConfigFromEnv = new t.Type<
-  ValidableKafkaProducerConfig,
-  ValidableKafkaProducerConfig,
+export const KafkaProducerCompactConfigFromEnv = new t.Type<
+  KafkaProducerCompactConfig,
+  KafkaProducerCompactConfig,
   unknown
 >(
-  "ValidableKafkaProducerConfigFromEnv",
-  (u: unknown): u is ValidableKafkaProducerConfig =>
-    ValidableKafkaProducerConfig.is(u),
+  "KafkaProducerCompactConfigFromEnv",
+  (u: unknown): u is KafkaProducerCompactConfig =>
+    KafkaProducerCompactConfig.is(u),
   (input, context) =>
     pipe(
       input,
@@ -80,35 +78,8 @@ export const ValidableKafkaProducerConfigFromEnv = new t.Type<
         createNotRecordOfStringErrorL(input, context)
       ),
       E.chainW(inputRecord =>
-        ValidableKafkaProducerConfig.validate(
+        KafkaProducerCompactConfig.validate(
           nestifyPrefixedType(inputRecord, "TARGETKAFKA"),
-          context
-        )
-      )
-    ),
-  t.identity
-);
-
-export type KafkaProducerTopicConfig = t.TypeOf<
-  typeof KafkaProducerTopicConfig
->;
-export const KafkaProducerTopicConfigFromEnv = new t.Type<
-  KafkaProducerTopicConfig,
-  KafkaProducerTopicConfig,
-  unknown
->(
-  "KafkaProducerTopicConfigFromEnv",
-  (u: unknown): u is KafkaProducerTopicConfig => KafkaProducerTopicConfig.is(u),
-  (input, context) =>
-    pipe(
-      input,
-      E.fromPredicate(
-        isRecordOfString,
-        createNotRecordOfStringErrorL(input, context)
-      ),
-      E.chainW(inputRecord =>
-        KafkaProducerTopicConfig.validate(
-          nestifyPrefixedType(inputRecord, "SERVICESTOPIC"),
           context
         )
       )
@@ -119,29 +90,23 @@ export const KafkaProducerTopicConfigFromEnv = new t.Type<
 // global app configuration
 export type IDecodableConfig = t.TypeOf<typeof IDecodableConfig>;
 export const IDecodableConfig = t.interface({
-  AzureWebJobsStorage: NonEmptyString,
-
   COSMOSDB_KEY: NonEmptyString,
   COSMOSDB_NAME: NonEmptyString,
   COSMOSDB_URI: NonEmptyString,
-
-  QueueStorageConnection: NonEmptyString,
 
   isProduction: t.boolean
 });
 
 export interface IParsableConfig {
-  readonly targetKafka: ValidableKafkaProducerConfig;
-  readonly servicesTopic: KafkaProducerTopicConfig;
+  readonly targetKafka: KafkaProducerCompactConfig;
+  // readonly servicesTopic: KafkaProducerTopicConfig;
 }
 
 export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
   pipe(
     E.Do,
-    E.bind("targetKafka", () =>
-      ValidableKafkaProducerConfigFromEnv.decode(input)
-    ),
-    E.bind("servicesTopic", () => KafkaProducerTopicConfigFromEnv.decode(input))
+    E.bind("targetKafka", () => KafkaProducerCompactConfigFromEnv.decode(input))
+    // E.bind("servicesTopic", () => KafkaProducerTopicConfigFromEnv.decode(input))
   );
 
 export type IConfig = IDecodableConfig & IParsableConfig;

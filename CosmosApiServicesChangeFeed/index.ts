@@ -4,7 +4,7 @@ import * as avro from "avsc";
 import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
-import * as KP from "../utils/kafka/kafkaProducer";
+import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { services } from "../generated/avro/dto/services";
 import { CrudOperation } from "../generated/avro/dto/CrudOperationEnum";
 import {
@@ -57,21 +57,22 @@ const avroServiceFormatter: MessageFormatter<RetrievedService> = message => ({
 
 const config = getConfigOrThrow();
 
-const kakfaClient = KP.fromConfig(
-  config.targetKafka as ValidableKafkaProducerConfig // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
-);
-
 const servicesTopic = {
-  ...config.servicesTopic,
+  ...config.targetKafka,
   messageFormatter: avroServiceFormatter
 };
+
+const kakfaClient = KP.fromConfig(
+  config.targetKafka as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
+  servicesTopic
+);
 
 const changeFeedStart = async (
   context: Context,
   documents: ReadonlyArray<unknown>
 ): Promise<void> => {
   logger = context.log;
-  return handleServicesChange(kakfaClient, servicesTopic, documents);
+  return handleServicesChange(kakfaClient, documents);
 };
 
 export default changeFeedStart;

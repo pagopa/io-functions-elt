@@ -4,19 +4,17 @@ import * as E from "fp-ts/lib/Either";
 import * as T from "fp-ts/lib/Task";
 import * as RA from "fp-ts/ReadonlyArray";
 
-import * as as from "azure-storage";
+// import * as as from "azure-storage";
 
 import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 
 import { KafkaJSError } from "kafkajs";
-import { KafkaProducerTopicConfig } from "../utils/kafka/KafkaTypes";
-import * as KP from "../utils/kafka/kafkaProducer";
+import * as KP from "../utils/kafka/KafkaProducerCompact";
 
 export const handleServicesChange = (
-  client: KP.KafkaProducer,
-  topic: KafkaProducerTopicConfig<RetrievedService>,
-  storage: as.TableService,
+  client: KP.KafkaProducerCompact<RetrievedService>,
+  // storage: as.TableService,
   documents: ReadonlyArray<unknown>
 ): Promise<void> =>
   pipe(
@@ -27,7 +25,7 @@ export const handleServicesChange = (
     T.chainFirst(
       flow(
         RA.rights,
-        KP.sendMessages(topic, client),
+        KP.sendMessages(client),
         TE.toUnion,
         T.map(r => {
           console.log(`results: ${JSON.stringify(r)}`); // TODO: log errors into storage (Table API)
