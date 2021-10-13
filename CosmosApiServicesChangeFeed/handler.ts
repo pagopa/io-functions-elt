@@ -22,7 +22,7 @@ const storeErrors = (errorStorage: TableClient) => (
           body: `${JSON.stringify(es.body)}`,
           message: es.message,
           name: es.name,
-          partitionKey: `${new Date().getMonth}`,
+          partitionKey: `${new Date().getMonth() + 1}`,
           retriable: es.retriable,
           rowKey: `${Date.now()}`
         }),
