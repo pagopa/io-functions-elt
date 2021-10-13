@@ -4,6 +4,7 @@ import * as avro from "avsc";
 import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
+import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { services } from "../generated/avro/dto/services";
 import { CrudOperation } from "../generated/avro/dto/CrudOperationEnum";
@@ -67,12 +68,21 @@ const kakfaClient = KP.fromConfig(
   servicesTopic
 );
 
+const errorStorage = new TableClient(
+  `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
+  config.ERROR_STORAGE_TABLE,
+  new AzureNamedKeyCredential(
+    config.ERROR_STORAGE_ACCOUNT,
+    config.ERROR_STORAGE_KEY
+  )
+);
+
 const changeFeedStart = async (
   context: Context,
   documents: ReadonlyArray<unknown>
 ): Promise<void> => {
   logger = context.log;
-  return handleServicesChange(kakfaClient, documents);
+  return handleServicesChange(kakfaClient, errorStorage, documents);
 };
 
 export default changeFeedStart;

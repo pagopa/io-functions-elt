@@ -94,6 +94,10 @@ export const IDecodableConfig = t.interface({
   COSMOSDB_NAME: NonEmptyString,
   COSMOSDB_URI: NonEmptyString,
 
+  ERROR_STORAGE_ACCOUNT: NonEmptyString,
+  ERROR_STORAGE_KEY: NonEmptyString,
+  ERROR_STORAGE_TABLE: NonEmptyString,
+
   isProduction: t.boolean
 });
 
