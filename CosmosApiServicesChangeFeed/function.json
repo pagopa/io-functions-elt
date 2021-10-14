@@ -1,0 +1,16 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "cosmosDBTrigger",
+      "name": "cosmosApiProfilesTrigger",
+      "direction": "in",
+      "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
+      "databaseName": "greta",
+      "collectionName": "services",
+      "leaseCollectionName": "leases-services",
+      "createLeaseCollectionIfNotExists": true
+    }
+  ],
+  "scriptFile": "../dist/CosmosApiServicesChangeFeed/index.js"
+}
