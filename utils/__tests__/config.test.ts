@@ -1,6 +1,6 @@
 import {
   nestifyPrefixedType,
-  ValidableKafkaProducerConfigFromEnv
+  KafkaProducerCompactConfigFromEnv
 } from "../config";
 import * as E from "fp-ts/Either";
 
@@ -14,7 +14,8 @@ const dummyEnv = {
   TARGETKAFKA_sasl_password: "password",
   TARGETKAFKA_maxInFlightRequests: "1",
   TARGETKAFKA_idempotent: "true",
-  TARGETKAFKA_transactionalId: "IO_ELT"
+  TARGETKAFKA_transactionalId: "IO_ELT",
+  TARGETKAFKA_topic: "io-cosmosdb-services"
 };
 
 const dummyNestedEnv = {
@@ -28,7 +29,8 @@ const dummyNestedEnv = {
     username: "username"
   },
   ssl: "true",
-  transactionalId: "IO_ELT"
+  transactionalId: "IO_ELT",
+  topic: "io-cosmosdb-services"
 };
 
 const dummyTargetKafkaConfig = {
@@ -42,7 +44,8 @@ const dummyTargetKafkaConfig = {
     username: "username"
   },
   ssl: true,
-  transactionalId: "IO_ELT"
+  transactionalId: "IO_ELT",
+  topic: "io-cosmosdb-services"
 };
 
 describe("config", () => {
@@ -52,7 +55,7 @@ describe("config", () => {
   });
 
   it("GIVEN a not valid kafka producer configuration WHEN the decode is called THEN a left either is returned", () => {
-    const aaa = ValidableKafkaProducerConfigFromEnv.decode({
+    const aaa = KafkaProducerCompactConfigFromEnv.decode({
       ...dummyEnv,
       TARGETKAFKA_clientId: 1
     });
@@ -60,7 +63,7 @@ describe("config", () => {
   });
 
   it("GIVEN a valid kafka producer configuration WHEN the decode is called THEN a right either is returned", () => {
-    const aaa = ValidableKafkaProducerConfigFromEnv.decode(dummyEnv);
+    const aaa = KafkaProducerCompactConfigFromEnv.decode(dummyEnv);
     expect(E.isRight(aaa)).toBeTruthy();
     if (E.isRight(aaa)) {
       expect(E.getOrElseW(() => "")(aaa)).toStrictEqual(dummyTargetKafkaConfig);
