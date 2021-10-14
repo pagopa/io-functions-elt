@@ -71,5 +71,6 @@ export const handleServicesChange = (
         TE.toUnion
       )
     ),
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     T.map(() => {})
   )();

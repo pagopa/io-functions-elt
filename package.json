@@ -69,7 +69,6 @@
     "kafkajs": "^1.15.0",
     "lodash": "^4.17.21",
     "node-fetch": "^2.6.0",
-    "ts-to-io": "../../../../ts-to-io/ts-to-io-v0.3.1.tgz",
     "winston": "^3.2.1"
   },
   "resolutions": {
