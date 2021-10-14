@@ -20,7 +20,6 @@
     "lint-api": "oval validate -p openapi/index.yaml",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "predeploy": "npm-run-all generate build dist:*",
-    "generate:definitions": "shx rm -rf ./generated/definitions && mkdir -p ./generated/definitions && gen-api-models --api-spec ./openapi/index.yaml --out-dir ./generated/definitions",
     "generate:avro": "shx rm -rf ./generated/avro && mkdir -p ./generated/avro && avro-to-typescript --compile ./avro ./generated/avro",
     "g:iotskafka": "shx rm -rf ./generated/kafka && mkdir -p ./generated/kafka && ts-to-io --follow-imports utils/kafka/KafkaTypes.ts > ./generated/kafka/IoKafkaTypes.ts",
     "generate": "npm-run-all generate:*",
