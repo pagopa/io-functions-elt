@@ -72,7 +72,7 @@ stages:
 
 
   # Prepare Artifact
-  - stage: Deploy_staging
+  - stage: Deploy_io-p-fn-elt
     dependsOn:
       - Release
     jobs:
@@ -127,13 +127,13 @@ stages:
               package: '$(Build.ArtifactStagingDirectory)/'
               deploymentMethod: 'auto'
               deployToSlotOrASE: true
-              slotName: 'staging'
-            displayName: Deploy to staging slot
+              slotName: 'io-p-fn-elt'
+            displayName: Deploy to io-p-fn-elt slot
 
-  # Check that the staging instance is healthy
+  # Check that the io-p-fn-elt instance is healthy
   - stage: Healthcheck
     dependsOn:
-      - Deploy_staging
+      - Deploy_io-p-fn-elt
     jobs:
       - job: 'do_healthcheck'       
         steps:  
@@ -141,25 +141,8 @@ stages:
             parameters:
               azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
               appName: '$(PRODUCTION_APP_NAME)'
-              endpoint: 'https://$(PRODUCTION_APP_NAME)-staging.azurewebsites.net/api/v1/info'
+              endpoint: 'https://$(PRODUCTION_APP_NAME).azurewebsites.net/api/v1/info'
               endpointType: 'private'
-              containerInstanceResourceGroup: 'io-p-rg-common'
+              containerInstanceResourceGroup: 'io-p-elt-rg'
               containerInstanceVNet: 'io-p-vnet-common'
               containerInstanceSubnet: 'azure-devops' 
-
-  # Promote the staging instance to production
-  - stage: Deploy_production
-    dependsOn:
-      - Healthcheck
-      - Deploy_staging
-    jobs:
-      - job: 'do_deploy'       
-        steps:  
-          - task: AzureAppServiceManage@0   
-            inputs:
-              azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
-              resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
-              webAppName: '$(PRODUCTION_APP_NAME)'
-              sourceSlot: staging
-              swapWithProduction: true
-            displayName: Swap with production slot
