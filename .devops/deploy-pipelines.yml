@@ -127,7 +127,7 @@ stages:
               package: '$(Build.ArtifactStagingDirectory)/'
               deploymentMethod: 'auto'
               deployToSlotOrASE: true
-              slotName: 'io-p-fn-elt'
+              slotName: 'production'
             displayName: Deploy to io-p-fn-elt slot
 
   # Check that the io-p-fn-elt instance is healthy
