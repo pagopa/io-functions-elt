@@ -6,7 +6,7 @@
       "name": "cosmosApiProfilesTrigger",
       "direction": "in",
       "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
-      "databaseName": "greta",
+      "databaseName": "db",
       "collectionName": "services",
       "leaseCollectionName": "leases-services",
       "createLeaseCollectionIfNotExists": true
