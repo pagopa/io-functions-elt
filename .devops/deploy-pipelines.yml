@@ -72,7 +72,7 @@ stages:
 
 
   # Prepare Artifact
-  - stage: Deploy_io-p-fn-elt
+  - stage: Deploy_production
     dependsOn:
       - Release
     jobs:
@@ -133,7 +133,7 @@ stages:
   # Check that the io-p-fn-elt instance is healthy
   - stage: Healthcheck
     dependsOn:
-      - Deploy_io-p-fn-elt
+      - Deploy_production
     jobs:
       - job: 'do_healthcheck'       
         steps:  
