@@ -14,6 +14,7 @@ import {
 } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow } from "../utils/config";
 import { handleServicesChange } from "./handler";
+import { IBulkOperationResult } from "../utils/bulkOperationResult";
 
 // eslint-disable-next-line functional/no-let
 let logger: Context["log"] | undefined;
@@ -22,7 +23,7 @@ const contextTransport = new AzureContextTransport(() => logger, {
 });
 winston.add(contextTransport);
 
-const avroServiceFormatter: MessageFormatter<RetrievedService> = message => ({
+export const avroServiceFormatter: MessageFormatter<RetrievedService> = message => ({
   value: avro.Type.forSchema(
     services.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
   ).toBuffer(
@@ -80,7 +81,7 @@ const errorStorage = new TableClient(
 const changeFeedStart = async (
   context: Context,
   documents: ReadonlyArray<unknown>
-): Promise<void> => {
+): Promise<IBulkOperationResult> => {
   logger = context.log;
   return handleServicesChange(kakfaClient, errorStorage, documents);
 };

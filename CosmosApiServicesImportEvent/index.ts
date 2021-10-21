@@ -4,6 +4,7 @@ import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
 import { getConfigOrThrow } from "../utils/config";
+import * as KP from "../utils/kafka/KafkaProducerCompact";
 
 import * as T from "fp-ts/Task";
 import {
@@ -11,6 +12,9 @@ import {
   SERVICE_COLLECTION_NAME
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { cosmosdbInstance } from "../utils/cosmosdb";
+import { importServices } from "./handler";
+import { avroServiceFormatter } from "../CosmosApiServicesChangeFeed";
+import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 
 // eslint-disable-next-line functional/no-let
 let logger: Context["log"] | undefined;
@@ -34,13 +38,17 @@ const errorStorage = new TableClient(
   )
 );
 
-const changeFeedStart = async (context: Context, command: unknown) => {
-  logger = context.log;
-  return T.of({
-    result: `${command}`,
-    partitionKey: `${new Date().getMonth() + 1}`,
-    rowKey: `${Date.now()}`
-  })();
+const servicesTopic = {
+  ...config.targetKafka,
+  messageFormatter: avroServiceFormatter
 };
+
+const kakfaClient = KP.fromConfig(
+  config.targetKafka as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
+  servicesTopic
+);
+
+const changeFeedStart = async (context: Context, command: unknown) =>
+  importServices(serviceModel, kakfaClient, errorStorage);
 
 export default changeFeedStart;
