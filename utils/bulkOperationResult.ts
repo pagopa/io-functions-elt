@@ -2,15 +2,18 @@
 
 export interface IBulkOperationResult {
   readonly isSuccess: boolean;
-  readonly partitionKey: string;
   readonly result: string;
+}
+
+export interface IBulkOperationResultEntity extends IBulkOperationResult {
+  readonly partitionKey: string;
   readonly rowKey: string;
 }
 
-export const toBulkOperationResult = (
-  isSuccess: boolean,
-  result: string
-): IBulkOperationResult => ({
+export const toBulkOperationResultEntity = ({
+  isSuccess,
+  result
+}: IBulkOperationResult): IBulkOperationResultEntity => ({
   result,
   isSuccess,
   partitionKey: `${new Date().getMonth() + 1}`,
