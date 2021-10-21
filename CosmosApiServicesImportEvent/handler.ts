@@ -1,16 +1,21 @@
 import { flow, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
-import * as T from "fp-ts/lib/Task";
 import * as RA from "fp-ts/ReadonlyArray";
 
-import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import {
+  RetrievedService,
+  ServiceModel
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 
-import { KafkaJSError } from "kafkajs";
 import { TableClient, TableInsertEntityHeaders } from "@azure/data-tables";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { IStorableSendFailureError } from "../utils/kafka/KafkaOperation";
+import {
+  IBulkOperationResult,
+  toBulkOperationResult
+} from "./bulkOperationResult";
 
 const storeErrors = (errorStorage: TableClient) => (
   storableErrors: ReadonlyArray<IStorableSendFailureError<unknown>>
@@ -30,47 +35,65 @@ const storeErrors = (errorStorage: TableClient) => (
     )
   );
 
-export const handleServicesChange = (
+export const importServices = (
+  serviceModel: ServiceModel,
   client: KP.KafkaProducerCompact<RetrievedService>,
-  errorStorage: TableClient,
-  documents: ReadonlyArray<unknown>
-): Promise<void> =>
+  errorStorage: TableClient
+): Promise<IBulkOperationResult> =>
   pipe(
-    documents,
-    RA.map(RetrievedService.decode),
-    T.of,
+    serviceModel.listLastVersionServices(),
+    TE.mapLeft(_ => toBulkOperationResult(false, `Decode Errors`)),
+    TE.chain(
+      TE.fromPredicate(O.isSome, _ =>
+        toBulkOperationResult(false, `Empty service list`)
+      )
+    ),
+    TE.map(option => option.value),
     // publish entities on brokers and store send errors
-    T.chainFirst(
+    TE.chain(
       flow(
-        RA.rights,
         KP.sendMessages(client),
         TE.mapLeft(storeErrors(errorStorage)),
         TE.orLeft(RA.sequence(TE.ApplicativeSeq)),
-        TE.toUnion
-      )
-    ),
-    // store decode errors
-    T.chainFirst(
-      flow(
-        RA.mapWithIndex((i, decodeResult) =>
-          pipe(
-            decodeResult,
-            E.mapLeft(errorsToReadableMessages),
-            E.mapLeft(
-              RA.reduce("", (errorsJoined, rde) => errorsJoined + " | " + rde)
-            ),
-            E.mapLeft(errorsJoined => ({
-              ...new KafkaJSError(errorsJoined, { retriable: false }),
-              body: documents[i]
-            }))
+        TE.mapLeft(_ =>
+          toBulkOperationResult(
+            false,
+            `Error sending service list (Check error table for details)`
           )
         ),
-        RA.lefts,
-        storeErrors(errorStorage),
-        RA.sequence(TE.ApplicativeSeq),
-        TE.toUnion
+        TE.map(_ => toBulkOperationResult(true, `Sent ${_.length} services`))
       )
     ),
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    T.map(() => {})
+    TE.toUnion
   )();
+// export const importServices = (
+//   serviceModel: ServiceModel,
+//   client: KP.KafkaProducerCompact<RetrievedService>,
+//   errorStorage: TableClient
+// ): Promise<IBulkOperationResult> =>
+//   pipe(
+//     serviceModel.listLastVersionServices(),
+//     TE.mapLeft(_ => toBulkOperationResult(false, `Decode Errors`)),
+//     TE.chain(
+//       TE.fromPredicate(O.isSome, _ =>
+//         toBulkOperationResult(false, `Empty service list`)
+//       )
+//     ),
+//     TE.map(option => option.value),
+//     // publish entities on brokers and store send errors
+//     TE.chain(
+//       flow(
+//         KP.sendMessages(client),
+//         TE.mapLeft(storeErrors(errorStorage)),
+//         TE.orLeft(RA.sequence(TE.ApplicativeSeq)),
+//         TE.mapLeft(_ =>
+//           toBulkOperationResult(
+//             false,
+//             `Error sending service list (Check error table for details)`
+//           )
+//         ),
+//         TE.map(_ => toBulkOperationResult(true, `Sent ${_.length} services`))
+//       )
+//     ),
+//     TE.toUnion
+//   )();

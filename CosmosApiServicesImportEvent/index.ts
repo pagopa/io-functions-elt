@@ -6,6 +6,11 @@ import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
 import { getConfigOrThrow } from "../utils/config";
 
 import * as T from "fp-ts/Task";
+import {
+  ServiceModel,
+  SERVICE_COLLECTION_NAME
+} from "@pagopa/io-functions-commons/dist/src/models/service";
+import { cosmosdbInstance } from "../utils/cosmosdb";
 
 // eslint-disable-next-line functional/no-let
 let logger: Context["log"] | undefined;
@@ -15,6 +20,10 @@ const contextTransport = new AzureContextTransport(() => logger, {
 winston.add(contextTransport);
 
 const config = getConfigOrThrow();
+
+const serviceModel = new ServiceModel(
+  cosmosdbInstance.container(SERVICE_COLLECTION_NAME)
+);
 
 const errorStorage = new TableClient(
   `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
