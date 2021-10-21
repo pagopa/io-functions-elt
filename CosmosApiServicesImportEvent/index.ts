@@ -3,18 +3,18 @@ import * as winston from "winston";
 import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
-import { getConfigOrThrow } from "../utils/config";
-import * as KP from "../utils/kafka/KafkaProducerCompact";
 
-import * as T from "fp-ts/Task";
 import {
   ServiceModel,
   SERVICE_COLLECTION_NAME
 } from "@pagopa/io-functions-commons/dist/src/models/service";
+import * as KP from "../utils/kafka/KafkaProducerCompact";
+import { getConfigOrThrow } from "../utils/config";
 import { cosmosdbInstance } from "../utils/cosmosdb";
-import { importServices } from "./handler";
-import { avroServiceFormatter } from "../CosmosApiServicesChangeFeed";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
+import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
+import { IBulkOperationResult } from "../utils/bulkOperationResult";
+import { importServices } from "./handler";
 
 // eslint-disable-next-line functional/no-let
 let logger: Context["log"] | undefined;
@@ -48,7 +48,10 @@ const kakfaClient = KP.fromConfig(
   servicesTopic
 );
 
-const changeFeedStart = async (context: Context, command: unknown) =>
+const run = async (
+  _context: Context,
+  _command: unknown
+): Promise<IBulkOperationResult> =>
   importServices(serviceModel, kakfaClient, errorStorage);
 
-export default changeFeedStart;
+export default run;
