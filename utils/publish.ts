@@ -49,8 +49,8 @@ export const publish = <T>(
         RA.rights,
         KP.sendMessages(client),
         TE.mapLeft(storeErrors(errorStorage)),
-        TE.orElseW(RA.sequence(TE.ApplicativeSeq)),
-        TE.map(__ => "Documents sent."),
+        TE.orElseFirstW(RA.sequence(TE.ApplicativeSeq)),
+        TE.map(messagesSent => `Documents sent (${messagesSent.length}).`),
         TE.mapLeft(
           __ =>
             "Error publishing some documents. Check storage table errors for details."
