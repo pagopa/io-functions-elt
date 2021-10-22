@@ -10,50 +10,37 @@ async function* yield123() {
 }
 
 describe("AsyncIterableTask", () => {
-  it("should work", async () => {
-    const asyncIterable = yield123();
-    const asyncIterator = asyncIterable[Symbol.asyncIterator]();
-
-    for await (let variable of asyncIterator) {
-      console.log(variable);
-    }
-  });
-  it("should read all values", async () => {
+  it("fold - should read all values", async () => {
     const asyncIterable = yield123();
     const asyncIterator = asyncIterable[Symbol.asyncIterator]();
 
     const res = await pipe(
       asyncIterator,
-      x => x,
       AI.fromAsyncIterable,
-      AI.map(v => {
-        console.log("Value " + v);
-        return v + 1;
-      }),
+      AI.map(v => v + 1),
       AI.fold
     )();
 
-    console.log(res);
-
-    return res;
+    expect(res).toEqual([2, 3, 4]);
   });
-  it("should read all values", async () => {
+
+  it("run - should process all values", async () => {
     const asyncIterable = yield123();
     const asyncIterator = asyncIterable[Symbol.asyncIterator]();
 
+    let elements = 0;
+
     const res = await pipe(
       asyncIterator,
-      x => x,
       AI.fromAsyncIterable,
       AI.map(v => {
-        console.log("Value " + v);
+        elements++;
         return v + 1;
       }),
       AI.run
     )();
 
-    console.log(res);
-
-    return res;
+    expect(elements).toEqual(3);
+    expect(res).toBeUndefined();
   });
 });
