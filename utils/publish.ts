@@ -7,10 +7,12 @@ import { Validation } from "io-ts";
 
 import { TableClient, TableInsertEntityHeaders } from "@azure/data-tables";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
-import { KafkaJSError } from "kafkajs";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { IStorableSendFailureError } from "./kafka/KafkaOperation";
 import { IBulkOperationResult } from "./bulkOperationResult";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const kerr = require("kafkajs/src/errors.js"); // due to suspected issue "KafkaJsError is not a costructor" whe using kafkajs type
 
 const storeErrors = (errorStorage: TableClient) => (
   storableErrors: ReadonlyArray<IStorableSendFailureError<unknown>>
@@ -67,7 +69,7 @@ export const publish = <T>(
               RA.reduce("", (errorsJoined, rde) => errorsJoined + " | " + rde)
             ),
             E.mapLeft(errorsJoined => ({
-              ...new KafkaJSError(errorsJoined, { retriable: false }),
+              ...new kerr.KafkaJSError(errorsJoined, { retriable: false }),
               body: documents ? documents[i] : ""
             }))
           )

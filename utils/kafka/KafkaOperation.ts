@@ -13,6 +13,9 @@ import { identity, pipe } from "fp-ts/lib/function";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { failure, createErrorFromCode } = require("kafkajs/src/protocol/error"); // import required becouse createErrorFromRecord is not included in @types/kafkajs
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const kerr = require("kafkajs/src/errors.js"); // due to suspected issue "KafkaJsError is not a costructor" whe using kafkajs type
+
 export interface IStorableSendFailureError<T> extends KafkaJSError {
   readonly body: T;
 }
@@ -65,7 +68,7 @@ export const storableSendFailureError = <T>(
     E.toError,
     E.fromPredicate(
       isKafkaJSError,
-      e => new KafkaJSError(e, { retriable: false })
+      e => new kerr.KafkaJSError(e, { retriable: false })
     ),
     E.toUnion,
     (ke: KafkaJSError) => messages.map(message => ({ ...ke, body: message }))
