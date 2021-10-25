@@ -6,10 +6,7 @@ import * as RA from "fp-ts/ReadonlyArray";
 import { Validation } from "io-ts";
 
 import { TableClient, TableInsertEntityHeaders } from "@azure/data-tables";
-import {
-  errorsToReadableMessages,
-  readableReport
-} from "@pagopa/ts-commons/lib/reporters";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { toString } from "lodash";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { IStorableSendFailureError } from "./kafka/KafkaOperation";

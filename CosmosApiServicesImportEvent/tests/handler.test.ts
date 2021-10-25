@@ -1,5 +1,5 @@
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { IPString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
@@ -91,8 +91,8 @@ const serviceModelMock = ({
 } as unknown) as ServiceModel;
 
 const producerMock = {
-  connect: jest.fn(async () => {}),
-  disconnect: jest.fn(async () => {}),
+  connect: jest.fn(async () => void 0),
+  disconnect: jest.fn(async () => void 0),
   send: jest.fn(async (pr: ProducerRecord) =>
     pipe(
       pr.messages,
@@ -107,8 +107,7 @@ const producerMock = {
     )
   ),
   sendBatch: jest.fn(async _ => {
-    console.log("sendBatch");
-    [] as RecordMetadata[];
+    [] as ReadonlyArray<RecordMetadata>;
   })
 };
 
@@ -117,10 +116,11 @@ const kpc: KafkaProducerCompact<RetrievedService> = () => ({
   topic: { topic }
 });
 
+const createEntityMock = jest.fn(
+  async (_entity, _options) => ({} as TableInsertEntityHeaders)
+);
 const tableClient: TableClient = ({
-  createEntity: jest.fn(
-    async (entity, options) => ({} as TableInsertEntityHeaders)
-  )
+  createEntity: createEntityMock
 } as unknown) as TableClient;
 
 // ----------------------
@@ -128,6 +128,10 @@ const tableClient: TableClient = ({
 // ----------------------
 
 describe("CosmosApiServicesImportEvent", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("sould send all services version to kafka client, ordered by serviceId and version", async () => {
     const res = await importServices(serviceModelMock, kpc, tableClient);
 
@@ -171,6 +175,39 @@ describe("CosmosApiServicesImportEvent", () => {
         partitionKey: `${new Date().getMonth() + 1}`,
         result:
           "Documents sent (6). Error decoding some documents. Check storage table errors for details."
+      })
+    );
+  });
+
+  it("should exit if error during send occurred", async () => {
+    producerMock.send.mockImplementationOnce(
+      jest.fn(async (pr: ProducerRecord) =>
+        pipe(
+          pr.messages,
+          RA.map(
+            __ =>
+              ({
+                // Set errorCode != 0
+                errorCode: 1,
+                partition: 1,
+                topicName: pr.topic
+              } as RecordMetadata)
+          )
+        )
+      )
+    );
+
+    const res = await importServices(serviceModelMock, kpc, tableClient);
+
+    expect(tableClient.createEntity).toHaveBeenCalledTimes(
+      aListOfRightServices.length
+    );
+    expect(res).toEqual(
+      expect.objectContaining({
+        isSuccess: false,
+        partitionKey: `${new Date().getMonth() + 1}`,
+        result:
+          "Error publishing some documents. Check storage table errors for details. No decoding errors."
       })
     );
   });
