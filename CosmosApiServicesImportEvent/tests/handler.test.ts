@@ -179,16 +179,38 @@ describe("CosmosApiServicesImportEvent", () => {
     );
   });
 
-  it("should exit if error during send occurred", async () => {
+  it("should exit if unexpected eception during send occurred", async () => {
+    producerMock.send.mockImplementationOnce(
+      jest.fn(async (_pr: ProducerRecord) => {
+        throw Error();
+      })
+    );
+
+    const res = await importServices(serviceModelMock, kpc, tableClient);
+
+    expect(tableClient.createEntity).toHaveBeenCalledTimes(
+      aListOfRightServices.length
+    );
+    expect(res).toEqual(
+      expect.objectContaining({
+        isSuccess: false,
+        partitionKey: `${new Date().getMonth() + 1}`,
+        result:
+          "Error publishing some documents. Check storage table errors for details. No decoding errors."
+      })
+    );
+  });
+
+  it("should exit if error sending at least one message occurred", async () => {
     producerMock.send.mockImplementationOnce(
       jest.fn(async (pr: ProducerRecord) =>
         pipe(
           pr.messages,
-          RA.map(
-            __ =>
+          RA.mapWithIndex(
+            (i, __) =>
               ({
                 // Set errorCode != 0
-                errorCode: 1,
+                errorCode: i === 0 ? 1 : 0,
                 partition: 1,
                 topicName: pr.topic
               } as RecordMetadata)
@@ -199,9 +221,7 @@ describe("CosmosApiServicesImportEvent", () => {
 
     const res = await importServices(serviceModelMock, kpc, tableClient);
 
-    expect(tableClient.createEntity).toHaveBeenCalledTimes(
-      aListOfRightServices.length
-    );
+    expect(tableClient.createEntity).toHaveBeenCalledTimes(1);
     expect(res).toEqual(
       expect.objectContaining({
         isSuccess: false,
