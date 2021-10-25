@@ -6,7 +6,11 @@ import * as RA from "fp-ts/ReadonlyArray";
 import { Validation } from "io-ts";
 
 import { TableClient, TableInsertEntityHeaders } from "@azure/data-tables";
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import {
+  errorsToReadableMessages,
+  readableReport
+} from "@pagopa/ts-commons/lib/reporters";
+import { toString } from "lodash";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { IStorableSendFailureError } from "./kafka/KafkaOperation";
 import { IBulkOperationResult } from "./bulkOperationResult";
@@ -76,16 +80,19 @@ export const publish = <T>(
         ),
         RA.lefts,
         TE.fromPredicate(lefts => lefts.length === 0, identity),
+        TE.map(_ => undefined),
         TE.mapLeft(storeErrors(errorStorage)),
         TE.orElseW(RA.sequence(TE.ApplicativeSeq)),
-        TE.map(__ => "No decoding errors."),
-        TE.mapLeft(
-          __ =>
-            "Error decoding some documents. Check storage table errors for details."
+        TE.mapLeft(e => toString(e)),
+        TE.chain(res =>
+          typeof res === "undefined"
+            ? TE.of("No decoding errors.")
+            : TE.left(
+                "Error decoding some documents. Check storage table errors for details."
+              )
         )
       )
     ),
-    x => x,
     T.map(({ sendResult, decodeResult }) => ({
       isSuccess: E.isRight(sendResult) && E.isRight(decodeResult),
       result: `${E.toUnion(sendResult)} ${E.toUnion(decodeResult)}`

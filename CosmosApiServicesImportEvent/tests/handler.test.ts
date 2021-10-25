@@ -167,7 +167,7 @@ describe("CosmosApiServicesImportEvent", () => {
     expect(tableClient.createEntity).toHaveBeenCalled();
     expect(res).toEqual(
       expect.objectContaining({
-        isSuccess: true,
+        isSuccess: false,
         partitionKey: `${new Date().getMonth() + 1}`,
         result:
           "Documents sent (6). Error decoding some documents. Check storage table errors for details."
