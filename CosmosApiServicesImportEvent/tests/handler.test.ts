@@ -11,7 +11,7 @@ import {
   ServiceModel
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { Producer, ProducerRecord, RecordMetadata } from "kafkajs";
-import { TableClient } from "@azure/data-tables";
+import { TableClient, TableInsertEntityHeaders } from "@azure/data-tables";
 import { contramap } from "fp-ts/lib/Ord";
 import { aRetrievedService } from "../../__mocks__/services.mock";
 import { importServices } from "../handler";
@@ -50,6 +50,10 @@ const aListOfRightServices = pipe(
     throw Error();
   })
 );
+const aListOfServicesWithDecodingError = [
+  ...aListOfRightServices,
+  { serviceId: "anId" }
+];
 
 // eslint-disable-next-line functional/immutable-data
 const aListOfOrderedServices = pipe(
@@ -78,11 +82,12 @@ async function* buildServiceIterator(
 // ----------------------
 // Mocks
 // ----------------------
+const collectionIteratorMock = jest.fn(() =>
+  buildServiceIterator(aListOfRightServices)[Symbol.asyncIterator]()
+);
 
 const serviceModelMock = ({
-  getCollectionIterator: jest.fn(() =>
-    buildServiceIterator(aListOfRightServices)[Symbol.asyncIterator]()
-  )
+  getCollectionIterator: collectionIteratorMock
 } as unknown) as ServiceModel;
 
 const producerMock = {
@@ -112,7 +117,11 @@ const kpc: KafkaProducerCompact<RetrievedService> = () => ({
   topic: { topic }
 });
 
-const tableClient: TableClient = ({} as unknown) as TableClient;
+const tableClient: TableClient = ({
+  createEntity: jest.fn(
+    async (entity, options) => ({} as TableInsertEntityHeaders)
+  )
+} as unknown) as TableClient;
 
 // ----------------------
 // Tests
@@ -122,6 +131,7 @@ describe("CosmosApiServicesImportEvent", () => {
   it("sould send all services version to kafka client, ordered by serviceId and version", async () => {
     const res = await importServices(serviceModelMock, kpc, tableClient);
 
+    expect(tableClient.createEntity).not.toHaveBeenCalled();
     expect(res).toEqual(
       expect.objectContaining({
         isSuccess: true,
@@ -141,6 +151,26 @@ describe("CosmosApiServicesImportEvent", () => {
     expect(producerMock.send).toHaveBeenCalledWith(
       expect.objectContaining({
         messages: expect.arrayContaining(expected)
+      })
+    );
+  });
+
+  it("should exit if decoding error was found", async () => {
+    collectionIteratorMock.mockReturnValueOnce(
+      buildServiceIterator(aListOfServicesWithDecodingError)[
+        Symbol.asyncIterator
+      ]()
+    );
+
+    const res = await importServices(serviceModelMock, kpc, tableClient);
+
+    expect(tableClient.createEntity).toHaveBeenCalled();
+    expect(res).toEqual(
+      expect.objectContaining({
+        isSuccess: true,
+        partitionKey: `${new Date().getMonth() + 1}`,
+        result:
+          "Documents sent (6). Error decoding some documents. Check storage table errors for details."
       })
     );
   });
