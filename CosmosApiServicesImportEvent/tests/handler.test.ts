@@ -3,12 +3,9 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
+import * as RA from "fp-ts/ReadonlyArray";
 import { Service } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { aService } from "../../__mocks__/services.mock";
-import { importServices } from "../handler";
-
-import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
-import { forEach } from "lodash";
 
 type ServiceIDAndVersion = t.TypeOf<typeof ServiceIDAndVersion>;
 const ServiceIDAndVersion = t.interface({
@@ -46,11 +43,9 @@ async function* buildServiceIterator(
   list: ReadonlyArray<unknown>
 ): AsyncGenerator<ReadonlyArray<t.Validation<Service>>, void, unknown> {
   // eslint-disable-next-line functional/no-let
-  for (let index = 0; index < list.length; index += 2) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    index + 1 < list.length
-      ? yield [Service.decode(list[index]), Service.decode(list[index])]
-      : yield [Service.decode(list[index])];
+
+  for (const p of pipe(list, RA.map(Service.decode), RA.chunksOf(2))) {
+    yield p;
   }
 }
 
