@@ -7,7 +7,7 @@ import {
   KafkaProducerTopicConfig,
   ValidableKafkaProducerConfig
 } from "./KafkaTypes";
-import { send } from "./kafkaProducer";
+import { send } from "./KafkaProducer";
 
 interface IKafkaProducerCompact<T> {
   readonly producer: Producer;
