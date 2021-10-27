@@ -6,7 +6,7 @@
       "name": "cosmosApiProfilesTrigger",
       "direction": "in",
       "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
-      "databaseName": "db",
+      "databaseName": "%COSMOSDB_NAME%",
       "collectionName": "services",
       "leaseCollectionName": "leases-services",
       "createLeaseCollectionIfNotExists": true

@@ -3,12 +3,18 @@ import * as winston from "winston";
 import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
+
+import {
+  ServiceModel,
+  SERVICE_COLLECTION_NAME
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
-import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow } from "../utils/config";
-import { IBulkOperationResult } from "../utils/bulkOperationResult";
+import { cosmosdbInstance } from "../utils/cosmosdb";
+import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
-import { handleServicesChange } from "./handler";
+import { IBulkOperationResult } from "../utils/bulkOperationResult";
+import { importServices } from "./handler";
 
 // eslint-disable-next-line functional/no-let
 let logger: Context["log"] | undefined;
@@ -19,14 +25,8 @@ winston.add(contextTransport);
 
 const config = getConfigOrThrow();
 
-const servicesTopic = {
-  ...config.targetKafka,
-  messageFormatter: avroServiceFormatter
-};
-
-const kakfaClient = KP.fromConfig(
-  config.targetKafka as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
-  servicesTopic
+const serviceModel = new ServiceModel(
+  cosmosdbInstance.container(SERVICE_COLLECTION_NAME)
 );
 
 const errorStorage = new TableClient(
@@ -38,12 +38,20 @@ const errorStorage = new TableClient(
   )
 );
 
-const run = async (
-  context: Context,
-  documents: ReadonlyArray<unknown>
-): Promise<IBulkOperationResult> => {
-  logger = context.log;
-  return handleServicesChange(kakfaClient, errorStorage, documents);
+const servicesTopic = {
+  ...config.targetKafka,
+  messageFormatter: avroServiceFormatter
 };
+
+const kakfaClient = KP.fromConfig(
+  config.targetKafka as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
+  servicesTopic
+);
+
+const run = async (
+  _context: Context,
+  _command: unknown
+): Promise<IBulkOperationResult> =>
+  importServices(serviceModel, kakfaClient, errorStorage);
 
 export default run;

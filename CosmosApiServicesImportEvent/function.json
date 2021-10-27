@@ -1,0 +1,20 @@
+{
+  "bindings": [
+    {
+      "type": "eventHubTrigger",
+      "name": "command",
+      "direction": "in",
+      "eventHubName": "%IMPORT_TOPIC_NAME%",
+      "cardinality": "one",
+      "connection": "IMPORT_TOPIC_CONNECTION_STRING"
+    },
+    {
+      "tableName": "%COMMAND_STORAGE_TABLE%",
+      "connection": "COMMAND_STORAGE",
+      "type": "table",
+      "name": "$return",
+      "direction": "out"
+    }
+  ],
+  "scriptFile": "../dist/CosmosApiServicesImportEvent/index.js"
+}
