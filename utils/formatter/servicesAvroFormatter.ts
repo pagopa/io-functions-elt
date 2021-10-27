@@ -6,6 +6,7 @@ import { services } from "../../generated/avro/dto/services";
 import { CrudOperation } from "../../generated/avro/dto/CrudOperationEnum";
 
 export const avroServiceFormatter: MessageFormatter<RetrievedService> = message => ({
+  key: message.serviceId,
   value: avro.Type.forSchema(
     services.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
   ).toBuffer(
