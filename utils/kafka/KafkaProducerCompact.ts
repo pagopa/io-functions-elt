@@ -9,7 +9,7 @@ import {
 } from "./KafkaTypes";
 import { send } from "./KafkaProducer";
 
-interface IKafkaProducerCompact<T> {
+export interface IKafkaProducerCompact<T> {
   readonly producer: Producer;
   readonly topic: KafkaProducerTopicConfig<T>;
 }
