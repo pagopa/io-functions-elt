@@ -7,14 +7,14 @@ import { Validation } from "io-ts";
 
 import { TableClient, TableInsertEntityHeaders } from "@azure/data-tables";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
-import * as KP from "../utils/kafka/KafkaProducerCompact";
+import * as KP from "./kafka/KafkaProducerCompact";
 import { IStorableSendFailureError } from "./kafka/KafkaOperation";
 import { IBulkOperationResult } from "./bulkOperationResult";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const kerr = require("kafkajs/src/errors.js"); // due to suspected issue "KafkaJsError is not a costructor" whe using kafkajs type
 
-const storeErrors = (errorStorage: TableClient) => (
+export const storeErrors = (errorStorage: TableClient) => (
   storableErrors: ReadonlyArray<IStorableSendFailureError<unknown>>
 ): ReadonlyArray<TE.TaskEither<Error, TableInsertEntityHeaders>> =>
   storableErrors.map(es =>
@@ -77,7 +77,7 @@ export const publish = <T>(
         RA.lefts,
         TE.fromPredicate(lefts => lefts.length === 0, identity),
         TE.mapLeft(storeErrors(errorStorage)),
-        TE.orElseW(RA.sequence(TE.ApplicativeSeq)),
+        TE.orElseFirstW(RA.sequence(TE.ApplicativeSeq)),
         TE.map(__ => "No decoding errors."),
         TE.mapLeft(
           __ =>
@@ -85,7 +85,6 @@ export const publish = <T>(
         )
       )
     ),
-    x => x,
     T.map(({ sendResult, decodeResult }) => ({
       isSuccess: E.isRight(sendResult) && E.isRight(decodeResult),
       result: `${E.toUnion(sendResult)} ${E.toUnion(decodeResult)}`
