@@ -77,16 +77,12 @@ export const publish = <T>(
         ),
         RA.lefts,
         TE.fromPredicate(lefts => lefts.length === 0, identity),
-        TE.map(_ => undefined),
         TE.mapLeft(storeErrors(errorStorage)),
-        TE.orElseW(RA.sequence(TE.ApplicativeSeq)),
-        TE.mapLeft(e => toString(e)),
-        TE.chain(res =>
-          typeof res === "undefined"
-            ? TE.of("No decoding errors.")
-            : TE.left(
-                "Error decoding some documents. Check storage table errors for details."
-              )
+        TE.orElseFirstW(RA.sequence(TE.ApplicativeSeq)),
+        TE.map(__ => "No decoding errors."),
+        TE.mapLeft(
+          __ =>
+            "Error decoding some documents. Check storage table errors for details."
         )
       )
     ),
