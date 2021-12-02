@@ -3,6 +3,10 @@
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "AzureWebJobsStorage": "{AzureWebJobsStorage}",
-    "FUNCTIONS_V2_COMPATIBILITY_MODE": false
+    "FUNCTIONS_V2_COMPATIBILITY_MODE": false,
+
+    "COSMOS_CHUNK_SIZE": "1000",
+    "COSMOS_DEGREE_OF_PARALLELISM": "2",
+    "MESSAGE_CONTENT_CHUNK_SIZE": "500"
   }
 }
