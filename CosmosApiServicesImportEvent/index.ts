@@ -1,10 +1,14 @@
-import { createBlobService } from "azure-storage";
+import { createBlobService, BlobService } from "azure-storage";
 
 // disabled in order to use the naming convention used to flatten nested object to root ('_' char used as nested object separator)
 /* eslint-disable @typescript-eslint/naming-convention */ import * as winston from "winston";
 import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
+
+import * as TE from "fp-ts/TaskEither";
+import * as O from "fp-ts/Option";
+import * as E from "fp-ts/Either";
 
 import {
   ServiceModel,
@@ -16,6 +20,8 @@ import {
   MESSAGE_COLLECTION_NAME
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 import * as t from "io-ts";
+import { upsertBlobFromText } from "@pagopa/io-functions-commons/dist/src/utils/azure_storage";
+import { pipe } from "fp-ts/lib/function";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { getConfigOrThrow } from "../utils/config";
 import { cosmosdbInstance } from "../utils/cosmosdb";
@@ -79,6 +85,25 @@ const kakfaClient = KP.fromConfig(
   servicesTopic
 );
 
+const addCSVToBlob = (blobService: BlobService, containerName: string) => (
+  fileName: string,
+  csv_content: string
+): TE.TaskEither<Error, BlobService.BlobResult> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        upsertBlobFromText(blobService, containerName, fileName, csv_content),
+      E.toError
+    ),
+    TE.chain(TE.fromEither),
+    TE.chain(
+      O.fold(
+        () => TE.left(Error("blob not created")),
+        _ => TE.right(_)
+      )
+    )
+  );
+
 const run = async (
   _context: Context,
   _command: unknown
@@ -91,9 +116,9 @@ const run = async (
     return processMessages(
       messageModel,
       messageContentBlobService,
-      csvFilesBlobService,
-      config.COSMOS_DEGREE_OF_PARALLELISM,
+      addCSVToBlob(csvFilesBlobService, "messages"),
       config.COSMOS_CHUNK_SIZE,
+      config.COSMOS_DEGREE_OF_PARALLELISM,
       config.MESSAGE_CONTENT_CHUNK_SIZE
     )(_context, _command.range_min, _command.range_max);
   } else {

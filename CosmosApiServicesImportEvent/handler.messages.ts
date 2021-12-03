@@ -21,7 +21,6 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 
 import { PaymentData } from "@pagopa/io-functions-commons/dist/generated/definitions/PaymentData";
-import { upsertBlobFromText } from "@pagopa/io-functions-commons/dist/src/utils/azure_storage";
 
 import * as AI from "../utils/AsyncIterableTask";
 import {
@@ -113,9 +112,9 @@ const enrichMessagesContent = (
       pipe(
         chunks,
         RA.map(m =>
-          !m.isPending
-            ? enrichMessageContent(messageModel, blobService, m)
-            : T.of(m)
+          m.isPending === undefined || m.isPending
+            ? T.of(m)
+            : enrichMessageContent(messageModel, blobService, m)
         ),
         RA.sequence(T.ApplicativePar)
       )
@@ -152,9 +151,12 @@ const updateMessageInfo = (
 export const processMessages = (
   messageModel: MessageModel,
   blobService: BlobService,
-  csvFilesBlobService: BlobService,
-  cosmosDegreeeOfParallelism: number,
+  storeCSVInBlob: (
+    blobName: string,
+    text: string
+  ) => TE.TaskEither<Error, BlobService.BlobResult>,
   cosmosChunkSize: number,
+  cosmosDegreeeOfParallelism: number,
   mesageContentChunkSize: number
   // eslint-disable-next-line max-params
 ) => async (
@@ -212,7 +214,7 @@ export const processMessages = (
     TE.map(
       // Create csv
       M.reduceWithIndex(S.Ord)(
-        "ServiceID\tTOT\tSENT\tPAYMENT\n",
+        "SERVICE ID\tSENT\tDELIVERED\tDELIVERED (PAYMENT)\n",
         (key, prev, curr) => {
           // eslint-disable-next-line no-param-reassign
           prev += `${key}\t${curr.messages_total}\t${curr.messages_sent}\t${curr.payment_messages}\n`;
@@ -224,30 +226,16 @@ export const processMessages = (
       context.log(`End csv.. ${Date.now()}`);
       return _;
     }),
-    TE.chain(csv_content =>
-      pipe(
-        TE.tryCatch(() => {
-          const dateStringMin = new Date(rangeMin * 1000).toJSON();
-          const dateStringMax = new Date(rangeMax * 1000).toJSON();
-
-          return upsertBlobFromText(
-            csvFilesBlobService,
-            "messages",
-            `${dateStringMin} - ${dateStringMax}.csv`,
-            csv_content
-          );
-        }, E.toError),
-        TE.chain(TE.fromEither),
-        TE.chain(
-          O.fold(
-            () => TE.left(Error("blob not created")),
-            _ => TE.right(_)
-          )
-        )
-      )
-    ),
+    TE.chain(csv_content => {
+      const dateStringMin = new Date(rangeMin * 1000).toJSON();
+      const dateStringMax = new Date(rangeMax * 1000).toJSON();
+      return storeCSVInBlob(
+        `${dateStringMin} - ${dateStringMax}.csv`,
+        csv_content
+      );
+    }),
     T.map(_ => {
-      context.log("RESULT: ", _);
+      context.log("RESULT SUCCESS: ", E.isRight(_));
       return _;
     }),
     TE.map(_ => ({ isSuccess: true, result: "none" })),
