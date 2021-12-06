@@ -95,6 +95,11 @@ export const IDecodableConfig = t.interface({
   COSMOSDB_NAME: NonEmptyString,
   COSMOSDB_URI: NonEmptyString,
 
+  // eslint-disable-next-line sort-keys
+  COSMOSDB_REPLICA_KEY: NonEmptyString,
+  COSMOSDB_REPLICA_NAME: NonEmptyString,
+  COSMOSDB_REPLICA_URI: NonEmptyString,
+
   ERROR_STORAGE_ACCOUNT: NonEmptyString,
   ERROR_STORAGE_KEY: NonEmptyString,
   ERROR_STORAGE_TABLE: NonEmptyString,

@@ -18,7 +18,7 @@ import {
 import * as t from "io-ts";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { getConfigOrThrow } from "../utils/config";
-import { cosmosdbInstance } from "../utils/cosmosdb";
+import { cosmosdbInstance, cosmosdbInstanceReplica } from "../utils/cosmosdb";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
 import {
@@ -53,7 +53,7 @@ const serviceModel = new ServiceModel(
 );
 
 const messageModel = new MessageModel(
-  cosmosdbInstance.container(MESSAGE_COLLECTION_NAME),
+  cosmosdbInstanceReplica.container(MESSAGE_COLLECTION_NAME),
   "message-content" as NonEmptyString
 );
 
