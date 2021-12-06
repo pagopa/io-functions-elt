@@ -1,7 +1,7 @@
 import { Context } from "@azure/functions";
 import { BlobService } from "azure-storage";
 
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as RA from "fp-ts/ReadonlyArray";
@@ -16,32 +16,19 @@ import {
   Message,
   MessageModel,
   RetrievedMessage,
-  RetrievedMessageWithContent,
-  RetrievedMessageWithoutContent
+  RetrievedMessageWithContent
 } from "@pagopa/io-functions-commons/dist/src/models/message";
-
-import { PaymentData } from "@pagopa/io-functions-commons/dist/generated/definitions/PaymentData";
 
 import * as AI from "../utils/AsyncIterableTask";
 import {
   IBulkOperationResultEntity,
   toBulkOperationResultEntity
 } from "../utils/bulkOperationResult";
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type MessageInfo = {
-  readonly messages_total: number;
-  readonly messages_sent: number;
-  readonly payment_messages: number;
-};
-
-const PaymentMessage = t.interface({
-  content: t.interface({ payment_data: PaymentData })
-});
-const RetrievedNotPendingMessage = t.intersection([
-  RetrievedMessageWithoutContent,
-  t.interface({ isPending: t.literal(false) })
-]);
+import {
+  MessageReport,
+  PaymentMessage,
+  RetrievedNotPendingMessage
+} from "../utils/types/reportTypes";
 
 /**
  * Build a Cosmos query iterator for messages with a min and max timestamp.
@@ -124,25 +111,51 @@ const enrichMessagesContent = (
   );
 
 /**
- * return an updated MessageInfo, based on `message` values
+ * return an updated MessageReport, based on `message` values
  */
-const updateMessageInfo = (
-  curr: MessageInfo | undefined,
+const updateMessageReport = (
+  curr: MessageReport | undefined,
   message: Message
-): MessageInfo =>
+): MessageReport =>
   pipe(
     curr,
     value =>
-      value ?? { messages_sent: 0, messages_total: 0, payment_messages: 0 },
+      value ?? {
+        serviceId: message.senderServiceId,
+        // eslint-disable-next-line sort-keys
+        sent: 0,
+        // eslint-disable-next-line sort-keys
+        delivered: 0,
+        delivered_payment: 0
+      },
     value => ({
-      messages_total: value.messages_total + 1,
+      serviceId: value.serviceId,
       // eslint-disable-next-line sort-keys
-      messages_sent:
-        value.messages_sent + (RetrievedNotPendingMessage.is(message) ? 1 : 0),
-      payment_messages:
-        value.payment_messages + (PaymentMessage.is(message) ? 1 : 0)
+      sent: value.sent + 1,
+      // eslint-disable-next-line sort-keys
+      delivered:
+        value.delivered + (RetrievedNotPendingMessage.is(message) ? 1 : 0),
+      delivered_payment:
+        value.delivered_payment + (PaymentMessage.is(message) ? 1 : 0)
     })
   );
+
+const toJSONString = flow(
+  M.reduce(S.Ord)<
+    // eslint-disable-next-line functional/prefer-readonly-type
+    MessageReport[],
+    MessageReport
+  >([], (prev, curr) => {
+    // eslint-disable-next-line functional/immutable-data
+    prev.push(curr);
+    return prev;
+  }),
+  JSON.stringify
+);
+
+// ------------------
+// Process report
+// ------------------
 
 /**
  * Process all messages between min and max timestamp values
@@ -151,10 +164,9 @@ const updateMessageInfo = (
 export const processMessages = (
   messageModel: MessageModel,
   blobService: BlobService,
-  storeCSVInBlob: (
-    blobName: string,
-    text: string
-  ) => TE.TaskEither<Error, BlobService.BlobResult>,
+  exportToBlob: (
+    blobName: string
+  ) => (text: string) => TE.TaskEither<Error, BlobService.BlobResult>,
   cosmosChunkSize: number,
   cosmosDegreeeOfParallelism: number,
   mesageContentChunkSize: number
@@ -186,12 +198,12 @@ export const processMessages = (
     }),
     AI.reduceTaskEither(
       E.toError,
-      new Map<string, MessageInfo>(),
+      new Map<string, MessageReport>(),
       (prev, curr) => {
         curr.forEach(message => {
           prev.set(
             message.senderServiceId,
-            updateMessageInfo(prev.get(message.senderServiceId), message)
+            updateMessageReport(prev.get(message.senderServiceId), message)
           );
         });
         return prev;
@@ -206,33 +218,23 @@ export const processMessages = (
       // eslint-disable-next-line functional/no-let
       let tot = 0;
       _.forEach(v => {
-        tot += v.messages_total;
+        tot += v.sent;
       });
       context.log("TOTAL: ", tot);
       return _;
     }),
     TE.map(
       // Create csv
-      M.reduceWithIndex(S.Ord)(
-        "SERVICE ID\tSENT\tDELIVERED\tDELIVERED (PAYMENT)\n",
-        (key, prev, curr) => {
-          // eslint-disable-next-line no-param-reassign
-          prev += `${key}\t${curr.messages_total}\t${curr.messages_sent}\t${curr.payment_messages}\n`;
-          return prev;
-        }
-      )
+      toJSONString
     ),
     T.map(_ => {
       context.log(`End csv.. ${Date.now()}`);
       return _;
     }),
-    TE.chain(csv_content => {
+    TE.chain(content => {
       const dateStringMin = new Date(rangeMin * 1000).toJSON();
       const dateStringMax = new Date(rangeMax * 1000).toJSON();
-      return storeCSVInBlob(
-        `${dateStringMin} - ${dateStringMax}.csv`,
-        csv_content
-      );
+      return exportToBlob(`${dateStringMin} - ${dateStringMax}.json`)(content);
     }),
     T.map(_ => {
       context.log("RESULT SUCCESS: ", E.isRight(_));
@@ -241,5 +243,5 @@ export const processMessages = (
     TE.map(_ => ({ isSuccess: true, result: "none" })),
     TE.mapLeft(_ => ({ isSuccess: false, result: "none" })),
     TE.toUnion,
-    T.map(toBulkOperationResultEntity("process-messages"))
+    T.map(toBulkOperationResultEntity("process-message-report"))
   )();

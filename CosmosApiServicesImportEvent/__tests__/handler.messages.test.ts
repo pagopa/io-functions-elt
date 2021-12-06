@@ -118,14 +118,17 @@ const messageModelMock = ({
   getQueryIterator: messageCollectionIteratorMock
 } as unknown) as MessageModel;
 
-const mockStoreCSVInBlob = jest.fn((_blobName: string, _text: string) =>
-  TE.of({} as BlobService.BlobResult)
-);
-
 // ----------------------
 // Tests
 // ----------------------
 describe("processMessages", () => {
+  const mockStoreCSVInBlob = jest.fn((_text: string) =>
+    TE.of({} as BlobService.BlobResult)
+  );
+  const getMockStoreCSVInBlob = jest.fn(
+    (_blobName: string) => mockStoreCSVInBlob
+  );
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -135,27 +138,27 @@ describe("processMessages", () => {
       {
         serviceId: serviceId1,
         sent: 2,
-        deliveder: 2,
-        payment: 1
+        delivered: 2,
+        delivered_payment: 1
       },
       {
         serviceId: serviceId2,
         sent: 2,
-        deliveder: 1,
-        payment: 0
+        delivered: 1,
+        delivered_payment: 0
       },
       {
         serviceId: serviceId3,
         sent: 1,
-        deliveder: 0,
-        payment: 0
+        delivered: 0,
+        delivered_payment: 0
       }
     ];
 
     const handler = processMessages(
       messageModelMock,
       {} as any,
-      mockStoreCSVInBlob,
+      getMockStoreCSVInBlob,
       100,
       2,
       50
@@ -166,12 +169,8 @@ describe("processMessages", () => {
     expect(res).toEqual(expect.objectContaining({ isSuccess: true }));
     expect(mockGetContentFromBlob).toHaveBeenCalledTimes(3);
 
-    const csv = mockStoreCSVInBlob.mock.calls[0][1];
-    expected.forEach(e =>
-      expect(csv).toContain(
-        `${e.serviceId}\t${e.sent}\t${e.deliveder}\t${e.payment}`
-      )
-    );
+    const csv = mockStoreCSVInBlob.mock.calls[0][0];
+    expect(csv).toEqual(JSON.stringify(expected));
   });
 
   it("should exit with success `false` if iterator fails", async () => {
@@ -182,7 +181,7 @@ describe("processMessages", () => {
     const handler = processMessages(
       messageModelMock,
       {} as any,
-      mockStoreCSVInBlob,
+      getMockStoreCSVInBlob,
       100,
       2,
       50
@@ -198,29 +197,30 @@ describe("processMessages", () => {
       {
         serviceId: serviceId1,
         sent: 2,
-        deliveder: 2,
-        payment: 0
+        delivered: 2,
+        delivered_payment: 0
       },
       {
         serviceId: serviceId2,
         sent: 2,
-        deliveder: 1,
-        payment: 0
+        delivered: 1,
+        delivered_payment: 0
       },
       {
         serviceId: serviceId3,
         sent: 1,
-        deliveder: 0,
-        payment: 0
+        delivered: 0,
+        delivered_payment: 0
       }
     ];
 
     mockGetContentFromBlob.mockImplementation(returnContent(false));
 
+    getMockStoreCSVInBlob.mockClear();
     const handler = processMessages(
       messageModelMock,
       {} as any,
-      mockStoreCSVInBlob,
+      getMockStoreCSVInBlob,
       100,
       2,
       50
@@ -231,11 +231,10 @@ describe("processMessages", () => {
     expect(res).toEqual(expect.objectContaining({ isSuccess: true }));
     expect(mockGetContentFromBlob).toHaveBeenCalledTimes(3);
 
-    const csv = mockStoreCSVInBlob.mock.calls[0][1];
-    expected.forEach(e =>
-      expect(csv).toContain(
-        `${e.serviceId}\t${e.sent}\t${e.deliveder}\t${e.payment}`
-      )
-    );
+    const csv = mockStoreCSVInBlob.mock.calls[0][0];
+
+    console.log(csv);
+
+    expect(csv).toEqual(JSON.stringify(expected));
   });
 });

@@ -1,0 +1,26 @@
+{
+  "bindings": [
+    {
+      "name": "messageReportBlob",
+      "type": "blobTrigger",
+      "direction": "in",
+      "path": "%MESSAGE_EXPORT_STEP_1_CONTAINER%/{name}",
+      "connection": "COMMAND_STORAGE"
+    },
+    {
+      "name": "visibleServicesExtended",
+      "type": "blob",
+      "path": "services/services-webview/visible-services-extended.json",
+      "connection": "ServiceInfoBlobStorageConnection",
+      "direction": "in"
+    },
+    {
+      "tableName": "%COMMAND_STORAGE_TABLE%",
+      "connection": "COMMAND_STORAGE",
+      "type": "table",
+      "name": "$return",
+      "direction": "out"
+    }
+  ],
+  "scriptFile": "../dist/EnrichMessagesReportBlobTrigger/index.js"
+}

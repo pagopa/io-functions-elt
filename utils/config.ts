@@ -101,12 +101,16 @@ export const IDecodableConfig = t.interface({
 
   // eslint-disable-next-line sort-keys
   COMMAND_STORAGE: NonEmptyString,
-  MessageContentStorageConnection: NonEmptyString,
+  MESSAGE_EXPORT_STEP_1_CONTAINER: NonEmptyString,
+  MESSAGE_EXPORT_STEP_FINAL_CONTAINER: NonEmptyString,
 
   // eslint-disable-next-line sort-keys
   COSMOS_CHUNK_SIZE: IntegerFromString,
   COSMOS_DEGREE_OF_PARALLELISM: IntegerFromString,
+
   MESSAGE_CONTENT_CHUNK_SIZE: IntegerFromString,
+  MessageContentStorageConnection: NonEmptyString,
+  ServiceInfoBlobStorageConnection: NonEmptyString,
 
   isProduction: t.boolean
 });
