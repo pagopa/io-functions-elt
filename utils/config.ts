@@ -9,6 +9,7 @@ import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import * as R from "fp-ts/Record";
 import * as S from "fp-ts/string";
 import { set } from "lodash";
@@ -94,9 +95,27 @@ export const IDecodableConfig = t.interface({
   COSMOSDB_NAME: NonEmptyString,
   COSMOSDB_URI: NonEmptyString,
 
+  // eslint-disable-next-line sort-keys
+  COSMOSDB_REPLICA_KEY: NonEmptyString,
+  COSMOSDB_REPLICA_NAME: NonEmptyString,
+  COSMOSDB_REPLICA_URI: NonEmptyString,
+
   ERROR_STORAGE_ACCOUNT: NonEmptyString,
   ERROR_STORAGE_KEY: NonEmptyString,
   ERROR_STORAGE_TABLE: NonEmptyString,
+
+  // eslint-disable-next-line sort-keys
+  COMMAND_STORAGE: NonEmptyString,
+  MESSAGE_EXPORT_STEP_1_CONTAINER: NonEmptyString,
+  MESSAGE_EXPORT_STEP_FINAL_CONTAINER: NonEmptyString,
+
+  // eslint-disable-next-line sort-keys
+  COSMOS_CHUNK_SIZE: IntegerFromString,
+  COSMOS_DEGREE_OF_PARALLELISM: IntegerFromString,
+
+  MESSAGE_CONTENT_CHUNK_SIZE: IntegerFromString,
+  MessageContentStorageConnection: NonEmptyString,
+  ServiceInfoBlobStorageConnection: NonEmptyString,
 
   isProduction: t.boolean
 });

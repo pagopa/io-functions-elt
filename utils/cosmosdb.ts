@@ -16,4 +16,12 @@ export const cosmosdbClient = new CosmosClient({
   key: masterKey
 });
 
+export const cosmosdbReplicaClient = new CosmosClient({
+  endpoint: config.COSMOSDB_REPLICA_URI,
+  key: config.COSMOSDB_REPLICA_KEY
+});
+
 export const cosmosdbInstance = cosmosdbClient.database(cosmosDbName);
+export const cosmosdbInstanceReplica = cosmosdbReplicaClient.database(
+  config.COSMOSDB_REPLICA_NAME
+);

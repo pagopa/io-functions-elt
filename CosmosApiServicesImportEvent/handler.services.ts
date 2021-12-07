@@ -48,5 +48,5 @@ export const importServices = (
       ])
     ),
     publish(client, errorStorage),
-    T.map(toBulkOperationResultEntity)
+    T.map(toBulkOperationResultEntity("import-services"))
   )();

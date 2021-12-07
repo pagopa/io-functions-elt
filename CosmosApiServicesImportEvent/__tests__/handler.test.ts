@@ -14,7 +14,7 @@ import { Producer, ProducerRecord, RecordMetadata } from "kafkajs";
 import { TableClient, TableInsertEntityHeaders } from "@azure/data-tables";
 import { contramap } from "fp-ts/lib/Ord";
 import { aRetrievedService } from "../../__mocks__/services.mock";
-import { importServices } from "../handler";
+import { importServices } from "../handler.services";
 import { KafkaProducerCompact } from "../../utils/kafka/KafkaProducerCompact";
 
 const topic = "aTopic";
