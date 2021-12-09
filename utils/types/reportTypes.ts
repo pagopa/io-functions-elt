@@ -31,6 +31,10 @@ export const MessageReportExtended = t.intersection([
   })
 ]);
 
+export const WithContentMessage = t.interface({
+  content: t.unknown
+});
+
 export const PaymentMessage = t.interface({
   content: t.interface({ payment_data: PaymentData })
 });
