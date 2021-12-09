@@ -133,25 +133,28 @@ describe("processMessages", () => {
     jest.clearAllMocks();
   });
 
-  it("should write correct csv file", async () => {
+  it("should write correct file", async () => {
     const expected = [
       {
         serviceId: serviceId1,
         sent: 2,
         delivered: 2,
-        delivered_payment: 1
+        delivered_payment: 1,
+        with_content: 2
       },
       {
         serviceId: serviceId2,
         sent: 2,
         delivered: 1,
-        delivered_payment: 0
+        delivered_payment: 0,
+        with_content: 1
       },
       {
         serviceId: serviceId3,
         sent: 1,
         delivered: 0,
-        delivered_payment: 0
+        delivered_payment: 0,
+        with_content: 0
       }
     ];
 

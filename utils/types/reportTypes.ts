@@ -16,7 +16,8 @@ export const MessageReport = t.interface({
   sent: t.number,
   // eslint-disable-next-line sort-keys
   delivered: t.number,
-  delivered_payment: t.number
+  delivered_payment: t.number,
+  with_content: t.number
 });
 
 export const MessageReportArray = t.array(MessageReport);
