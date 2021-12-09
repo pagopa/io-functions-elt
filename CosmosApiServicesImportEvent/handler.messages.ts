@@ -105,9 +105,9 @@ const enrichMessagesContent = (
       pipe(
         chunks,
         RA.map(m =>
-          m.isPending === undefined || m.isPending
-            ? T.of(m)
-            : enrichMessageContent(messageModel, blobService, m, context)
+          m.isPending === false
+            ? enrichMessageContent(messageModel, blobService, m, context)
+            : T.of(m)
         ),
         RA.sequence(T.ApplicativePar)
       )
