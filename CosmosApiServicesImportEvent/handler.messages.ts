@@ -68,7 +68,8 @@ export const buildIterator = (
 export const enrichMessageContent = (
   messageModel: MessageModel,
   blobService: BlobService,
-  message: RetrievedMessage
+  message: RetrievedMessage,
+  context: Context
 ): T.Task<RetrievedMessageWithContent | RetrievedMessage> =>
   pipe(
     messageModel.getContentFromBlob(blobService, message.id),
@@ -79,7 +80,10 @@ export const enrichMessageContent = (
       )
     ),
     TE.map(content => ({ ...message, content })),
-    TE.orElseW(_e => TE.right(message)),
+    TE.orElseW(_e => {
+      context.log.warn(`Error retrieving message ${message.id}`, _e);
+      return TE.right(message);
+    }),
     TE.toUnion
   );
 
@@ -91,7 +95,8 @@ const enrichMessagesContent = (
   messageModel: MessageModel,
   mesageContentChunkSize: number,
   blobService: BlobService,
-  messages: ReadonlyArray<RetrievedMessage>
+  messages: ReadonlyArray<RetrievedMessage>,
+  context: Context
 ): T.Task<ReadonlyArray<RetrievedMessageWithContent | RetrievedMessage>> =>
   pipe(
     messages,
@@ -102,7 +107,7 @@ const enrichMessagesContent = (
         RA.map(m =>
           m.isPending === undefined || m.isPending
             ? T.of(m)
-            : enrichMessageContent(messageModel, blobService, m)
+            : enrichMessageContent(messageModel, blobService, m, context)
         ),
         RA.sequence(T.ApplicativePar)
       )
@@ -199,7 +204,8 @@ export const processMessages = (
         messageModel,
         mesageContentChunkSize,
         blobService,
-        messages
+        messages,
+        context
       )()
     ),
     T.map(_ => {
