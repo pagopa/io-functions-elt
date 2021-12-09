@@ -15,7 +15,6 @@ import * as t from "io-ts";
 import {
   Message,
   MessageModel,
-  MessageWithContent,
   RetrievedMessage,
   RetrievedMessageWithContent
 } from "@pagopa/io-functions-commons/dist/src/models/message";
@@ -28,7 +27,8 @@ import {
 import {
   MessageReport,
   PaymentMessage,
-  RetrievedNotPendingMessage
+  RetrievedNotPendingMessage,
+  WithContentMessage
 } from "../utils/types/reportTypes";
 
 /**
@@ -145,7 +145,7 @@ const updateMessageReport = (
       delivered_payment:
         value.delivered_payment + (PaymentMessage.is(message) ? 1 : 0),
       with_content:
-        value.with_content + (MessageWithContent.is(message) ? 1 : 0)
+        value.with_content + (WithContentMessage.is(message) ? 1 : 0)
     })
   );
 
