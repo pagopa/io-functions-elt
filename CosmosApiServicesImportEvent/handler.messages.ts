@@ -15,6 +15,7 @@ import * as t from "io-ts";
 import {
   Message,
   MessageModel,
+  MessageWithContent,
   RetrievedMessage,
   RetrievedMessageWithContent
 } from "@pagopa/io-functions-commons/dist/src/models/message";
@@ -126,7 +127,8 @@ const updateMessageReport = (
         sent: 0,
         // eslint-disable-next-line sort-keys
         delivered: 0,
-        delivered_payment: 0
+        delivered_payment: 0,
+        with_content: 0
       },
     value => ({
       serviceId: value.serviceId,
@@ -136,7 +138,9 @@ const updateMessageReport = (
       delivered:
         value.delivered + (RetrievedNotPendingMessage.is(message) ? 1 : 0),
       delivered_payment:
-        value.delivered_payment + (PaymentMessage.is(message) ? 1 : 0)
+        value.delivered_payment + (PaymentMessage.is(message) ? 1 : 0),
+      with_content:
+        value.with_content + (MessageWithContent.is(message) ? 1 : 0)
     })
   );
 
@@ -183,7 +187,13 @@ export const processMessages = (
       cosmosDegreeeOfParallelism
     )(rangeMin, rangeMax),
     AI.fromAsyncIterable,
-    AI.map(RA.rights),
+    AI.map(page => {
+      const [rights, lefts] = [RA.rights(page), RA.lefts(page)];
+      if (lefts.length > 0) {
+        context.log(`ERROR: ${lefts.length} messages metadata not loaded`);
+      }
+      return rights;
+    }),
     AI.map(messages =>
       enrichMessagesContent(
         messageModel,

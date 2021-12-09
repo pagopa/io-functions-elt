@@ -18,7 +18,11 @@ export const cosmosdbClient = new CosmosClient({
 
 export const cosmosdbReplicaClient = new CosmosClient({
   endpoint: config.COSMOSDB_REPLICA_URI,
-  key: config.COSMOSDB_REPLICA_KEY
+  key: config.COSMOSDB_REPLICA_KEY,
+  // eslint-disable-next-line sort-keys
+  connectionPolicy: {
+    preferredLocations: [config.COSMOSDB_REPLICA_LOCATION]
+  }
 });
 
 export const cosmosdbInstance = cosmosdbClient.database(cosmosDbName);

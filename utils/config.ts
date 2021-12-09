@@ -7,12 +7,14 @@
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import * as R from "fp-ts/Record";
 import * as S from "fp-ts/string";
 import { set } from "lodash";
+
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
 
 import { KafkaProducerCompactConfig } from "./IoKafkaTypes";
 
@@ -97,6 +99,10 @@ export const IDecodableConfig = t.interface({
 
   // eslint-disable-next-line sort-keys
   COSMOSDB_REPLICA_KEY: NonEmptyString,
+  COSMOSDB_REPLICA_LOCATION: withDefault(
+    NonEmptyString,
+    "North Europe" as NonEmptyString
+  ),
   COSMOSDB_REPLICA_NAME: NonEmptyString,
   COSMOSDB_REPLICA_URI: NonEmptyString,
 
