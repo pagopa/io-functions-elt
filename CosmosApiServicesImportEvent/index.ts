@@ -16,6 +16,10 @@ import {
   MESSAGE_COLLECTION_NAME
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 import * as t from "io-ts";
+import {
+  ProfileModel,
+  PROFILE_COLLECTION_NAME
+} from "@pagopa/io-functions-commons/dist/src/models/profile";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { getConfigOrThrow } from "../utils/config";
 import { cosmosdbInstance, cosmosdbInstanceReplica } from "../utils/cosmosdb";
@@ -28,6 +32,7 @@ import {
 import { exportTextToBlob } from "../utils/azure-storage";
 import { importServices } from "./handler.services";
 import { processMessages } from "./handler.messages";
+import { processProfiles } from "./handler.profiles";
 
 const CommandImportServices = t.interface({
   operation: t.literal("import-service")
@@ -37,6 +42,10 @@ const CommandMessageReport = t.interface({
   range_min: t.number,
   // eslint-disable-next-line sort-keys
   range_max: t.number
+});
+
+const CommandProfileReport = t.interface({
+  operation: t.literal("process-profile-report")
 });
 
 // eslint-disable-next-line functional/no-let
@@ -55,6 +64,10 @@ const serviceModel = new ServiceModel(
 const messageModel = new MessageModel(
   cosmosdbInstanceReplica.container(MESSAGE_COLLECTION_NAME),
   "message-content" as NonEmptyString
+);
+
+const profileModel = new ProfileModel(
+  cosmosdbInstanceReplica.container(PROFILE_COLLECTION_NAME)
 );
 
 const messageContentBlobService = createBlobService(
@@ -102,6 +115,16 @@ const run = async (
       config.COSMOS_DEGREE_OF_PARALLELISM,
       config.MESSAGE_CONTENT_CHUNK_SIZE
     )(_context, _command.range_min, _command.range_max);
+  } else if (CommandProfileReport.is(_command)) {
+    return processProfiles(
+      profileModel,
+      exportTextToBlob(
+        csvFilesBlobService,
+        config.MESSAGE_EXPORT_STEP_FINAL_CONTAINER
+      ),
+      config.COSMOS_CHUNK_SIZE,
+      config.COSMOS_DEGREE_OF_PARALLELISM
+    )(_context);
   } else {
     return toBulkOperationResultEntity("non-valid-command")({
       isSuccess: true,
