@@ -209,7 +209,7 @@ export const processMessages = (
       )()
     ),
     T.map(_ => {
-      context.log(`Start retrieving data.. ${Date.now()}`);
+      context.log(`[${rangeMin}] Start retrieving data.. ${Date.now()}`);
       return _;
     }),
     AI.reduceTaskEither(
@@ -226,17 +226,20 @@ export const processMessages = (
       }
     ),
     T.map(_ => {
-      context.log(`End retrieving data.. ${Date.now()}`);
-      context.log(`Start creating csv.. ${Date.now()}`);
+      context.log(`[${rangeMin}] End retrieving data.. ${Date.now()}`);
       return _;
     }),
     TE.map(_ => {
       // eslint-disable-next-line functional/no-let
       let tot = 0;
+      // eslint-disable-next-line functional/no-let
+      let withoutContent = 0;
       _.forEach(v => {
         tot += v.sent;
+        withoutContent += v.delivered !== v.with_content ? 1 : 0;
       });
-      context.log("TOTAL: ", tot);
+      context.log(`[${rangeMin}] Total: ${tot}`);
+      context.log(`[${rangeMin}] Without content: ${withoutContent}`);
       return _;
     }),
     TE.map(
@@ -244,7 +247,7 @@ export const processMessages = (
       toJSONString
     ),
     T.map(_ => {
-      context.log(`End csv.. ${Date.now()}`);
+      context.log(`[${rangeMin}] End csv.. ${Date.now()}`);
       return _;
     }),
     TE.chain(content => {
@@ -253,7 +256,7 @@ export const processMessages = (
       return exportToBlob(`${dateStringMin} - ${dateStringMax}.json`)(content);
     }),
     T.map(_ => {
-      context.log("RESULT SUCCESS: ", E.isRight(_));
+      context.log(`[${rangeMin}] Result success:  ${E.isRight(_)}`);
       return _;
     }),
     TE.map(_ => ({ isSuccess: true, result: "none" })),
