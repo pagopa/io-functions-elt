@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable extra-rules/no-commented-out-code */
 import { createBlobService } from "azure-storage";
 
 // disabled in order to use the naming convention used to flatten nested object to root ('_' char used as nested object separator)
@@ -91,17 +93,22 @@ const run = async (
   if (CommandImportServices.is(_command)) {
     return importServices(serviceModel, kakfaClient, errorStorage);
   } else if (CommandMessageReport.is(_command)) {
-    return processMessages(
-      messageModel,
-      messageContentBlobService,
-      exportTextToBlob(
-        csvFilesBlobService,
-        config.MESSAGE_EXPORT_STEP_1_CONTAINER
-      ),
-      config.COSMOS_CHUNK_SIZE,
-      config.COSMOS_DEGREE_OF_PARALLELISM,
-      config.MESSAGE_CONTENT_CHUNK_SIZE
-    )(_context, _command.range_min, _command.range_max);
+    _context.log(`Skipped.. ${_command.operation}`);
+    return toBulkOperationResultEntity("skipped")({
+      isSuccess: true,
+      result: `nothing to do: " ${_command}`
+    });
+    // return processMessages(
+    //   messageModel,
+    //   messageContentBlobService,
+    //   exportTextToBlob(
+    //     csvFilesBlobService,
+    //     config.MESSAGE_EXPORT_STEP_1_CONTAINER
+    //   ),
+    //   config.COSMOS_CHUNK_SIZE,
+    //   config.COSMOS_DEGREE_OF_PARALLELISM,
+    //   config.MESSAGE_CONTENT_CHUNK_SIZE
+    // )(_context, _command.range_min, _command.range_max);
   } else {
     return toBulkOperationResultEntity("non-valid-command")({
       isSuccess: true,
