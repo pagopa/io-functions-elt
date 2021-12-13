@@ -172,8 +172,8 @@ describe("processMessages", () => {
     expect(res).toEqual(expect.objectContaining({ isSuccess: true }));
     expect(mockGetContentFromBlob).toHaveBeenCalledTimes(3);
 
-    const csv = mockStoreCSVInBlob.mock.calls[0][0];
-    expect(csv).toEqual(JSON.stringify(expected));
+    const content = mockStoreCSVInBlob.mock.calls[0][0];
+    expect(content).toEqual(JSON.stringify(expected));
   });
 
   it("should exit with success `false` if iterator fails", async () => {
@@ -195,49 +195,49 @@ describe("processMessages", () => {
     expect(res).toEqual(expect.objectContaining({ isSuccess: false }));
   });
 
-  // it("should not fail if blobService fails to retrieve a content", async () => {
-  //   const expected = [
-  //     {
-  //       serviceId: serviceId1,
-  //       sent: 2,
-  //       delivered: 2,
-  //       delivered_payment: 0
-  //     },
-  //     {
-  //       serviceId: serviceId2,
-  //       sent: 2,
-  //       delivered: 1,
-  //       delivered_payment: 0
-  //     },
-  //     {
-  //       serviceId: serviceId3,
-  //       sent: 1,
-  //       delivered: 0,
-  //       delivered_payment: 0
-  //     }
-  //   ];
+  it("should not fail if blobService fails to retrieve a content", async () => {
+    const expected = [
+      {
+        serviceId: serviceId1,
+        sent: 2,
+        delivered: 2,
+        delivered_payment: 0,
+        with_content: 1
+      },
+      {
+        serviceId: serviceId2,
+        sent: 2,
+        delivered: 1,
+        delivered_payment: 0,
+        with_content: 1
+      },
+      {
+        serviceId: serviceId3,
+        sent: 1,
+        delivered: 0,
+        delivered_payment: 0,
+        with_content: 0
+      }
+    ];
 
-  //   mockGetContentFromBlob.mockImplementation(returnContent(false));
+    mockGetContentFromBlob.mockImplementation(returnContent(false));
 
-  //   getMockStoreCSVInBlob.mockClear();
-  //   const handler = processMessages(
-  //     messageModelMock,
-  //     {} as any,
-  //     getMockStoreCSVInBlob,
-  //     100,
-  //     2,
-  //     50
-  //   );
+    getMockStoreCSVInBlob.mockClear();
+    const handler = processMessages(
+      messageModelMock,
+      {} as any,
+      getMockStoreCSVInBlob,
+      100,
+      2,
+      50
+    );
 
-  //   const res = await handler(createContext(), 0 /* unused */, 10 /* unused */);
+    const res = await handler(createContext(), 0 /* unused */, 10 /* unused */);
 
-  //   expect(res).toEqual(expect.objectContaining({ isSuccess: true }));
-  //   expect(mockGetContentFromBlob).toHaveBeenCalledTimes(3);
+    expect(res).toEqual(expect.objectContaining({ isSuccess: true }));
+    expect(mockGetContentFromBlob).toHaveBeenCalledTimes(3);
 
-  //   const csv = mockStoreCSVInBlob.mock.calls[0][0];
-
-  //   console.log(csv);
-
-  //   expect(csv).toEqual(JSON.stringify(expected));
-  // });
+    const content = mockStoreCSVInBlob.mock.calls[0][0];
+    expect(content).toEqual(JSON.stringify(expected));
+  });
 });

@@ -83,6 +83,13 @@ export const handler = (
         serviceName: services.get(m.serviceId)?.serviceName ?? "-"
       }))
     ),
+    TE.map(report => report.filter(r => r.serviceName !== "-")),
+    TE.map(report =>
+      // eslint-disable-next-line functional/immutable-data
+      report.sort((a, b) =>
+        a.organizationName.localeCompare(b.organizationName)
+      )
+    ),
     TE.map(toCSV),
     TE.chainW(
       exportToBlob(
