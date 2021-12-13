@@ -1,13 +1,11 @@
 import { Context } from "@azure/functions";
 import { BlobService } from "azure-storage";
 
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as O from "fp-ts/Option";
-import * as M from "fp-ts/Map";
-import * as S from "fp-ts/string";
 import * as E from "fp-ts/Either";
 
 import * as t from "io-ts";
@@ -81,7 +79,7 @@ export const enrichMessageContent = (
     ),
     TE.map(content => ({ ...message, content })),
     TE.orElseW(_e => {
-      context.log.warn(`Error retrieving message ${message.id}`, _e);
+      context.log(`Error retrieving message ${message.id}`, _e.message);
       return TE.right(message);
     }),
     TE.toUnion
@@ -149,18 +147,8 @@ const updateMessageReport = (
     })
   );
 
-const toJSONString = flow(
-  M.reduce(S.Ord)<
-    // eslint-disable-next-line functional/prefer-readonly-type
-    MessageReport[],
-    MessageReport
-  >([], (prev, curr) => {
-    // eslint-disable-next-line functional/immutable-data
-    prev.push(curr);
-    return prev;
-  }),
-  JSON.stringify
-);
+const toJSONString = (map: ReadonlyMap<string, MessageReport>): string =>
+  pipe(map, m => Array.from(m.values()), JSON.stringify);
 
 // ------------------
 // Process report

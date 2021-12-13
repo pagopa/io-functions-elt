@@ -103,7 +103,7 @@ export const run = <A>(fa: AsyncIterableTask<A>): T.Task<void> =>
 export const reduceTaskEither = <E, A, B>(
   onError: (err: unknown) => E,
   initialValue: B,
-  reducer: (prev: B, curr: A) => B
+  reducer: (prev: B, curr: A) => B | Promise<B>
 ) => (fa: AsyncIterableTask<A>): TE.TaskEither<E, B> =>
   pipe(
     fa,
@@ -123,13 +123,13 @@ export const reduceTaskEither = <E, A, B>(
  */
 const reduceIterableArray = <A, B>(
   initialValue: B,
-  reducer: (prev: B, curr: A) => B
+  reducer: (prev: B, curr: A) => B | Promise<B>
 ) => (asyncIterable: AsyncIterable<A>) => async (): Promise<B> => {
   // eslint-disable-next-line functional/no-let
   let p: B = initialValue;
 
   for await (const variable of asyncIterable) {
-    p = reducer(p, variable);
+    p = await reducer(p, variable);
   }
   return p;
 };
