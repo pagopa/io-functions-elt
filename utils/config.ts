@@ -120,6 +120,7 @@ export const IDecodableConfig = t.interface({
   COSMOS_DEGREE_OF_PARALLELISM: IntegerFromString,
 
   MESSAGE_CONTENT_CHUNK_SIZE: IntegerFromString,
+  MESSAGE_EXPORTS_COMMAND_TABLE: NonEmptyString,
   MessageContentStorageConnection: NonEmptyString,
   ServiceInfoBlobStorageConnection: NonEmptyString,
 

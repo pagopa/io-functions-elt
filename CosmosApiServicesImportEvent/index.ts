@@ -15,7 +15,6 @@ import {
   MessageModel,
   MESSAGE_COLLECTION_NAME
 } from "@pagopa/io-functions-commons/dist/src/models/message";
-import * as t from "io-ts";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { getConfigOrThrow } from "../utils/config";
 import { cosmosdbInstance, cosmosdbInstanceReplica } from "../utils/cosmosdb";
@@ -28,16 +27,7 @@ import {
 import { exportTextToBlob } from "../utils/azure-storage";
 import { importServices } from "./handler.services";
 import { processMessages } from "./handler.messages";
-
-const CommandImportServices = t.interface({
-  operation: t.literal("import-service")
-});
-const CommandMessageReport = t.interface({
-  operation: t.literal("process-message-report"),
-  range_min: t.number,
-  // eslint-disable-next-line sort-keys
-  range_max: t.number
-});
+import { CommandImportServices, CommandMessageReport } from "./commands";
 
 // eslint-disable-next-line functional/no-let
 let logger: Context["log"] | undefined;
