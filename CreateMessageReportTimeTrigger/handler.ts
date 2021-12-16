@@ -62,7 +62,7 @@ const startNewExport = (
         () =>
           table.updateEntity({
             ...row,
-            status: "PENDING"
+            status: PENDING_STATUS.value
           }),
         E.toError
       )
@@ -71,13 +71,35 @@ const startNewExport = (
     TE.map(CommandMessageReport.encode),
     TE.chain(c => TE.tryCatch(() => run(context, c), E.toError)),
     TE.map(_ => context.log("Export done...", _)),
-    TE.mapLeft(_ => logAndReturn(context)("ERROR!!!...", _)(_)),
+    TE.mapLeft(_ =>
+      logAndReturn(context)("An error occurred during export: ", _)(_)
+    ),
+    TE.mapLeft(error =>
+      pipe(
+        TE.tryCatch(
+          () =>
+            table.updateEntity({
+              ...row,
+              status: ERROR_STATUS.value
+            }),
+          E.toError
+        ),
+        TE.mapLeft(_ => {
+          context.log(
+            `Error updating row ${row.rowKey} status to 'ERROR': ${_}`
+          );
+          return error;
+        }),
+        // Just return the previous error
+        _ => error
+      )
+    ),
     TE.chainFirst(_ =>
       TE.tryCatch(
         () =>
           table.updateEntity({
             ...row,
-            status: "DONE"
+            status: DONE_STATUS.value
           }),
         E.toError
       )
@@ -96,18 +118,18 @@ export const timerTrigger: (
       }
     }),
     AI.fromAsyncIterable,
+    AI.map(Row.decode),
     AI.foldTaskEither(E.toError),
-    TE.map(RA.map(Row.decode)),
     TE.map(RA.rights),
     TE.chain(records =>
       records.length === 0 ||
-      records.find(r => r.status === "PENDING") !== undefined
+      records.find(r => r.status === PENDING_STATUS.value) !== undefined
         ? TE.of<Error, void>(
             context.log("Another process pending, do nothing..")
           )
         : startNewExport(context, exportCommandsStorage, records[0])
     ),
     TE.mapLeft(_ => context.log("An error occurred: ", _)),
-    TE.map(_ => context.log(_)),
+
     TE.toUnion
   )();
