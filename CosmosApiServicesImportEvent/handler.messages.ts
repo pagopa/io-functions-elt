@@ -29,6 +29,26 @@ import {
   WithContentMessage
 } from "../utils/types/reportTypes";
 
+const testUsers: ReadonlyArray<string> = [
+  "AAAAAA00A00A000A",
+  "EEEEEE00E00E000A",
+  "EEEEEE00E00E000B",
+  "EEEEEE00E00E000C",
+  "EEEEEE00E00E000D",
+  "AAAAAA00A00A000C",
+  "AAAAAA00A00A000D",
+  "AAAAAA00A00A000E",
+  "PRVPRV25A01H501B",
+  "XXXXXP25A01H501L",
+  "YYYYYP25A01H501K",
+  "KKKKKP25A01H501U",
+  "QQQQQP25A01H501S",
+  "WWWWWP25A01H501A",
+  "ZZZZZP25A01H501J",
+  "JJJJJP25A01H501X",
+  "GGGGGP25A01H501Z"
+];
+
 /**
  * Build a Cosmos query iterator for messages with a min and max timestamp.
  */
@@ -50,9 +70,13 @@ export const buildIterator = (
         {
           name: "@max",
           value: rangeMax
+        },
+        {
+          name: "@testUsers",
+          value: testUsers
         }
       ],
-      query: `SELECT * FROM m WHERE m._ts > @min AND m._ts <= @max`
+      query: `SELECT * FROM m WHERE m._ts > @min AND m._ts <= @max AND NOT ARRAY_CONTAINS(@testUsers, m.fiscalCode)`
     },
     {
       maxDegreeOfParallelism: cosmosDegreeeOfParallelism,

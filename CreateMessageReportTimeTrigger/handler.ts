@@ -60,10 +60,12 @@ const startNewExport = (
     TE.chainFirst(_ =>
       TE.tryCatch(
         () =>
-          table.updateEntity({
-            ...row,
-            status: PENDING_STATUS.value
-          }),
+          table.updateEntity(
+            Row.encode({
+              ...row,
+              status: PENDING_STATUS.value
+            })
+          ),
         E.toError
       )
     ),
@@ -78,10 +80,12 @@ const startNewExport = (
       pipe(
         TE.tryCatch(
           () =>
-            table.updateEntity({
-              ...row,
-              status: ERROR_STATUS.value
-            }),
+            table.updateEntity(
+              Row.encode({
+                ...row,
+                status: ERROR_STATUS.value
+              })
+            ),
           E.toError
         ),
         TE.mapLeft(_ => {
@@ -97,10 +101,12 @@ const startNewExport = (
     TE.chainFirst(_ =>
       TE.tryCatch(
         () =>
-          table.updateEntity({
-            ...row,
-            status: DONE_STATUS.value
-          }),
+          table.updateEntity(
+            Row.encode({
+              ...row,
+              status: DONE_STATUS.value
+            })
+          ),
         E.toError
       )
     )
@@ -118,12 +124,13 @@ export const timerTrigger: (
       }
     }),
     AI.fromAsyncIterable,
-    AI.map(Row.decode),
     AI.foldTaskEither(E.toError),
+    TE.map(RA.map(Row.decode)),
     TE.map(RA.rights),
     TE.chain(records =>
-      records.length === 0 ||
-      records.find(r => r.status === PENDING_STATUS.value) !== undefined
+      records.length === 0
+        ? TE.of<Error, void>(context.log("No report to perform.."))
+        : records.find(r => r.status === PENDING_STATUS.value) !== undefined
         ? TE.of<Error, void>(
             context.log("Another process pending, do nothing..")
           )
