@@ -5,6 +5,8 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 import * as t from "io-ts";
+import { JsonFromString } from "io-ts-types";
+
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as R from "fp-ts/Record";
@@ -123,6 +125,11 @@ export const IDecodableConfig = t.interface({
   MESSAGE_EXPORTS_COMMAND_TABLE: NonEmptyString,
   MessageContentStorageConnection: NonEmptyString,
   ServiceInfoBlobStorageConnection: NonEmptyString,
+
+  // eslint-disable-next-line sort-keys
+  SERVICEID_EXCLUSION_LIST: withDefault(JsonFromString, "[]").pipe(
+    t.readonlyArray(NonEmptyString)
+  ),
 
   isProduction: t.boolean
 });

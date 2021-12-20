@@ -6,6 +6,7 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 
 import {
+  RetrievedService,
   toAuthorizedCIDRs,
   toAuthorizedRecipients
 } from "@pagopa/io-functions-commons/dist/src/models/service";
@@ -21,20 +22,20 @@ export const aService = {
   departmentName: "MyDept" as NonEmptyString,
   id: "xyz" as NonEmptyString,
   isVisible: true,
-  kind: "IRetrievedService",
-  maxAllowedPaymentAmount: 0 as MaxAllowedPaymentAmount,
+  maxAllowedPaymentAmount: 100 as MaxAllowedPaymentAmount,
   organizationFiscalCode: anOrganizationFiscalCode,
   organizationName: "MyOrg" as NonEmptyString,
   requireSecureChannels: false,
   serviceId: aServiceId,
   serviceName: "MyService" as NonEmptyString,
-  version: 0 as NonNegativeInteger
+  version: 1 as NonNegativeInteger
 };
 
-export const aRetrievedService = {
+export const aRetrievedService: RetrievedService = {
+  ...aService,
   _etag: "_etag",
   _rid: "_rid",
   _self: "_self",
-  _ts: 1,
-  ...aService
+  _ts: 1639739512,
+  kind: "IRetrievedService"
 };
