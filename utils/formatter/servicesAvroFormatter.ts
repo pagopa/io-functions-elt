@@ -11,10 +11,9 @@ import { CrudOperation } from "../../generated/avro/dto/CrudOperationEnum";
 export const buildAvroServiceObject = (
   retrievedService: RetrievedService,
   SERVICEID_EXCLUSION_LIST: ReadonlyArray<string>
-): Omit<services, "schema" | "subject"> => {
+): Omit<services, "schema" | "subject"> =>
   // eslint-disable-next-line no-console, no-underscore-dangle
-  console.log("TIMESTAMP", retrievedService._ts);
-  return {
+  ({
     departmentName: retrievedService.departmentName,
     id: retrievedService.id,
     isVisible: retrievedService.isVisible,
@@ -54,8 +53,7 @@ export const buildAvroServiceObject = (
       SERVICEID_EXCLUSION_LIST.indexOf(retrievedService.serviceId) > -1
         ? true
         : ValidService.is(retrievedService)
-  };
-};
+  });
 
 export const avroServiceFormatter = (
   SERVICEID_EXCLUSION_LIST: ReadonlyArray<string>
