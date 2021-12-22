@@ -21,7 +21,7 @@ const config = getConfigOrThrow();
 
 const servicesTopic = {
   ...config.targetKafka,
-  messageFormatter: avroServiceFormatter
+  messageFormatter: avroServiceFormatter(config.SERVICEID_EXCLUSION_LIST)
 };
 
 const kakfaClient = KP.fromConfig(

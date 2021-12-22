@@ -135,6 +135,17 @@
       "name": "metadata_webUrl",
       "type": "string",
       "default": "undefined"
+    },
+    {
+      "name": "timestamp",
+      "type": "int",
+      "logicalType": "time-millis",
+      "default": 0
+    },
+    {
+      "name": "isQuality",
+      "type": "boolean",
+      "default": false
     }
   ]
 }
