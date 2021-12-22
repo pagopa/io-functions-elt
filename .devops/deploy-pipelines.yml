@@ -137,6 +137,8 @@ stages:
   - stage: Healthcheck
     pool:
       name: io-prod-linux
+    dependsOn:
+      - Deploy_production
     jobs:
       - job: 'do_healthcheck'
         steps:  
