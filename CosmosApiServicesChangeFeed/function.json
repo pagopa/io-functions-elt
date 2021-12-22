@@ -8,8 +8,10 @@
       "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
       "databaseName": "%COSMOSDB_NAME%",
       "collectionName": "services",
-      "leaseCollectionName": "leases-services",
-      "createLeaseCollectionIfNotExists": true
+      "leaseCollectionName": "leases-services-2",
+      "createLeaseCollectionIfNotExists": true,
+      "startFromBeginning": true
+
     }
   ],
   "scriptFile": "../dist/CosmosApiServicesChangeFeed/index.js"
