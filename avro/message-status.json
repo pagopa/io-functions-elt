@@ -1,0 +1,65 @@
+{
+  "name": "messageStatus",
+  "type": "record",
+  "namespace": "dto",
+  "doc": "Kafka JS schema for cosmos api container 'message-status'",
+  "fields": [
+    {
+      "name": "op",
+      "type": {
+        "type": "enum",
+        "name": "CrudOperation",
+        "symbols": [
+          "CREATE",
+          "UPDATE",
+          "DELETE"
+        ]
+      }
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "messageId",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "version",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "MessageStatus",
+        "symbols": [
+          "ACCEPTED",
+          "THROTTLED",
+          "FAILED",
+          "PROCESSED",
+          "REJECTED"
+        ]
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": "int",
+      "logicalType": "time-millis",
+      "default": 0
+    },
+    {
+      "name": "isRead",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "isArchived",
+      "type": "boolean",
+      "default": false
+    }
+  ]
+}
