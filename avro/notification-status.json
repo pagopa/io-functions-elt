@@ -1,0 +1,81 @@
+{
+  "name": "notificationStatus",
+  "type": "record",
+  "namespace": "dto",
+  "doc": "Kafka JS schema for cosmos api container 'notification-status'",
+  "fields": [
+    {
+      "name": "op",
+      "type": {
+        "type": "enum",
+        "name": "NotificationStatusCrudOperation",
+        "symbols": [
+          "CREATE",
+          "UPDATE",
+          "DELETE"
+        ]
+      }
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "messageId",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "notificationId",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "statusId",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "channel",
+      "type": {
+        "type": "enum",
+        "name": "ChannelType",
+        "symbols": [
+          "EMAIL",
+          "WEBHOOK"
+        ]
+      }
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "MessageNotificationStatus",
+        "symbols": [
+          "SENT",
+          "THROTTLED",
+          "EXPIRED",
+          "FAILED"
+        ]
+      }
+    },
+    {
+      "name": "version",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "updatedAt",
+      "type": "int",
+      "logicalType": "time-millis",
+      "default": 0
+    },
+    {
+      "name": "timestamp",
+      "type": "int",
+      "logicalType": "time-millis",
+      "default": 0
+    }
+  ]
+}
