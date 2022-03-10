@@ -16,16 +16,6 @@ const messageStatusContainer = cosmosdbInstance.container(
   MESSAGE_STATUS_COLLECTION_NAME
 );
 
-// const config = getConfigOrThrow();
-// const errorStorage = new TableClient(
-//   `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
-//   config.ERROR_STORAGE_TABLE,
-//   new AzureNamedKeyCredential(
-//     config.ERROR_STORAGE_ACCOUNT,
-//     config.ERROR_STORAGE_KEY
-//   )
-// );
-
 const run = async (
   context: Context,
   rawMessageStatus: ReadonlyArray<unknown>
