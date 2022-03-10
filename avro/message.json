@@ -59,111 +59,20 @@
             "default": "undefined"
           },
           {
-            "name": "markdown",
-            "type": "string",
-            "default": "undefined"
-          },
-          {
-            "name": "paymentData",
-            "type": ["null", {
-              "name": "paymentDataStruct",
-              "type": "record",
-              "fields": [
-                {
-                  "name": "amount",
-                  "type": "int",
-                  "default": 1
-                },
-                {
-                  "name": "noticeNumber",
-                  "type": "string",
-                  "default": "undefined"
-                },
-                {
-                  "name": "invalidAfterDueDate",
-                  "type": "boolean",
-                  "default": "false"
-                },
-                {
-                  "name": "payeeFiscalCode",
-                  "type": "string",
-                  "default": "undefined"
-                }
+            "name": "type",
+            "type": {
+              "type": "enum",
+              "name": "MessageContentType",
+              "symbols": [
+                "GENERIC",
+                "PAYMENT",
+                "EU_COVID_CERT",
+                "LEGAL"
               ]
-            }],
+            },
             "default": "undefined"
-          },
-          {
-            "name": "prescriptionData",
-            "type": ["null", {
-              "name": "prescriptionDataStruct",
-              "type": "record",
-              "fields": [
-                {
-                  "name": "nre",
-                  "type": "string",
-                  "default": "undefined"
-                },
-                {
-                  "name": "iup",
-                  "type": "string",
-                  "default": "undefined"
-                },
-                {
-                  "name": "prescriberFiscalCode",
-                  "type": "string",
-                  "default": "undefined"
-                }
-               ]
-              }
-            ]
-          },
-          {
-            "name": "euCovidCertData",
-            "type": ["null", {
-              "name": "euCovidCertDataStruct",
-              "type": "record",
-              "fields": [
-                {
-                  "name": "authCode",
-                  "type": "string",
-                  "default": "undefined"
-                }
-               ]
-              }
-            ]
-          },
-          {
-            "name": "legalData",
-            "type": ["null", {
-              "name": "legalDataStruct",
-              "type": "record",
-              "fields": [
-                {
-                  "name": "senderMailFrom",
-                  "type": "string",
-                  "default": "undefined"
-                },
-                {
-                  "name": "hasAttachment",
-                  "type": "boolean",
-                  "default": false
-                },
-                {
-                  "name": "messageUniqueId",
-                  "type": "string",
-                  "default": "undefined"
-                },
-                {
-                  "name": "originalMessageUrl",
-                  "type": "string",
-                  "default": "undefined"
-                }
-               ]
-              }
-            ]
           }
-        ]
+        ]         
       }],
       "default": "undefined"
     }
