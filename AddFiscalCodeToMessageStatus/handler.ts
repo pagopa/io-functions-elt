@@ -18,6 +18,7 @@ import * as AR from "fp-ts/Array";
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 import { RetrievedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/src/models/message";
 import * as T from "fp-ts/lib/Task";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 
 const VERSION_PADDING_LENGTH = 16;
 const getVersionedIds = (
@@ -78,7 +79,7 @@ export const patchAllVersion: (
           AR.reduce(
             true as boolean,
             (hasError, response) =>
-              hasError || ![200, 404, 424].includes(response.statusCode)
+              hasError && [200, 404, 424].includes(response.statusCode)
           )
         ),
       results =>
@@ -102,12 +103,14 @@ export const handle = (
       flow(
         RetrievedMessageWithoutContent.decode,
         TE.fromEither,
+        TE.mapLeft(readableReport),
+        TE.mapLeft(msg => new Error(msg)),
         TE.chainW(patchAllVersion(container)),
         TE.map(responses =>
           pipe(
             responses,
             RA.reduce(404, (previous, result) =>
-              result.statusCode === 200 ? previous : result.statusCode
+              result.statusCode !== 200 ? previous : result.statusCode
             )
           )
         ),
