@@ -48,33 +48,49 @@
       "default": true
     },
     {
-      "name": "content",
-      "type": ["null", {
-        "name": "messageContentStruct",
-        "type": "record",
-        "fields": [
-          {
-            "name": "subject",
-            "type": "string",
-            "default": "undefined"
-          },
-          {
-            "name": "type",
-            "type": {
-              "type": "enum",
-              "name": "MessageContentType",
-              "symbols": [
-                "GENERIC",
-                "PAYMENT",
-                "EU_COVID_CERT",
-                "LEGAL"
-              ]
-            },
-            "default": "undefined"
-          }
-        ]         
-      }],
+      "name": "content_subject",
+      "type": "string",
       "default": "undefined"
+    },
+    {
+      "name": "content_type",
+      "type": ["null", {
+        "type": "enum",
+        "name": "MessageContentType",
+        "symbols": [
+          "GENERIC",
+          "PAYMENT",
+          "EU_COVID_CERT",
+          "LEGAL"
+        ]
+      }],
+      "default": null
+    },
+    {
+      "name": "content_paymentData_amount",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "content_paymentData_noticeNumber",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "content_paymentData_invalidAfterDueDate",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "content_paymentData_payeeFiscalCode",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "timestamp",
+      "type": "int",
+      "logicalType": "time-millis",
+      "default": 0
     }
   ]
 }
