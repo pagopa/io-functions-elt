@@ -27,7 +27,7 @@ type InfoHandler = () => Promise<
 
 type HealthChecker = (
   config: unknown
-) => healthcheck.HealthCheck<healthcheck.ProblemSource, true>;
+) => healthcheck.HealthCheck<"Config" | "AzureCosmosDB", true>;
 
 export const InfoHandler = (
   checkApplicationHealth: HealthChecker
