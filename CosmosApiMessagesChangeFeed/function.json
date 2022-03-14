@@ -1,0 +1,18 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "cosmosDBTrigger",
+      "name": "cosmosApiMessagesTrigger",
+      "direction": "in",
+      "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
+      "databaseName": "%COSMOSDB_NAME%",
+      "collectionName": "messages",
+      "leaseCollectionName": "%MESSAGES_LEASES_COLLECTION_NAME%",
+      "createLeaseCollectionIfNotExists": true,
+      "startFromBeginning": true
+
+    }
+  ],
+  "scriptFile": "../dist/CosmosApiMessagesChangeFeed/index.js"
+}

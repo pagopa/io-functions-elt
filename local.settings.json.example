@@ -9,6 +9,11 @@
     "COSMOS_DEGREE_OF_PARALLELISM": "2",
     "MESSAGE_CONTENT_CHUNK_SIZE": "200",
 
+
+    "MESSAGES_TOPIC_NAME": "pdnd-io-cosmosdb-message",
+    "MESSAGES_TOPIC_CONNECTION_STRING": "<Connection String>"
+    "MESSAGES_LEASES_COLLECTION_NAME": "pdnd-leases-messages-001",
+
     "SERVICEID_EXCLUSION_LIST": "ServiceId1,ServiceId2"
   }
 }

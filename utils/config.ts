@@ -137,20 +137,33 @@ export const IDecodableConfig = t.interface({
     UTCISODateFromString,
     new Date("2022-03-22T00:00:00")
   ),
+  // eslint-disable-next-line sort-keys
+  MESSAGES_LEASES_COLLECTION_NAME: NonEmptyString,
 
   isProduction: t.boolean
 });
 
+const MessagesKafkaTopicConfig = t.type({
+  MESSAGES_TOPIC_CONNECTION_STRING: NonEmptyString,
+  MESSAGES_TOPIC_NAME: NonEmptyString
+});
+type MessagesKafkaTopicConfig = t.TypeOf<typeof MessagesKafkaTopicConfig>;
+
 export interface IParsableConfig {
   readonly targetKafka: KafkaProducerCompactConfig;
-  // readonly servicesTopic: KafkaProducerTopicConfig;
+
+  readonly MessagesKafkaTopicConfig: MessagesKafkaTopicConfig;
 }
 
 export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
   pipe(
     E.Do,
-    E.bind("targetKafka", () => KafkaProducerCompactConfigFromEnv.decode(input))
-    // E.bind("servicesTopic", () => KafkaProducerTopicConfigFromEnv.decode(input))
+    E.bind("targetKafka", () =>
+      KafkaProducerCompactConfigFromEnv.decode(input)
+    ),
+    E.bind("MessagesKafkaTopicConfig", () =>
+      MessagesKafkaTopicConfig.decode(input)
+    )
   );
 
 export type IConfig = IDecodableConfig & IParsableConfig;
