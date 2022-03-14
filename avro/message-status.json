@@ -8,7 +8,7 @@
       "name": "op",
       "type": {
         "type": "enum",
-        "name": "CrudOperation",
+        "name": "MessageStatusCrudOperation",
         "symbols": [
           "CREATE",
           "UPDATE",
@@ -46,12 +46,6 @@
       }
     },
     {
-      "name": "timestamp",
-      "type": "int",
-      "logicalType": "time-millis",
-      "default": 0
-    },
-    {
       "name": "isRead",
       "type": "boolean",
       "default": false
@@ -60,6 +54,12 @@
       "name": "isArchived",
       "type": "boolean",
       "default": false
+    },
+    {
+      "name": "timestamp",
+      "type": "int",
+      "logicalType": "time-millis",
+      "default": 0
     }
   ]
 }
