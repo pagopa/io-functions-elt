@@ -112,6 +112,7 @@ export const IDecodableConfig = t.interface({
   ERROR_STORAGE_ACCOUNT: NonEmptyString,
   ERROR_STORAGE_KEY: NonEmptyString,
   ERROR_STORAGE_TABLE: NonEmptyString,
+  ERROR_STORAGE_TABLE_MESSAGES: NonEmptyString,
 
   // eslint-disable-next-line sort-keys
   COMMAND_STORAGE: NonEmptyString,
@@ -128,6 +129,9 @@ export const IDecodableConfig = t.interface({
   ServiceInfoBlobStorageConnection: NonEmptyString,
 
   // eslint-disable-next-line sort-keys
+  MessageContentPrimaryStorageConnection: NonEmptyString,
+
+  // eslint-disable-next-line sort-keys
   SERVICEID_EXCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),
     []
@@ -137,8 +141,6 @@ export const IDecodableConfig = t.interface({
     UTCISODateFromString,
     new Date("2022-03-22T00:00:00")
   ),
-  // eslint-disable-next-line sort-keys
-  MESSAGES_LEASES_COLLECTION_NAME: NonEmptyString,
 
   isProduction: t.boolean
 });

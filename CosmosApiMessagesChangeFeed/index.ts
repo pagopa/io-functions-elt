@@ -1,13 +1,23 @@
 /* eslint-disable @typescript-eslint/naming-convention */ // disabled in order to use the naming convention used to flatten nested object to root ('_' char used as nested object separator)
 import * as winston from "winston";
 import { Context } from "@azure/functions";
-import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
+import { createBlobService } from "azure-storage";
+
+import {
+  MessageModel,
+  MESSAGE_COLLECTION_NAME
+} from "@pagopa/io-functions-commons/dist/src/models/message";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
+
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow } from "../utils/config";
 import { IBulkOperationResult } from "../utils/bulkOperationResult";
 import { avroMessageFormatter } from "../utils/formatter/messagesAvroFormatter";
+import { cosmosdbInstance } from "../utils/cosmosdb";
+
 import { handleMessageChange } from "./handler";
 
 // eslint-disable-next-line functional/no-let
@@ -40,11 +50,20 @@ const kakfaClient = KP.fromConfig(
 
 const errorStorage = new TableClient(
   `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
-  config.ERROR_STORAGE_TABLE,
+  config.ERROR_STORAGE_TABLE_MESSAGES,
   new AzureNamedKeyCredential(
     config.ERROR_STORAGE_ACCOUNT,
     config.ERROR_STORAGE_KEY
   )
+);
+
+const messageModel = new MessageModel(
+  cosmosdbInstance.container(MESSAGE_COLLECTION_NAME),
+  "message-content" as NonEmptyString
+);
+
+const messageContentBlobService = createBlobService(
+  config.MessageContentPrimaryStorageConnection
 );
 
 const run = async (
@@ -52,7 +71,11 @@ const run = async (
   documents: ReadonlyArray<unknown>
 ): Promise<IBulkOperationResult> => {
   logger = context.log;
-  return handleMessageChange(kakfaClient, errorStorage, documents);
+  return handleMessageChange(messageModel, messageContentBlobService)(
+    kakfaClient,
+    errorStorage,
+    documents
+  );
 };
 
 export default run;
