@@ -151,12 +151,19 @@ const MessagesKafkaTopicConfig = t.type({
 });
 type MessagesKafkaTopicConfig = t.TypeOf<typeof MessagesKafkaTopicConfig>;
 
+const MessageStatusKafkaTopicConfig = t.type({
+  MESSAGE_STATUS_TOPIC_CONNECTION_STRING: NonEmptyString,
+  MESSAGE_STATUS_TOPIC_NAME: NonEmptyString
+});
+type MessageStatusKafkaTopicConfig = t.TypeOf<
+  typeof MessageStatusKafkaTopicConfig
+>;
+
 export interface IParsableConfig {
   readonly targetKafka: KafkaProducerCompactConfig;
 
   readonly MessagesKafkaTopicConfig: MessagesKafkaTopicConfig;
-  readonly MESSAGE_STATUS_TOPIC_NAME: NonEmptyString;
-  readonly MESSAGE_STATUS_TOPIC_CONNECTION_STRING: NonEmptyString;
+  readonly messageStatusKafkaTopicConfig: MessageStatusKafkaTopicConfig;
 }
 
 export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
@@ -168,15 +175,8 @@ export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
     E.bind("MessagesKafkaTopicConfig", () =>
       MessagesKafkaTopicConfig.decode(input)
     ),
-    E.bind("MESSAGE_STATUS_TOPIC_NAME", () =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      NonEmptyString.decode((input as any).MESSAGE_STATUS_TOPIC_NAME)
-    ),
-    E.bind("MESSAGE_STATUS_TOPIC_CONNECTION_STRING", () =>
-      NonEmptyString.decode(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (input as any).MESSAGE_STATUS_TOPIC_CONNECTION_STRING
-      )
+    E.bind("messageStatusKafkaTopicConfig", () =>
+      MessageStatusKafkaTopicConfig.decode(input)
     )
   );
 

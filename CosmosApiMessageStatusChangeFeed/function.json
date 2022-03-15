@@ -8,7 +8,7 @@
       "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
       "databaseName": "%COSMOSDB_NAME%",
       "collectionName": "message-status",
-      "leaseCollectionName": "pdnd-leases-message-status-001",
+      "leaseCollectionName": "%MESSAGE_STATUS_LEASES_COLLECTION_NAME%",
       "createLeaseCollectionIfNotExists": true,
       "startFromBeginning": true
 

@@ -23,9 +23,11 @@ const messageStatusConfig = {
   ...config.targetKafka,
   sasl: {
     ...config.targetKafka.sasl,
-    password: config.MESSAGE_STATUS_TOPIC_CONNECTION_STRING
+    password:
+      config.messageStatusKafkaTopicConfig
+        .MESSAGE_STATUS_TOPIC_CONNECTION_STRING
   },
-  topic: config.MESSAGE_STATUS_TOPIC_NAME
+  topic: config.messageStatusKafkaTopicConfig.MESSAGE_STATUS_TOPIC_NAME
 };
 
 const messageStatusTopic = {
