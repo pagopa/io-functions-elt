@@ -41,7 +41,7 @@ const kakfaClient = KP.fromConfig(
 
 const errorStorage = new TableClient(
   `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
-  config.ERROR_STORAGE_TABLE,
+  config.ERROR_STORAGE_TABLE_NOTIFICATION_STATUS,
   new AzureNamedKeyCredential(
     config.ERROR_STORAGE_ACCOUNT,
     config.ERROR_STORAGE_KEY
