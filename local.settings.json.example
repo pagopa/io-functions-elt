@@ -14,6 +14,10 @@
     "MESSAGES_TOPIC_NAME": "pdnd-io-cosmosdb-message",
     "MESSAGES_TOPIC_CONNECTION_STRING": "<Connection String>"
     "MESSAGES_LEASES_PREFIX": "messages-001",
+    
+    "NOTIFICATION_STATUS_TOPIC_NAME":"pdnd-io-cosmosdb-notification-status",
+    "NOTIFICATION_STATUS_TOPIC_CONNECTION_STRING":"<Conn string>",
+    "NOTIFICATION_STATUS_LEASES_COLLECTION_NAME": "pdnd-leases-notification-status-001",
 
     "SERVICEID_EXCLUSION_LIST": "ServiceId1,ServiceId2"
   }

@@ -151,10 +151,18 @@ const MessagesKafkaTopicConfig = t.type({
 });
 type MessagesKafkaTopicConfig = t.TypeOf<typeof MessagesKafkaTopicConfig>;
 
+const NotificationStatusKafkaTopicConfig = t.type({
+  NOTIFICATION_STATUS_TOPIC_CONNECTION_STRING: NonEmptyString,
+  NOTIFICATION_STATUS_TOPIC_NAME: NonEmptyString
+});
+type NotificationStatusKafkaTopicConfig = t.TypeOf<
+  typeof NotificationStatusKafkaTopicConfig
+>;
+
 export interface IParsableConfig {
   readonly targetKafka: KafkaProducerCompactConfig;
-
   readonly MessagesKafkaTopicConfig: MessagesKafkaTopicConfig;
+  readonly notificationStatusTopic: NotificationStatusKafkaTopicConfig;
 }
 
 export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
@@ -165,6 +173,9 @@ export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
     ),
     E.bind("MessagesKafkaTopicConfig", () =>
       MessagesKafkaTopicConfig.decode(input)
+    ),
+    E.bind("notificationStatusTopic", () =>
+      NotificationStatusKafkaTopicConfig.decode(input)
     )
   );
 
