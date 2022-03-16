@@ -17,7 +17,7 @@
 
     "MESSAGE_STATUS_TOPIC_NAME":"pdnd-io-cosmosdb-message-status",
     "MESSAGE_STATUS_TOPIC_CONNECTION_STRING":"<Conn String>",
-    "MESSAGE_STATUS_LEASES_COLLECTION_NAME": "message-status-001",
+    "MESSAGE_STATUS_LEASES_PREFIX": "message-status-001",
 
     "SERVICEID_EXCLUSION_LIST": "ServiceId1,ServiceId2"
   }
