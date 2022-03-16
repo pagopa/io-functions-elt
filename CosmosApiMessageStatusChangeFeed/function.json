@@ -9,7 +9,7 @@
       "databaseName": "%COSMOSDB_NAME%",
       "collectionName": "message-status",
       "leaseCollectionPrefix": "%MESSAGE_STATUS_LEASES_PREFIX%-",
-      "leaseCollectionName": "pdnd-leases-messages",
+      "leaseCollectionName": "pdnd-leases",
       "createLeaseCollectionIfNotExists": true,
       "startFromBeginning": true
 
