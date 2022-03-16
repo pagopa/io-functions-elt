@@ -65,6 +65,24 @@ export const nestifyPrefixedType = (
     )
   );
 
+/**
+ *
+ * @param topicName
+ * @param password
+ * @returns
+ */
+export const withTopic = (topicName: string, password: string) => (
+  kafkaConfig: KafkaProducerCompactConfig
+): KafkaProducerCompactConfig =>
+  ({
+    ...kafkaConfig,
+    sasl: {
+      ...kafkaConfig.sasl,
+      password
+    },
+    topic: topicName
+  } as KafkaProducerCompactConfig);
+
 export type KafkaProducerCompactConfig = t.TypeOf<
   typeof KafkaProducerCompactConfig
 >;

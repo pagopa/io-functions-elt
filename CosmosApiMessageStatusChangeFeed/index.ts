@@ -5,7 +5,7 @@ import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/uti
 import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
-import { getConfigOrThrow } from "../utils/config";
+import { getConfigOrThrow, withTopic } from "../utils/config";
 import { IBulkOperationResult } from "../utils/bulkOperationResult";
 import { messageStatusAvroFormatter } from "../utils/formatter/messageStatusAvroFormatter";
 import { handleMessageStatusChange } from "./handler";
@@ -19,16 +19,10 @@ winston.add(contextTransport);
 
 const config = getConfigOrThrow();
 
-const messageStatusConfig = {
-  ...config.targetKafka,
-  sasl: {
-    ...config.targetKafka.sasl,
-    password:
-      config.messageStatusKafkaTopicConfig
-        .MESSAGE_STATUS_TOPIC_CONNECTION_STRING
-  },
-  topic: config.messageStatusKafkaTopicConfig.MESSAGE_STATUS_TOPIC_NAME
-};
+const messageStatusConfig = withTopic(
+  config.messageStatusKafkaTopicConfig.MESSAGE_STATUS_TOPIC_NAME,
+  config.messageStatusKafkaTopicConfig.MESSAGE_STATUS_TOPIC_CONNECTION_STRING
+)(config.targetKafka);
 
 const messageStatusTopic = {
   ...messageStatusConfig,
