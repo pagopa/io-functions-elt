@@ -61,7 +61,7 @@ export const patchAllVersion: (
         ]
       }
     })),
-    readonlyPatchOperations => readonlyPatchOperations.slice(), // copy the readonly array to a mutable one
+    RA.toArray, // copy the readonly array to a mutable one
     patchOperations =>
       TE.tryCatch(
         () =>
