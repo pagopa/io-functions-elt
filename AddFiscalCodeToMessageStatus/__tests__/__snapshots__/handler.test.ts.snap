@@ -1,0 +1,2200 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`patchAllVersion GIVEN an existing fiscalCode+id and a multiple patch response WHEN patch all version THEN return a successfull either 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "id": "dummy-message-id-0000000000000000",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000001",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000002",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000003",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000004",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000005",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000006",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000007",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000008",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000009",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000010",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000011",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000012",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000013",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000014",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000015",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000016",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000017",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000018",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000019",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000020",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000021",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000022",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000023",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000024",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+      ],
+      Object {
+        "continueOnError": false,
+      },
+      undefined,
+    ],
+    Array [
+      Array [
+        Object {
+          "id": "dummy-message-id-0000000000000000",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000001",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000002",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000003",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000004",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000005",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000006",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000007",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000008",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000009",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000010",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000011",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000012",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000013",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000014",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000015",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000016",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000017",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000018",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000019",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000020",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000021",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000022",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000023",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000024",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+      ],
+      Object {
+        "continueOnError": false,
+      },
+      undefined,
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`patchAllVersion GIVEN an existing fiscalCode+id and a single patch response WHEN patch all version THEN return a successfull either 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "id": "dummy-message-id-0000000000000000",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000001",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000002",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000003",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000004",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000005",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000006",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000007",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000008",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000009",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000010",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000011",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000012",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000013",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000014",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000015",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000016",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000017",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000018",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000019",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000020",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000021",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000022",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000023",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000024",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+      ],
+      Object {
+        "continueOnError": false,
+      },
+      undefined,
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`patchAllVersion GIVEN an existing fiscalCode+id and am error patch response WHEN patch all version THEN return a failed either 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "id": "dummy-message-id-0000000000000000",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000001",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000002",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000003",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000004",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000005",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000006",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000007",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000008",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000009",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000010",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000011",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000012",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000013",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000014",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000015",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000016",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000017",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000018",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000019",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000020",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000021",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000022",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000023",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000024",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+      ],
+      Object {
+        "continueOnError": false,
+      },
+      undefined,
+    ],
+    Array [
+      Array [
+        Object {
+          "id": "dummy-message-id-0000000000000000",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000001",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000002",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000003",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000004",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000005",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000006",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000007",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000008",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000009",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000010",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000011",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000012",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000013",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000014",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000015",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000016",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000017",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000018",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000019",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000020",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000021",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000022",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000023",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000024",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+      ],
+      Object {
+        "continueOnError": false,
+      },
+      undefined,
+    ],
+    Array [
+      Array [
+        Object {
+          "id": "dummy-message-id-0000000000000000",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000001",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000002",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000003",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000004",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000005",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000006",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000007",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000008",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000009",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000010",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000011",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000012",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000013",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000014",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000015",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000016",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000017",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000018",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000019",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000020",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000021",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000022",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000023",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+        Object {
+          "id": "dummy-message-id-0000000000000024",
+          "operationType": "Patch",
+          "partitionKey": "dummy-message-id",
+          "resourceBody": Object {
+            "operations": Array [
+              Object {
+                "op": "add",
+                "path": "/fiscalCode",
+                "value": "FRLFRC74E04B157I",
+              },
+            ],
+          },
+        },
+      ],
+      Object {
+        "continueOnError": false,
+      },
+      undefined,
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
