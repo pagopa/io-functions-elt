@@ -97,12 +97,52 @@ const aNewMessageWithoutContent: NewMessageWithoutContent = {
 const aRetrievedMessageWithoutContent = {
   ...cosmosMetadata,
   ...aSerializedNewMessageWithoutContent,
+  isPending: false,
   createdAt: new Date()
 };
 
+const aMaxThreshold = new Date();
+aMaxThreshold.setDate(aMaxThreshold.getDate() + 10);
+
+const mockMessageStatusModel = {
+  create: jest.fn()
+} as any;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe("handle", () => {
+  it("GIVEN an not pending message without a message_status WHEN handle the change feed THEN return a 200", async () => {
+    const mockPatchAllVersion = jest
+      .spyOn(HANDLE, "patchAllVersion")
+      .mockReturnValueOnce(() =>
+        TE.right([
+          { statusCode: 404 },
+          { statusCode: 424 }
+        ] as OperationResponse[])
+      );
+    mockMessageStatusModel.create.mockReturnValueOnce(TE.right({}));
+    const results = await HANDLE.handle(
+      mockContainer,
+      mockMessageStatusModel,
+      aMaxThreshold,
+      [aRetrievedMessageWithoutContent]
+    );
+    expect(results).toEqual([200]);
+    expect(mockPatchAllVersion).toBeCalledTimes(1);
+    expect(mockMessageStatusModel.create).toBeCalledWith(
+      expect.objectContaining({
+        fiscalCode: aFiscalCode,
+        isArchived: false,
+        isRead: false,
+        messageId: aRetrievedMessageWithoutContent.id,
+        status: "PROCESSED"
+      })
+    );
+  });
   it("GIVEN an existing message WHEN handle the change feed THEN return a 200", async () => {
-    jest
+    const mockPatchAllVersion = jest
       .spyOn(HANDLE, "patchAllVersion")
       .mockReturnValueOnce(() =>
         TE.right([
@@ -111,10 +151,15 @@ describe("handle", () => {
           { statusCode: 424 }
         ] as OperationResponse[])
       );
-    const results = await HANDLE.handle(mockContainer, [
-      aRetrievedMessageWithoutContent
-    ]);
+    const results = await HANDLE.handle(
+      mockContainer,
+      mockMessageStatusModel,
+      aMaxThreshold,
+      [aRetrievedMessageWithoutContent]
+    );
     expect(results).toEqual([200]);
+    expect(mockPatchAllVersion).toBeCalledTimes(1);
+    expect(mockMessageStatusModel.create).toBeCalledTimes(0);
   });
 
   it("GIVEN an existing message WHEN handle the change feed THEN return a 200", async () => {
@@ -127,10 +172,14 @@ describe("handle", () => {
           { statusCode: 424 }
         ] as OperationResponse[])
       );
-    const results = await HANDLE.handle(mockContainer, [
-      aRetrievedMessageWithoutContent
-    ]);
+    const results = await HANDLE.handle(
+      mockContainer,
+      mockMessageStatusModel,
+      aMaxThreshold,
+      [aRetrievedMessageWithoutContent]
+    );
     expect(results).toEqual([200]);
+    expect(mockMessageStatusModel.create).toBeCalledTimes(0);
   });
 
   it("GIVEN a not working cosmos WHEN handle the change feed THEN throw a CosmosError", async () => {
@@ -144,9 +193,33 @@ describe("handle", () => {
       })
     );
     await expect(
-      HANDLE.handle(mockContainer, [aRetrievedMessageWithoutContent])
+      HANDLE.handle(mockContainer, mockMessageStatusModel, aMaxThreshold, [
+        aRetrievedMessageWithoutContent
+      ])
     ).rejects.toEqual(
       expect.objectContaining({ kind: "COSMOS_ERROR_RESPONSE" })
     );
+    expect(mockMessageStatusModel.create).toBeCalledTimes(0);
+  });
+
+  it("GIVEN an existing message created after the maxThreshold WHEN handle the change feed THEN return a 0", async () => {
+    const mockPatchAllVersion = jest
+      .spyOn(HANDLE, "patchAllVersion")
+      .mockReturnValueOnce(() =>
+        TE.right([
+          { statusCode: 200 },
+          { statusCode: 404 },
+          { statusCode: 424 }
+        ] as OperationResponse[])
+      );
+    const results = await HANDLE.handle(
+      mockContainer,
+      mockMessageStatusModel,
+      new Date("2022-03-22T00:00:00"),
+      [aRetrievedMessageWithoutContent]
+    );
+    expect(results).toEqual([0]);
+    expect(mockPatchAllVersion).toBeCalledTimes(0);
+    expect(mockMessageStatusModel.create).toBeCalledTimes(0);
   });
 });
