@@ -19,6 +19,10 @@ import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definiti
 import { RetrievedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/src/models/message";
 import * as T from "fp-ts/lib/Task";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { MessageStatusModel } from "@pagopa/io-functions-commons/dist/src/models/message_status";
+import { MessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageStatusValue";
+
+export const SKIP_ME_KIND = "SKIP_ME";
 
 const VERSION_PADDING_LENGTH = 16;
 const getVersionedIds = (
@@ -95,6 +99,8 @@ export const patchAllVersion: (
 
 export const handle = (
   container: Container,
+  messageStatusModel: MessageStatusModel,
+  maxThresholdDate: Date,
   rawMessages: ReadonlyArray<unknown>
 ): Promise<ReadonlyArray<number>> =>
   pipe(
@@ -105,17 +111,45 @@ export const handle = (
         TE.fromEither,
         TE.mapLeft(readableReport),
         TE.mapLeft(msg => new Error(msg)),
-        TE.chainW(patchAllVersion(container)),
-        TE.map(responses =>
+        TE.filterOrElseW(
+          message => message.createdAt <= maxThresholdDate,
+          () => ({ kind: SKIP_ME_KIND })
+        ),
+        TE.chainW(message =>
           pipe(
-            responses,
-            RA.reduce(404, (previous, result) =>
-              result.statusCode !== 200 ? previous : result.statusCode
+            message,
+            patchAllVersion(container),
+            TE.map(responses =>
+              pipe(
+                responses,
+                RA.reduce(404, (previous, result) =>
+                  result.statusCode !== 200 ? previous : result.statusCode
+                )
+              )
+            ),
+            TE.chain(result =>
+              result === 404 && message.isPending === false
+                ? pipe(
+                    messageStatusModel.create({
+                      fiscalCode: message.fiscalCode,
+                      isArchived: false,
+                      isRead: false,
+                      kind: "INewMessageStatus",
+                      messageId: message.id,
+                      status: MessageStatusValueEnum.PROCESSED,
+                      updatedAt: new Date()
+                    }),
+                    TE.map(() => 200)
+                  )
+                : TE.right(result)
             )
           )
         ),
-        TE.mapLeft(e => {
-          throw e;
+        TE.mapLeft(error => {
+          if ("kind" in error && error.kind === SKIP_ME_KIND) {
+            return 0;
+          }
+          throw error;
         }),
         TE.toUnion
       )
