@@ -102,10 +102,10 @@ export const buildAvroMessagesObject = (
         paymentData?.invalid_after_due_date ?? false,
       content_paymentData_payeeFiscalCode:
         paymentData?.payee?.fiscal_code ?? "",
-      createdAt: Math.trunc(retrievedMessage.createdAt.getTime() / 1000),
+      createdAt: retrievedMessage.createdAt.getTime(),
       timeToLiveSeconds: retrievedMessage.timeToLiveSeconds,
       // eslint-disable-next-line no-underscore-dangle
-      timestamp: retrievedMessage._ts
+      timestamp: retrievedMessage._ts * 1000
     };
   };
 
