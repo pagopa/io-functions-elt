@@ -34,11 +34,9 @@ export const buildAvroNotificationStatusObject = (
     channel: toAvroChannel(retrievedNotificationStatus.channel),
     status: toAvroNotificationStatus(retrievedNotificationStatus.status),
     statusId: retrievedNotificationStatus.statusId,
-    updatedAt: Math.trunc(
-      retrievedNotificationStatus.updatedAt.getTime() / 1000
-    ),
+    updatedAt: retrievedNotificationStatus.updatedAt.getTime(),
     version: retrievedNotificationStatus.version,
-    timestamp: retrievedNotificationStatus._ts
+    timestamp: retrievedNotificationStatus._ts * 1000
     /* eslint-enable sort-keys */
   });
 

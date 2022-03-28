@@ -67,14 +67,14 @@
     },
     {
       "name": "updatedAt",
-      "type": "int",
-      "logicalType": "time-millis",
+      "type": "long",
+      "logicalType": "timestamp-millis",
       "default": 0
     },
     {
       "name": "timestamp",
-      "type": "int",
-      "logicalType": "time-millis",
+      "type": "long",
+      "logicalType": "timestamp-millis",
       "default": 0
     }
   ]
