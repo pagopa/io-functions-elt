@@ -24,7 +24,7 @@ export const buildAvroServiceObject = (
       ? CrudOperation.CREATE
       : CrudOperation.UPDATE,
   // eslint-disable-next-line sort-keys, no-underscore-dangle
-  timestamp: retrievedMessageStatus._ts
+  timestamp: retrievedMessageStatus._ts * 1000
 });
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
