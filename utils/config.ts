@@ -112,6 +112,7 @@ export const IDecodableConfig = t.interface({
   ERROR_STORAGE_ACCOUNT: NonEmptyString,
   ERROR_STORAGE_KEY: NonEmptyString,
   ERROR_STORAGE_TABLE: NonEmptyString,
+  ERROR_STORAGE_TABLE_MESSAGES: NonEmptyString,
 
   // eslint-disable-next-line sort-keys
   COMMAND_STORAGE: NonEmptyString,
@@ -128,6 +129,9 @@ export const IDecodableConfig = t.interface({
   ServiceInfoBlobStorageConnection: NonEmptyString,
 
   // eslint-disable-next-line sort-keys
+  MessageContentPrimaryStorageConnection: NonEmptyString,
+
+  // eslint-disable-next-line sort-keys
   SERVICEID_EXCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),
     []
@@ -141,16 +145,27 @@ export const IDecodableConfig = t.interface({
   isProduction: t.boolean
 });
 
+const MessagesKafkaTopicConfig = t.type({
+  MESSAGES_TOPIC_CONNECTION_STRING: NonEmptyString,
+  MESSAGES_TOPIC_NAME: NonEmptyString
+});
+type MessagesKafkaTopicConfig = t.TypeOf<typeof MessagesKafkaTopicConfig>;
+
 export interface IParsableConfig {
   readonly targetKafka: KafkaProducerCompactConfig;
-  // readonly servicesTopic: KafkaProducerTopicConfig;
+
+  readonly MessagesKafkaTopicConfig: MessagesKafkaTopicConfig;
 }
 
 export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
   pipe(
     E.Do,
-    E.bind("targetKafka", () => KafkaProducerCompactConfigFromEnv.decode(input))
-    // E.bind("servicesTopic", () => KafkaProducerTopicConfigFromEnv.decode(input))
+    E.bind("targetKafka", () =>
+      KafkaProducerCompactConfigFromEnv.decode(input)
+    ),
+    E.bind("MessagesKafkaTopicConfig", () =>
+      MessagesKafkaTopicConfig.decode(input)
+    )
   );
 
 export type IConfig = IDecodableConfig & IParsableConfig;

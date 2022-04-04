@@ -15,7 +15,7 @@ const aNewMessageWithoutContent: NewMessageWithoutContent = {
   fiscalCode: aFiscalCode,
   id: "A_MESSAGE_ID" as NonEmptyString,
   indexedId: "A_MESSAGE_ID" as NonEmptyString,
-  isPending: true,
+  isPending: false,
   kind: "INewMessageWithoutContent",
   senderServiceId: "test" as ServiceId,
   senderUserId: "u123" as NonEmptyString,
@@ -29,4 +29,9 @@ export const aRetrievedMessageWithoutContent: RetrievedMessageWithoutContent = {
   _self: "xyz",
   _ts: 1,
   kind: "IRetrievedMessageWithoutContent"
+};
+
+export const aGenericContent = {
+  subject: "t".repeat(80),
+  markdown: "t".repeat(120)
 };
