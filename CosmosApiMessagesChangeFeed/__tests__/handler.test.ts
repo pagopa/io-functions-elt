@@ -184,4 +184,29 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
       })
     );
   });
+
+  it("should throw an Error if storeMessageErrors fails", async () => {
+    const handler = handleMessageChange(mockMessageModel, {} as any);
+
+    getContentFromBlobMock.mockImplementationOnce(() =>
+      TE.left(Error("An error occurred"))
+    );
+
+    createEntityMock.mockImplementationOnce(async () => {
+      throw Error("An error");
+    });
+
+    await expect(
+      handler(mockKafkaProducerKompact, tableClient, [
+        ...aListOfRightMessages,
+        { error: "error" }
+      ])
+    ).rejects.toEqual(Error("An error"));
+
+    expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(
+      aListOfRightMessages.length
+    );
+
+    expect(tableClient.createEntity).toHaveBeenCalledTimes(1);
+  });
 });

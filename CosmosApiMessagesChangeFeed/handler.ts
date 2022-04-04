@@ -15,6 +15,7 @@ import { sequenceS } from "fp-ts/lib/Apply";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { publish } from "../utils/publish";
 import { IBulkOperationResult } from "../utils/bulkOperationResult";
+import { IStorableError } from "../utils/types/storableErrors";
 
 const CHUNK_SIZE = 15;
 
@@ -25,12 +26,13 @@ const CHUNK_SIZE = 15;
  * @returns
  */
 const storeMessageErrors = (errorStorage: TableClient) => (
-  storableErrors: ReadonlyArray<Error>
+  storableErrors: ReadonlyArray<IStorableError<RetrievedMessage>>
 ): ReadonlyArray<TE.TaskEither<Error, TableInsertEntityHeaders>> =>
   storableErrors.map(es =>
     TE.tryCatch(
       () =>
         errorStorage.createEntity({
+          body: `${JSON.stringify(es.body)}`,
           message: es.message,
           name: "Message Error",
           partitionKey: `${new Date().getMonth() + 1}`,
@@ -47,11 +49,14 @@ const enrichMessageContent = (
   messageModel: MessageModel,
   blobService: BlobService,
   message: RetrievedMessage
-): TE.TaskEither<Error, RetrievedMessage> =>
+): TE.TaskEither<IStorableError<RetrievedMessage>, RetrievedMessage> =>
   pipe(
     messageModel.getContentFromBlob(blobService, message.id),
     TE.chain(TE.fromOption(() => Error(`Blob not found`))),
-    TE.mapLeft(err => Error(`Message ${message.id}: ${err.message}`)),
+    TE.mapLeft(err => ({
+      ...Error(`Message ${message.id}: ${err.message}`),
+      body: message
+    })),
     TE.map(content => ({
       ...message,
       content,
@@ -97,7 +102,9 @@ export const enrichMessagesContent = (
         storeMessageErrors(errorStorage),
         RA.sequence(TE.ApplicativeSeq),
         TE.bimap(
-          _ => rights,
+          err => {
+            throw err;
+          },
           _ => rights
         )
       )
