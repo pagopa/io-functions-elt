@@ -71,7 +71,7 @@ const run = async (
   documents: ReadonlyArray<unknown>
 ): Promise<IBulkOperationResult> => {
   logger = context.log;
-  return handleMessageChange(messageModel, messageContentBlobService)(
+  return handleMessageChange(context, messageModel, messageContentBlobService)(
     kakfaClient,
     errorStorage,
     documents
