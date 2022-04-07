@@ -16,6 +16,7 @@ export const buildAvroServiceObject = (
   id: retrievedMessageStatus.id,
   messageId: retrievedMessageStatus.messageId,
   status: formatStatus(retrievedMessageStatus.status),
+  updatedAt: retrievedMessageStatus.updatedAt.getTime(),
   version: retrievedMessageStatus.version,
   isRead: retrievedMessageStatus.isRead,
   isArchived: retrievedMessageStatus.isArchived,
