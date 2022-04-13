@@ -65,6 +65,24 @@ export const nestifyPrefixedType = (
     )
   );
 
+/**
+ *
+ * @param topicName
+ * @param password
+ * @returns
+ */
+export const withTopic = (topicName: string, password: string) => (
+  kafkaConfig: KafkaProducerCompactConfig
+): KafkaProducerCompactConfig =>
+  ({
+    ...kafkaConfig,
+    sasl: {
+      ...kafkaConfig.sasl,
+      password
+    },
+    topic: topicName
+  } as KafkaProducerCompactConfig);
+
 export type KafkaProducerCompactConfig = t.TypeOf<
   typeof KafkaProducerCompactConfig
 >;
@@ -113,6 +131,7 @@ export const IDecodableConfig = t.interface({
   ERROR_STORAGE_KEY: NonEmptyString,
   ERROR_STORAGE_TABLE: NonEmptyString,
   ERROR_STORAGE_TABLE_MESSAGES: NonEmptyString,
+  ERROR_STORAGE_TABLE_MESSAGE_STATUS: NonEmptyString,
 
   // eslint-disable-next-line sort-keys
   COMMAND_STORAGE: NonEmptyString,
@@ -151,10 +170,19 @@ const MessagesKafkaTopicConfig = t.type({
 });
 type MessagesKafkaTopicConfig = t.TypeOf<typeof MessagesKafkaTopicConfig>;
 
+const MessageStatusKafkaTopicConfig = t.type({
+  MESSAGE_STATUS_TOPIC_CONNECTION_STRING: NonEmptyString,
+  MESSAGE_STATUS_TOPIC_NAME: NonEmptyString
+});
+type MessageStatusKafkaTopicConfig = t.TypeOf<
+  typeof MessageStatusKafkaTopicConfig
+>;
+
 export interface IParsableConfig {
   readonly targetKafka: KafkaProducerCompactConfig;
 
   readonly MessagesKafkaTopicConfig: MessagesKafkaTopicConfig;
+  readonly messageStatusKafkaTopicConfig: MessageStatusKafkaTopicConfig;
 }
 
 export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
@@ -165,6 +193,9 @@ export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
     ),
     E.bind("MessagesKafkaTopicConfig", () =>
       MessagesKafkaTopicConfig.decode(input)
+    ),
+    E.bind("messageStatusKafkaTopicConfig", () =>
+      MessageStatusKafkaTopicConfig.decode(input)
     )
   );
 

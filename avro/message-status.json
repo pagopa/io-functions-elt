@@ -27,6 +27,12 @@
       "default": "undefined"
     },
     {
+      "name": "updatedAt",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "default": 0
+    },
+    {
       "name": "version",
       "type": "int",
       "default": 0
