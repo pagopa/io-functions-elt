@@ -156,11 +156,6 @@ export const IDecodableConfig = t.interface({
     []
   ),
 
-  TIME_THRESHOLD_FOR_MESSAGE_STATUS_FISCALCODE_UPDATE: withDefault(
-    UTCISODateFromString,
-    new Date("2022-03-22T00:00:00")
-  ),
-
   isProduction: t.boolean
 });
 
