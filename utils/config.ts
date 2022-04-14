@@ -18,7 +18,6 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 
-import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { KafkaProducerCompactConfig } from "./IoKafkaTypes";
 
 const isRecordOfString = (i: unknown): i is Record<string, unknown> =>
@@ -154,11 +153,6 @@ export const IDecodableConfig = t.interface({
   SERVICEID_EXCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),
     []
-  ),
-
-  TIME_THRESHOLD_FOR_MESSAGE_STATUS_FISCALCODE_UPDATE: withDefault(
-    UTCISODateFromString,
-    new Date("2022-03-22T00:00:00")
   ),
 
   isProduction: t.boolean
