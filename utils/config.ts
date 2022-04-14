@@ -18,7 +18,6 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 
-import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { KafkaProducerCompactConfig } from "./IoKafkaTypes";
 
 const isRecordOfString = (i: unknown): i is Record<string, unknown> =>
