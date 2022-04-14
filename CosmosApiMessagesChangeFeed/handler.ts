@@ -1,5 +1,6 @@
 import { TableClient, TableInsertEntityHeaders } from "@azure/data-tables";
 import { BlobService } from "azure-storage";
+import { Context } from "@azure/functions";
 
 import { flow, pipe } from "fp-ts/lib/function";
 import * as T from "fp-ts/lib/Task";
@@ -33,9 +34,10 @@ const storeMessageErrors = (errorStorage: TableClient) => (
       () =>
         errorStorage.createEntity({
           body: `${JSON.stringify(es.body)}`,
-          message: es.message,
+          message: es.error.message,
           name: "Message Error",
           partitionKey: `${new Date().getMonth() + 1}`,
+          retriable: es.retriable,
           rowKey: `${Date.now()}`
         }),
       E.toError
@@ -46,17 +48,35 @@ const storeMessageErrors = (errorStorage: TableClient) => (
  * Retrieve a message content from blob storage and enrich message
  */
 const enrichMessageContent = (
+  context: Context,
   messageModel: MessageModel,
   blobService: BlobService,
   message: RetrievedMessage
 ): TE.TaskEither<IStorableError<RetrievedMessage>, RetrievedMessage> =>
   pipe(
     messageModel.getContentFromBlob(blobService, message.id),
-    TE.chain(TE.fromOption(() => Error(`Blob not found`))),
-    TE.mapLeft(err => ({
-      ...Error(`Message ${message.id}: ${err.message}`),
-      body: message
-    })),
+    TE.mapLeft(err => {
+      context.log.error(
+        `CosmosApiMessagesChangeFeed|enrichMessageContent|Error retrieving message content for message ${message.id}`
+      );
+      return {
+        body: message,
+        error: Error(`Message ${message.id}: ${err.message}`),
+        retriable: true
+      };
+    }),
+    TE.chain(
+      TE.fromOption(() => {
+        context.log.error(
+          `CosmosApiMessagesChangeFeed|enrichMessageContent|Message content not found for message ${message.id}`
+        );
+        return {
+          body: message,
+          error: Error(`Message ${message.id}: Message content not found`),
+          retriable: false
+        };
+      })
+    ),
     TE.map(content => ({
       ...message,
       content,
@@ -69,6 +89,7 @@ const enrichMessageContent = (
  *
  */
 export const enrichMessagesContent = (
+  context: Context,
   messageModel: MessageModel,
   mesageContentChunkSize: number,
   blobService: BlobService,
@@ -84,7 +105,7 @@ export const enrichMessagesContent = (
       flow(
         RA.map(m =>
           m.isPending === false
-            ? enrichMessageContent(messageModel, blobService, m)
+            ? enrichMessageContent(context, messageModel, blobService, m)
             : TE.of(m)
         ),
         // call task in parallel
@@ -103,6 +124,9 @@ export const enrichMessagesContent = (
         RA.sequence(TE.ApplicativeSeq),
         TE.bimap(
           err => {
+            context.log.error(
+              `CosmosApiMessagesChangeFeed|enrichMessageContent|Error performing "storeMessageErrors"`
+            );
             throw err;
           },
           _ => rights
@@ -113,6 +137,7 @@ export const enrichMessagesContent = (
   );
 
 export const handleMessageChange = (
+  context: Context,
   messageModel: MessageModel,
   blobService: BlobService
 ) => (
@@ -123,12 +148,13 @@ export const handleMessageChange = (
   pipe(
     documents,
     RA.map(RetrievedMessage.decode),
-    flow(retrievedMessages => ({
+    retrievedMessages => ({
       lefts: T.of(retrievedMessages.filter(m => E.isLeft(m))),
       rights: pipe(
         retrievedMessages,
         RA.rights,
         enrichMessagesContent(
+          context,
           messageModel,
           CHUNK_SIZE,
           blobService,
@@ -136,7 +162,7 @@ export const handleMessageChange = (
         ),
         T.map(RA.map(m => E.right(m)))
       )
-    })),
+    }),
     sequenceS(T.ApplyPar),
     T.map(({ lefts, rights }) => [...lefts, ...rights]),
     publish(client, errorStorage, documents)

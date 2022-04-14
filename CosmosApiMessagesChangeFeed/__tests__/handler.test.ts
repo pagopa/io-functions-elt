@@ -18,6 +18,7 @@ import {
   aGenericContent,
   aRetrievedMessageWithoutContent
 } from "../../__mocks__/messages.mock";
+import { functionsContextMock } from "../../__mocks__/@azure/context.mock";
 
 // ----------------------
 // Variables
@@ -86,7 +87,11 @@ beforeEach(() => jest.clearAllMocks());
 
 describe("CosmosApiMessagesChangeFeed", () => {
   it("should send all retrieved messages", async () => {
-    const handler = handleMessageChange(mockMessageModel, {} as any);
+    const handler = handleMessageChange(
+      functionsContextMock,
+      mockMessageModel,
+      {} as any
+    );
 
     const res = await handler(
       mockKafkaProducerKompact,
@@ -99,6 +104,8 @@ describe("CosmosApiMessagesChangeFeed", () => {
     );
 
     expect(tableClient.createEntity).not.toHaveBeenCalled();
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
+
     expect(res).toMatchObject(
       expect.objectContaining({
         isSuccess: true,
@@ -108,7 +115,11 @@ describe("CosmosApiMessagesChangeFeed", () => {
   });
 
   it("should enrich only non-pending messages", async () => {
-    const handler = handleMessageChange(mockMessageModel, {} as any);
+    const handler = handleMessageChange(
+      functionsContextMock,
+      mockMessageModel,
+      {} as any
+    );
 
     const res = await handler(
       mockKafkaProducerKompact,
@@ -122,6 +133,8 @@ describe("CosmosApiMessagesChangeFeed", () => {
     expect(mockMessageModel.getContentFromBlob).not.toHaveBeenCalled();
 
     expect(tableClient.createEntity).not.toHaveBeenCalled();
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
+
     expect(res).toMatchObject(
       expect.objectContaining({
         isSuccess: true,
@@ -133,15 +146,19 @@ describe("CosmosApiMessagesChangeFeed", () => {
 
 describe("CosmosApiMessagesChangeFeed - Errors", () => {
   it.each`
-    getContentResult
-    ${TE.left(Error("An error occurred"))}
-    ${TE.of(O.none)}
+    getContentResult                       | retriable
+    ${TE.left(Error("An error occurred"))} | ${true}
+    ${TE.of(O.none)}                       | ${false}
   `(
     "should store error if a content cannot be retrieved",
-    async ({ getContentResult }) => {
+    async ({ getContentResult, retriable }) => {
       getContentFromBlobMock.mockImplementationOnce(() => getContentResult);
 
-      const handler = handleMessageChange(mockMessageModel, {} as any);
+      const handler = handleMessageChange(
+        functionsContextMock,
+        mockMessageModel,
+        {} as any
+      );
 
       const res = await handler(
         mockKafkaProducerKompact,
@@ -154,6 +171,23 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
       );
 
       expect(tableClient.createEntity).toHaveBeenCalledTimes(1);
+      expect(tableClient.createEntity).toHaveBeenCalledWith({
+        body: `${JSON.stringify(aListOfRightMessages[0])}`,
+        message: `Message ${aListOfRightMessages[0].id}: ${
+          retriable ? "An error occurred" : "Message content not found"
+        }`,
+        name: "Message Error",
+        partitionKey: `${new Date().getMonth() + 1}`,
+        rowKey: expect.stringMatching(
+          `${Date.now()
+            .toString()
+            .substring(0, 11)}`
+        ),
+        retriable
+      });
+
+      expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
+
       expect(res).toMatchObject(
         expect.objectContaining({
           isSuccess: true,
@@ -165,7 +199,11 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
   );
 
   it("should send only decoded retrieved messages", async () => {
-    const handler = handleMessageChange(mockMessageModel, {} as any);
+    const handler = handleMessageChange(
+      functionsContextMock,
+      mockMessageModel,
+      {} as any
+    );
 
     const res = await handler(mockKafkaProducerKompact, tableClient, [
       ...aListOfRightMessages,
@@ -177,6 +215,8 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
     );
 
     expect(tableClient.createEntity).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
+
     expect(res).toMatchObject(
       expect.objectContaining({
         isSuccess: false,
@@ -186,7 +226,11 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
   });
 
   it("should throw an Error if storeMessageErrors fails", async () => {
-    const handler = handleMessageChange(mockMessageModel, {} as any);
+    const handler = handleMessageChange(
+      functionsContextMock,
+      mockMessageModel,
+      {} as any
+    );
 
     getContentFromBlobMock.mockImplementationOnce(() =>
       TE.left(Error("An error occurred"))
@@ -208,5 +252,6 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
     );
 
     expect(tableClient.createEntity).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(2);
   });
 });
