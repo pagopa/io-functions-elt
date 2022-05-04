@@ -91,6 +91,18 @@
       "type": "long",
       "logicalType": "timestamp-millis",
       "default": 0
+    },
+    {
+      "name": "featureLevelType",
+      "type": {
+        "type": "enum",
+        "name": "MessageFeatureLevelType",
+        "symbols": [
+          "STANDARD",
+          "ADVANCED"
+        ]
+      },
+      "default": "STANDARD"
     }
   ]
 }
