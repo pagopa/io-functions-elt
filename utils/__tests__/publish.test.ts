@@ -1,42 +1,48 @@
-import { TableClient } from "@azure/data-tables";
-import * as TE from "fp-ts/TaskEither";
 import * as T from "fp-ts/Task";
 import * as E from "fp-ts/Either";
 import * as KP from "../kafka/KafkaProducerCompact";
 import * as RA from "fp-ts/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
 import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
-import { storeErrors, publish } from "../publish";
+import { storeErrors, publishOrStore, publishOrThrow } from "../publish";
 import { aRetrievedService, aService } from "../../__mocks__/services.mock";
-import { IStorableSendFailureError } from "../kafka/KafkaOperation";
 import {
   ValidableKafkaProducerConfig,
   KafkaProducerTopicConfig
 } from "../kafka/KafkaTypes";
-import { RecordMetadata } from "kafkajs";
+import { QueueClient } from "@azure/storage-queue";
+import { TelemetryClient } from "../appinsights";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const kerr = require("kafkajs/src/errors.js"); // due to suspected issue "KafkaJsError is not a costructor" whe using kafkajs type
 
-jest.mock("@azure/data-tables");
 jest.mock("../kafka/KafkaProducerCompact");
 
-describe("storeErrors test", () => {
-  beforeEach(() => jest.resetAllMocks());
+const aStorableError = new kerr.KafkaJSError("ERROR!");
 
-  it("GIVEN a storable error and a working table client WHEN storeErrors is called THEN the storage table sdk is succesfully called", async () => {
-    const errorStorage = new TableClient("dummy", "dummy");
+const mockQueueClient = ({
+  sendMessage: jest.fn(() => Promise.resolve())
+} as unknown) as QueueClient;
+
+const mockTelemetryClient = ({
+  trackException: jest.fn(_ => void 0)
+} as unknown) as TelemetryClient;
+
+const mockProducer = KP.fromConfig(
+  {} as ValidableKafkaProducerConfig,
+  {} as KafkaProducerTopicConfig<RetrievedService>
+);
+
+describe("storeErrors test", () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it("GIVEN a storable error and a working queue client WHEN storeErrors is called THEN the storage queue sdk is succesfully called", async () => {
     const response = await pipe(
-      [new kerr.KafkaJSError("TEST")],
-      storeErrors(errorStorage),
-      RA.sequence(TE.ApplicativeSeq)
+      [aStorableError],
+      storeErrors(mockQueueClient)
     )();
-    expect(errorStorage.createEntity).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: "TEST",
-        name: "KafkaJSError",
-        partitionKey: `${new Date().getMonth() + 1}`,
-        retriable: true
-      })
+
+    expect(mockQueueClient.sendMessage).toHaveBeenCalledWith(
+      Buffer.from(JSON.stringify(aStorableError)).toString("base64")
     );
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) {
@@ -44,122 +50,167 @@ describe("storeErrors test", () => {
     }
   });
 
-  it("GIVEN a storable error and a not working table client WHEN storeErrors is called THEN the storage table sdk is un-succesfully called", async () => {
-    const errorStorage = new TableClient("dummy", "dummy");
-    (errorStorage.createEntity as jest.Mock).mockImplementationOnce(
-      async () => {
-        throw new Error("TEST");
-      }
-    );
+  it("GIVEN a storable error and a not working queue client WHEN storeErrors is called THEN the storage queue sdk is un-succesfully called", async () => {
+    const mockBrokenQueueClient = ({
+      sendMessage: jest.fn(() => Promise.reject("ERROR!"))
+    } as unknown) as QueueClient;
+
     const response = await pipe(
-      [new kerr.KafkaJSError("TEST")],
-      storeErrors(errorStorage),
-      RA.sequence(TE.ApplicativeSeq)
+      [aStorableError],
+      storeErrors(mockBrokenQueueClient)
     )();
     expect(E.isLeft(response)).toBeTruthy();
   });
+});
 
-  it("GIVEN a working table client, a working kafka producer and a valid service list WHEN publish is called THEN the publish return no errors and no error has been stored", async () => {
-    const errorStorage = new TableClient("dummy", "dummy");
-    const producer = KP.fromConfig(
-      {} as ValidableKafkaProducerConfig,
-      {} as KafkaProducerTopicConfig<RetrievedService>
-    );
+describe("publishOrStore test", () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it("GIVEN a working queue client, a working kafka producer and a valid service list WHEN publish is called THEN the publish return no errors and no error has been stored", async () => {
     const messages = [aRetrievedService];
     const response = await pipe(
       messages,
       RA.map(RetrievedService.decode),
       T.of,
-      publish(producer, errorStorage, messages)
+      publishOrStore(
+        mockProducer,
+        mockQueueClient,
+        mockTelemetryClient,
+        messages
+      )
     )();
     expect(response).toStrictEqual({
       isSuccess: true,
-      result: "Documents sent (1). No decoding errors."
+      result: "Documents sent 1. Retriable Errors: 0. Not Retriable Errors: 0."
     });
-    expect(errorStorage.createEntity).toHaveBeenCalledTimes(0);
+    expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(0);
+    expect(mockTelemetryClient.trackException).toHaveBeenCalledTimes(0);
   });
 
-  it("GIVEN a working table client, a working kafka producer and a valid service list WHEN publish is called THEN the publish return no errors and no error has been stored", async () => {
-    const errorStorage = new TableClient("dummy", "dummy");
-    const producer = KP.fromConfig(
-      {} as ValidableKafkaProducerConfig,
-      {} as KafkaProducerTopicConfig<RetrievedService>
-    );
-    const messages = [aRetrievedService];
-    const response = await pipe(
-      messages,
-      RA.map(RetrievedService.decode),
-      T.of,
-      publish(producer, errorStorage, messages)
-    )();
-    expect(response).toStrictEqual({
-      isSuccess: true,
-      result: "Documents sent (1). No decoding errors."
-    });
-    expect(errorStorage.createEntity).toHaveBeenCalledTimes(0);
-  });
-
-  it("GIVEN a working table client, a working kafka producer and a not valid service list WHEN publish is called THEN the publish return a decode error and the decode error is stored", async () => {
-    const errorStorage = new TableClient("dummy", "dummy");
-    const producer = KP.fromConfig(
-      {} as ValidableKafkaProducerConfig,
-      {} as KafkaProducerTopicConfig<RetrievedService>
-    );
+  it("GIVEN a working queue client, a working kafka producer and a not valid service list WHEN publish is called THEN the publish return a decode error and the decode error is stored", async () => {
     const messages = [aService];
     const response = await pipe(
       messages,
       RA.map(RetrievedService.decode),
       T.of,
-      publish(producer, errorStorage, messages)
+      publishOrStore(
+        mockProducer,
+        mockQueueClient,
+        mockTelemetryClient,
+        messages
+      )
     )();
     expect(response).toStrictEqual({
       isSuccess: false,
-      result:
-        "Documents sent (0). Error decoding some documents. Check storage table errors for details."
+      result: "Documents sent 0. Retriable Errors: 0. Not Retriable Errors: 1."
     });
-    expect(errorStorage.createEntity).toHaveBeenCalledTimes(1);
+    expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(0);
+    expect(mockTelemetryClient.trackException).toHaveBeenCalledTimes(1);
   });
 
-  it("GIVEN a working table client, a working kafka producer and a partially valid service list WHEN publish is called THEN the publish return a decode error and each decode errors are stored", async () => {
-    const errorStorage = new TableClient("dummy", "dummy");
-    const producer = KP.fromConfig(
-      {} as ValidableKafkaProducerConfig,
-      {} as KafkaProducerTopicConfig<RetrievedService>
-    );
+  it("GIVEN a working queue client, a working kafka producer and a partially valid service list WHEN publish is called THEN the publish return a decode error and each decode errors are stored", async () => {
     const messages = [aService, aRetrievedService];
     const response = await pipe(
       messages,
       RA.map(RetrievedService.decode),
       T.of,
-      publish(producer, errorStorage, messages)
+      publishOrStore(
+        mockProducer,
+        mockQueueClient,
+        mockTelemetryClient,
+        messages
+      )
     )();
     expect(response).toStrictEqual({
       isSuccess: false,
-      result:
-        "Documents sent (1). Error decoding some documents. Check storage table errors for details."
+      result: "Documents sent 1. Retriable Errors: 0. Not Retriable Errors: 1."
     });
-    expect(errorStorage.createEntity).toHaveBeenCalledTimes(1);
+    expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(0);
+    expect(mockTelemetryClient.trackException).toHaveBeenCalledTimes(1);
   });
 
-  it("GIVEN a working table client, a not working kafka producer and a valid service list WHEN publish is called THEN the publish return an error and the producer error is stored", async () => {
+  it("GIVEN a working queue client, a not working kafka producer and a valid service list WHEN publish is called THEN the publish return an error and the producer error is stored", async () => {
     require("../kafka/KafkaProducerCompact").__setSendMessageError();
-    const errorStorage = new TableClient("dummy", "dummy");
-    const producer = KP.fromConfig(
-      {} as ValidableKafkaProducerConfig,
-      {} as KafkaProducerTopicConfig<RetrievedService>
-    );
     const messages = [aRetrievedService];
     const response = await pipe(
       messages,
       RA.map(RetrievedService.decode),
       T.of,
-      publish(producer, errorStorage, messages)
+      publishOrStore(
+        mockProducer,
+        mockQueueClient,
+        mockTelemetryClient,
+        messages
+      )
     )();
     expect(response).toStrictEqual({
       isSuccess: false,
-      result:
-        "Error publishing some documents. Check storage table errors for details. No decoding errors."
+      result: "Documents sent 0. Retriable Errors: 1. Not Retriable Errors: 0."
     });
-    expect(errorStorage.createEntity).toHaveBeenCalledTimes(1);
+    expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("publishOrThrow test", () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it("GIVEN a working kafka producer and a valid service list WHEN publish is called THEN the publish return no errors and no error has been stored", async () => {
+    const messages = [aRetrievedService];
+    const response = await pipe(
+      messages,
+      RA.map(RetrievedService.decode),
+      T.of,
+      publishOrThrow(mockProducer, mockTelemetryClient, messages)
+    )();
+    expect(response).toStrictEqual({
+      isSuccess: true,
+      result: "Documents sent 1. Retriable Errors: 0. Not Retriable Errors: 0."
+    });
+    expect(mockTelemetryClient.trackException).toHaveBeenCalledTimes(0);
+  });
+
+  it("GIVEN a working kafka producer and a not valid service list WHEN publish is called THEN the publish return a decode error and the decode error is stored", async () => {
+    const messages = [aService];
+    const response = await pipe(
+      messages,
+      RA.map(RetrievedService.decode),
+      T.of,
+      publishOrThrow(mockProducer, mockTelemetryClient, messages)
+    )();
+    expect(response).toStrictEqual({
+      isSuccess: false,
+      result: "Documents sent 0. Retriable Errors: 0. Not Retriable Errors: 1."
+    });
+    expect(mockTelemetryClient.trackException).toHaveBeenCalledTimes(1);
+  });
+
+  it("GIVEN a working kafka producer and a partially valid service list WHEN publish is called THEN the publish return a decode error and each decode errors are stored", async () => {
+    const messages = [aService, aRetrievedService];
+    const response = await pipe(
+      messages,
+      RA.map(RetrievedService.decode),
+      T.of,
+      publishOrThrow(mockProducer, mockTelemetryClient, messages)
+    )();
+    expect(response).toStrictEqual({
+      isSuccess: false,
+      result: "Documents sent 1. Retriable Errors: 0. Not Retriable Errors: 1."
+    });
+    expect(mockTelemetryClient.trackException).toHaveBeenCalledTimes(1);
+  });
+
+  it("GIVEN a not working kafka producer and a valid service list WHEN publish is called THEN the publish throw an error", async () => {
+    require("../kafka/KafkaProducerCompact").__setSendMessageError();
+    const messages = [aRetrievedService, aRetrievedService];
+    const responseTask = pipe(
+      messages,
+      RA.map(RetrievedService.decode),
+      T.of,
+      publishOrThrow(mockProducer, mockTelemetryClient, messages)
+    );
+    await expect(responseTask()).rejects.toEqual(
+      expect.objectContaining({ body: aRetrievedService })
+    );
+    expect(mockTelemetryClient.trackException).toHaveBeenCalledTimes(2);
   });
 });

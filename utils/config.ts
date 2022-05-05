@@ -1,3 +1,4 @@
+/* eslint-disable sort-keys */
 /**
  * Config module
  *
@@ -113,11 +114,12 @@ export const KafkaProducerCompactConfigFromEnv = new t.Type<
 // global app configuration
 export type IDecodableConfig = t.TypeOf<typeof IDecodableConfig>;
 export const IDecodableConfig = t.interface({
+  APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
+
   COSMOSDB_KEY: NonEmptyString,
   COSMOSDB_NAME: NonEmptyString,
   COSMOSDB_URI: NonEmptyString,
 
-  // eslint-disable-next-line sort-keys
   COSMOSDB_REPLICA_KEY: NonEmptyString,
   COSMOSDB_REPLICA_LOCATION: withDefault(
     NonEmptyString,
@@ -132,12 +134,10 @@ export const IDecodableConfig = t.interface({
   ERROR_STORAGE_TABLE_MESSAGES: NonEmptyString,
   ERROR_STORAGE_TABLE_MESSAGE_STATUS: NonEmptyString,
 
-  // eslint-disable-next-line sort-keys
   COMMAND_STORAGE: NonEmptyString,
   MESSAGE_EXPORT_STEP_1_CONTAINER: NonEmptyString,
   MESSAGE_EXPORT_STEP_FINAL_CONTAINER: NonEmptyString,
 
-  // eslint-disable-next-line sort-keys
   COSMOS_CHUNK_SIZE: IntegerFromString,
   COSMOS_DEGREE_OF_PARALLELISM: IntegerFromString,
 
@@ -146,10 +146,11 @@ export const IDecodableConfig = t.interface({
   MessageContentStorageConnection: NonEmptyString,
   ServiceInfoBlobStorageConnection: NonEmptyString,
 
-  // eslint-disable-next-line sort-keys
   MessageContentPrimaryStorageConnection: NonEmptyString,
 
-  // eslint-disable-next-line sort-keys
+  INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
+  MESSAGE_STATUS_FAILURE_QUEUE_NAME: NonEmptyString,
+
   SERVICEID_EXCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),
     []

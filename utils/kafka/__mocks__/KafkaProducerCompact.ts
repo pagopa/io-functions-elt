@@ -50,7 +50,7 @@ export const sendMessages: <T>(
         RA.map(m => ({
           message: "TEST MESSAGE",
           name: "NAME MESSAGE",
-          retriable: false,
+          retriable: true,
           body: m
         })),
         TE.left
