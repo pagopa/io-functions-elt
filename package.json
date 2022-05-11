@@ -58,7 +58,7 @@
     "@azure/data-tables": "^13.0.0",
     "@chasdevs/avro-to-typescript": "^1.4.0",
     "@pagopa/express-azure-functions": "^2.0.0",
-    "@pagopa/io-functions-commons": "^23.2.0",
+    "@pagopa/io-functions-commons": "^24.1.2",
     "@pagopa/ts-commons": "^10.1.0",
     "avsc": "^5.7.3",
     "azure-storage": "^2.10.5",

@@ -7,11 +7,13 @@ import { TimeToLiveSeconds } from "@pagopa/io-functions-commons/dist/generated/d
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 
 const aNewMessageWithoutContent: NewMessageWithoutContent = {
   createdAt: new Date(),
+  featureLevelType: FeatureLevelTypeEnum.STANDARD,
   fiscalCode: aFiscalCode,
   id: "A_MESSAGE_ID" as NonEmptyString,
   indexedId: "A_MESSAGE_ID" as NonEmptyString,
