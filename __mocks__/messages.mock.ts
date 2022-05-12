@@ -5,7 +5,6 @@ import {
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { TimeToLiveSeconds } from "@pagopa/io-functions-commons/dist/generated/definitions/TimeToLiveSeconds";
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
-
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { RetrievedMessage } from "@pagopa/io-functions-commons/dist/src/models/message";
 import {
@@ -14,12 +13,14 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/message_status";
 import { MessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageStatusValue";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
 
 const aNewMessageWithoutContent: NewMessageWithoutContent = {
   createdAt: new Date(),
+  featureLevelType: FeatureLevelTypeEnum.STANDARD,
   fiscalCode: aFiscalCode,
   id: aMessageId,
   indexedId: "A_MESSAGE_ID" as NonEmptyString,

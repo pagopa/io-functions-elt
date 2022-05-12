@@ -18,10 +18,12 @@ import { EUCovidCert } from "@pagopa/io-functions-commons/dist/generated/definit
 import { PaymentData } from "@pagopa/io-functions-commons/dist/generated/definitions/PaymentData";
 import { LegalData } from "@pagopa/io-functions-commons/dist/generated/definitions/LegalData";
 
+import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
 import { MessageFormatter } from "../kafka/KafkaTypes";
 import { message as avroMessage } from "../../generated/avro/dto/message";
 import { MessageCrudOperation } from "../../generated/avro/dto/MessageCrudOperationEnum";
 import { MessageContentType } from "../../generated/avro/dto/MessageContentTypeEnum";
+import { MessageFeatureLevelType } from "../../generated/avro/dto/MessageFeatureLevelTypeEnum";
 
 interface IMessageCategoryMapping {
   readonly tag: MessageContentType;
@@ -68,6 +70,11 @@ const getCategory = (content: MessageContent): MessageContentType =>
     O.getOrElseW(() => MessageContentType.GENERIC)
   );
 
+const formatFeatureLevelType = (
+  featureLevelType: FeatureLevelTypeEnum
+): MessageFeatureLevelType =>
+  MessageFeatureLevelType[featureLevelType] ?? MessageFeatureLevelType.STANDARD;
+
 export const buildAvroMessagesObject = (
   retrievedMessage: RetrievedMessage
 ): Omit<avroMessage, "schema" | "subject"> =>
@@ -82,6 +89,9 @@ export const buildAvroMessagesObject = (
         ? MessageCrudOperation.CREATE
         : MessageCrudOperation.UPDATE,
 
+      featureLevelType: formatFeatureLevelType(
+        retrievedMessage.featureLevelType
+      ),
       senderServiceId: retrievedMessage.senderServiceId,
       senderUserId: retrievedMessage.senderUserId,
       id: retrievedMessage.id,

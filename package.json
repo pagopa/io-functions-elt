@@ -3,7 +3,7 @@
   "description": "Integration between IO data and PDND",
   "author": "IO team",
   "repository": "https://github.com/pagopa/io-functions-elt",
-  "version": "1.12.2",
+  "version": "1.13.0",
   "license": "MIT",
   "scripts": {
     "prebuild": "shx rm -rf dist && yarn generate",
@@ -59,7 +59,7 @@
     "@azure/storage-queue": "^12.8.0",
     "@chasdevs/avro-to-typescript": "^1.4.0",
     "@pagopa/express-azure-functions": "^2.0.0",
-    "@pagopa/io-functions-commons": "^23.2.0",
+    "@pagopa/io-functions-commons": "^24.1.2",
     "@pagopa/ts-commons": "^10.1.0",
     "applicationinsights": "^1.7.4",
     "avsc": "^5.7.3",
