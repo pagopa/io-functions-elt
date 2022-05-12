@@ -13,9 +13,10 @@ import { TelemetryClient } from "../../utils/appinsights";
 import { mockProducerCompact } from "../../utils/kafka/__mocks__/KafkaProducerCompact";
 import {
   aGenericContent,
-  aRetrievedMessageWithoutContent,
-  aRetrievedMessage
+  aRetrievedMessage,
+  aRetrievedMessageWithoutContent
 } from "../../__mocks__/messages.mock";
+import { ProducerRecord, RecordMetadata } from "kafkajs";
 
 // ----------------------
 // Variables
@@ -65,8 +66,7 @@ describe("CosmosApiMessagesChangeFeed", () => {
       mockTelemetryClient,
       mockMessageModel,
       {} as any,
-      dummyProducerCompact.getClient,
-      mockQueueClient
+      dummyProducerCompact.getClient
     );
 
     expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(
@@ -91,8 +91,7 @@ describe("CosmosApiMessagesChangeFeed", () => {
       mockTelemetryClient,
       mockMessageModel,
       {} as any,
-      dummyProducerCompact.getClient,
-      mockQueueClient
+      dummyProducerCompact.getClient
     );
 
     expect(mockMessageModel.getContentFromBlob).not.toHaveBeenCalled();
@@ -113,7 +112,7 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
     ${TE.left(Error("An error occurred"))}
     ${TE.of(O.none)}
   `(
-    "should store error if a content cannot be retrieved",
+    "should not enqueue error if a content cannot be retrieved",
     async ({ getContentResult }) => {
       getContentFromBlobMock.mockImplementationOnce(() => getContentResult);
 
@@ -122,15 +121,14 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
         mockTelemetryClient,
         mockMessageModel,
         {} as any,
-        dummyProducerCompact.getClient,
-        mockQueueClient
+        dummyProducerCompact.getClient
       );
 
       expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(
         aListOfRightMessages.length
       );
 
-      expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(1);
+      expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(0);
       expect(res).toMatchObject(
         expect.objectContaining({
           isSuccess: true
@@ -145,8 +143,7 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
       mockTelemetryClient,
       mockMessageModel,
       {} as any,
-      dummyProducerCompact.getClient,
-      mockQueueClient
+      dummyProducerCompact.getClient
     );
 
     expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(
@@ -163,31 +160,36 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
   });
 
   it("should throw an Error if storeMessageErrors fails", async () => {
-    getContentFromBlobMock.mockImplementationOnce(() =>
-      TE.left(Error("An error occurred"))
+    dummyProducerCompact.producer.send.mockImplementationOnce(
+      async (pr: ProducerRecord) => [
+        {
+          errorCode: 2, // a retriable error code
+          partition: 1,
+          topicName: pr.topic
+        } as RecordMetadata
+      ]
     );
 
-    mockSendMessage.mockImplementationOnce(async () => {
-      throw Error("An error");
-    });
-
-    const result = await handle(
-      [...aListOfRightMessages, { error: "error" }],
-      mockTelemetryClient,
-      mockMessageModel,
-      {} as any,
-      dummyProducerCompact.getClient,
-      mockQueueClient
+    await expect(
+      handle(
+        [...aListOfRightMessages, { error: "error" }],
+        mockTelemetryClient,
+        mockMessageModel,
+        {} as any,
+        dummyProducerCompact.getClient
+      )
+    ).rejects.toEqual(
+      expect.objectContaining({
+        retriable: true,
+        name: "KafkaJSProtocolError",
+        body: expect.anything()
+      })
     );
-    expect(result).toEqual({
-      isSuccess: false,
-      result: `Documents sent ${aListOfRightMessages.length}. Retriable Errors: 0. Not Retriable Errors: 1.`
-    });
 
     expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(
       aListOfRightMessages.length
     );
 
-    expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(1);
+    expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(0);
   });
 });

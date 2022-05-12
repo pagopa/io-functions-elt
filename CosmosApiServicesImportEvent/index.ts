@@ -4,7 +4,6 @@ import { createBlobService } from "azure-storage";
 /* eslint-disable @typescript-eslint/naming-convention */ import * as winston from "winston";
 import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
-import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
 
 import {
   ServiceModel,
@@ -15,6 +14,7 @@ import {
   MessageModel,
   MESSAGE_COLLECTION_NAME
 } from "@pagopa/io-functions-commons/dist/src/models/message";
+import { QueueClient } from "@azure/storage-queue";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { getConfigOrThrow } from "../utils/config";
 import { cosmosdbInstance, cosmosdbInstanceReplica } from "../utils/cosmosdb";
@@ -25,6 +25,7 @@ import {
   toBulkOperationResultEntity
 } from "../utils/bulkOperationResult";
 import { exportTextToBlob } from "../utils/azure-storage";
+import { initTelemetryClient } from "../utils/appinsights";
 import { importServices } from "./handler.services";
 import { processMessages } from "./handler.messages";
 import { CommandImportServices, CommandMessageReport } from "./commands";
@@ -53,15 +54,6 @@ const messageContentBlobService = createBlobService(
 
 const csvFilesBlobService = createBlobService(config.COMMAND_STORAGE);
 
-const errorStorage = new TableClient(
-  `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
-  config.ERROR_STORAGE_TABLE,
-  new AzureNamedKeyCredential(
-    config.ERROR_STORAGE_ACCOUNT,
-    config.ERROR_STORAGE_KEY
-  )
-);
-
 const servicesTopic = {
   ...config.targetKafka,
   messageFormatter: avroServiceFormatter(config.SERVICEID_EXCLUSION_LIST)
@@ -72,6 +64,15 @@ const kakfaClient = KP.fromConfig(
   servicesTopic
 );
 
+const queueClient = new QueueClient(
+  config.INTERNAL_STORAGE_CONNECTION_STRING,
+  config.MESSAGE_STATUS_FAILURE_QUEUE_NAME
+);
+
+const telemetryClient = initTelemetryClient(
+  config.APPINSIGHTS_INSTRUMENTATIONKEY
+);
+
 const run = async (
   _context: Context,
   _command: unknown
@@ -79,7 +80,12 @@ const run = async (
   _context.log("COMANDO", _command);
 
   if (CommandImportServices.is(_command)) {
-    return importServices(serviceModel, kakfaClient, errorStorage);
+    return importServices(
+      serviceModel,
+      kakfaClient,
+      queueClient,
+      telemetryClient
+    );
   } else if (CommandMessageReport.is(_command)) {
     return processMessages(
       messageModel,

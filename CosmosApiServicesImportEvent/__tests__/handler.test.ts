@@ -10,14 +10,13 @@ import {
   RetrievedService,
   ServiceModel
 } from "@pagopa/io-functions-commons/dist/src/models/service";
-import { Producer, ProducerRecord, RecordMetadata } from "kafkajs";
-import { TableClient, TableInsertEntityHeaders } from "@azure/data-tables";
+import { ProducerRecord, RecordMetadata } from "kafkajs";
 import { contramap } from "fp-ts/lib/Ord";
 import { aRetrievedService } from "../../__mocks__/services.mock";
 import { importServices } from "../handler.services";
-import { KafkaProducerCompact } from "../../utils/kafka/KafkaProducerCompact";
-
-const topic = "aTopic";
+import { QueueClient } from "@azure/storage-queue";
+import { TelemetryClient } from "../../utils/appinsights";
+import { mockProducerCompact } from "../../utils/kafka/__mocks__/KafkaProducerCompact";
 
 type ServiceIDAndVersion = t.TypeOf<typeof ServiceIDAndVersion>;
 const ServiceIDAndVersion = t.interface({
@@ -90,38 +89,15 @@ const serviceModelMock = ({
   getCollectionIterator: collectionIteratorMock
 } as unknown) as ServiceModel;
 
-const producerMock = {
-  connect: jest.fn(async () => void 0),
-  disconnect: jest.fn(async () => void 0),
-  send: jest.fn(async (pr: ProducerRecord) =>
-    pipe(
-      pr.messages,
-      RA.map(
-        __ =>
-          ({
-            errorCode: 0,
-            partition: 1,
-            topicName: pr.topic
-          } as RecordMetadata)
-      )
-    )
-  ),
-  sendBatch: jest.fn(async _ => {
-    [] as ReadonlyArray<RecordMetadata>;
-  })
-};
+const dummyProducerCompact = mockProducerCompact(aRetrievedService);
 
-const kpc: KafkaProducerCompact<RetrievedService> = () => ({
-  producer: (producerMock as unknown) as Producer,
-  topic: { topic }
-});
+const mockQueueClient = ({
+  sendMessage: jest.fn(() => Promise.resolve())
+} as unknown) as QueueClient;
 
-const createEntityMock = jest.fn(
-  async (_entity, _options) => ({} as TableInsertEntityHeaders)
-);
-const tableClient: TableClient = ({
-  createEntity: createEntityMock
-} as unknown) as TableClient;
+const mockTelemetryClient = ({
+  trackException: jest.fn(_ => void 0)
+} as unknown) as TelemetryClient;
 
 // ----------------------
 // Tests
@@ -133,14 +109,17 @@ describe("CosmosApiServicesImportEvent", () => {
   });
 
   it("sould send all services version to kafka client, ordered by serviceId and version", async () => {
-    const res = await importServices(serviceModelMock, kpc, tableClient);
+    const res = await importServices(
+      serviceModelMock,
+      dummyProducerCompact.getClient,
+      mockQueueClient,
+      mockTelemetryClient
+    );
 
-    expect(tableClient.createEntity).not.toHaveBeenCalled();
+    expect(mockQueueClient.sendMessage).not.toHaveBeenCalled();
     expect(res).toEqual(
       expect.objectContaining({
-        isSuccess: true,
-        partitionKey: `${new Date().getMonth() + 1}`,
-        result: "Documents sent (6). No decoding errors."
+        isSuccess: true
       })
     );
 
@@ -152,7 +131,7 @@ describe("CosmosApiServicesImportEvent", () => {
       RA.toArray
     );
 
-    expect(producerMock.send).toHaveBeenCalledWith(
+    expect(dummyProducerCompact.producer.send).toHaveBeenCalledWith(
       expect.objectContaining({
         messages: expect.arrayContaining(expected)
       })
@@ -166,43 +145,47 @@ describe("CosmosApiServicesImportEvent", () => {
       ]()
     );
 
-    const res = await importServices(serviceModelMock, kpc, tableClient);
+    const res = await importServices(
+      serviceModelMock,
+      dummyProducerCompact.getClient,
+      mockQueueClient,
+      mockTelemetryClient
+    );
 
-    expect(tableClient.createEntity).toHaveBeenCalled();
+    expect(mockQueueClient.sendMessage).not.toHaveBeenCalled();
     expect(res).toEqual(
       expect.objectContaining({
-        isSuccess: false,
-        partitionKey: `${new Date().getMonth() + 1}`,
-        result:
-          "Documents sent (6). Error decoding some documents. Check storage table errors for details."
+        isSuccess: false
       })
     );
   });
 
   it("should exit if unexpected eception during send occurred", async () => {
-    producerMock.send.mockImplementationOnce(
+    dummyProducerCompact.producer.send.mockImplementationOnce(
       jest.fn(async (_pr: ProducerRecord) => {
         throw Error();
       })
     );
 
-    const res = await importServices(serviceModelMock, kpc, tableClient);
+    const res = await importServices(
+      serviceModelMock,
+      dummyProducerCompact.getClient,
+      mockQueueClient,
+      mockTelemetryClient
+    );
 
-    expect(tableClient.createEntity).toHaveBeenCalledTimes(
+    expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(
       aListOfRightServices.length
     );
     expect(res).toEqual(
       expect.objectContaining({
-        isSuccess: false,
-        partitionKey: `${new Date().getMonth() + 1}`,
-        result:
-          "Error publishing some documents. Check storage table errors for details. No decoding errors."
+        isSuccess: false
       })
     );
   });
 
   it("should exit if error sending at least one message occurred", async () => {
-    producerMock.send.mockImplementationOnce(
+    dummyProducerCompact.producer.send.mockImplementationOnce(
       jest.fn(async (pr: ProducerRecord) =>
         pipe(
           pr.messages,
@@ -219,15 +202,17 @@ describe("CosmosApiServicesImportEvent", () => {
       )
     );
 
-    const res = await importServices(serviceModelMock, kpc, tableClient);
+    const res = await importServices(
+      serviceModelMock,
+      dummyProducerCompact.getClient,
+      mockQueueClient,
+      mockTelemetryClient
+    );
 
-    expect(tableClient.createEntity).toHaveBeenCalledTimes(1);
+    expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(0);
     expect(res).toEqual(
       expect.objectContaining({
-        isSuccess: false,
-        partitionKey: `${new Date().getMonth() + 1}`,
-        result:
-          "Error publishing some documents. Check storage table errors for details. No decoding errors."
+        isSuccess: false
       })
     );
   });

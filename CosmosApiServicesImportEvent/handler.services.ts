@@ -4,27 +4,27 @@ import * as E from "fp-ts/Either";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as S from "fp-ts/string";
 import * as N from "fp-ts/number";
-
 import {
   RetrievedService,
   ServiceModel
 } from "@pagopa/io-functions-commons/dist/src/models/service";
-
-import { TableClient } from "@azure/data-tables";
 import { contramap } from "fp-ts/lib/Ord";
 import { Validation } from "io-ts";
+import { QueueClient } from "@azure/storage-queue";
 import * as AI from "../utils/AsyncIterableTask";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import {
   IBulkOperationResultEntity,
   toBulkOperationResultEntity
 } from "../utils/bulkOperationResult";
-import { publish } from "../utils/publish";
+import { TelemetryClient } from "../utils/appinsights";
+import { publishOrStore } from "../utils/publish";
 
 export const importServices = (
   serviceModel: ServiceModel,
   client: KP.KafkaProducerCompact<RetrievedService>,
-  errorStorage: TableClient
+  queueClient: QueueClient,
+  telemetryClient: TelemetryClient
 ): Promise<IBulkOperationResultEntity> =>
   pipe(
     serviceModel.getCollectionIterator(),
@@ -47,6 +47,6 @@ export const importServices = (
         )
       ])
     ),
-    publish(client, errorStorage),
+    publishOrStore(client, queueClient, telemetryClient),
     T.map(toBulkOperationResultEntity("import-services"))
   )();
