@@ -1,19 +1,13 @@
 import * as t from "io-ts";
-
 import * as O from "fp-ts/lib/Option";
-import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
-
 import { handle } from "../handler";
 import {
   MessageModel,
   RetrievedMessage
 } from "@pagopa/io-functions-commons/dist/src/models/message";
-import { Producer, ProducerRecord, RecordMetadata } from "kafkajs";
-import { KafkaProducerCompact } from "../../utils/kafka/KafkaProducerCompact";
 import { pipe } from "fp-ts/lib/function";
-import { TableClient, TableInsertEntityHeaders } from "@azure/data-tables";
 import { QueueClient } from "@azure/storage-queue";
 import { TelemetryClient } from "../../utils/appinsights";
 import { mockProducerCompact } from "../../utils/kafka/__mocks__/KafkaProducerCompact";
@@ -22,8 +16,7 @@ import {
   aRetrievedMessage,
   aRetrievedMessageWithoutContent
 } from "../../__mocks__/messages.mock";
-
-const kerr = require("kafkajs/src/errors.js"); // due to suspected issue "KafkaJsError is not a costructor" whe using kafkajs type
+import { ProducerRecord, RecordMetadata } from "kafkajs";
 
 // ----------------------
 // Variables
@@ -167,9 +160,15 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
   });
 
   it("should throw an Error if storeMessageErrors fails", async () => {
-    dummyProducerCompact.producer.send.mockImplementationOnce(async () => {
-      throw new kerr.KafkaJSError("ERROR", { retriable: true });
-    });
+    dummyProducerCompact.producer.send.mockImplementationOnce(
+      async (pr: ProducerRecord) => [
+        {
+          errorCode: 2, // a retriable error code
+          partition: 1,
+          topicName: pr.topic
+        } as RecordMetadata
+      ]
+    );
 
     await expect(
       handle(
@@ -182,7 +181,7 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
     ).rejects.toEqual(
       expect.objectContaining({
         retriable: true,
-        name: "KafkaJSError",
+        name: "KafkaJSProtocolError",
         body: expect.anything()
       })
     );

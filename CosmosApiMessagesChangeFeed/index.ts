@@ -19,7 +19,7 @@ import { avroMessageFormatter } from "../utils/formatter/messagesAvroFormatter";
 import { cosmosdbInstance } from "../utils/cosmosdb";
 
 import { initTelemetryClient } from "../utils/appinsights";
-import { handleMessageChange } from "./handler";
+import { handle } from "./handler";
 
 // eslint-disable-next-line functional/no-let
 let logger: Context["log"] | undefined;
@@ -72,7 +72,7 @@ const run = async (
   documents: ReadonlyArray<unknown>
 ): Promise<IBulkOperationResult> => {
   logger = context.log;
-  return handleMessageChange(
+  return handle(
     documents,
     telemetryClient,
     messageModel,

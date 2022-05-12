@@ -85,7 +85,7 @@ export const enrichMessagesContent = (
     )
   );
 
-export const handleMessageChange = (
+export const handle = (
   documents: ReadonlyArray<unknown>,
   telemetryClient: TelemetryClient,
   messageModel: MessageModel,

@@ -1,19 +1,13 @@
 import * as t from "io-ts";
-
 import * as O from "fp-ts/lib/Option";
-import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
-
-import { handleMessageChange } from "../handler";
+import { handle } from "../handler";
 import {
   MessageModel,
   RetrievedMessage
 } from "@pagopa/io-functions-commons/dist/src/models/message";
-import { Producer, ProducerRecord, RecordMetadata } from "kafkajs";
-import { KafkaProducerCompact } from "../../utils/kafka/KafkaProducerCompact";
 import { pipe } from "fp-ts/lib/function";
-import { TableClient, TableInsertEntityHeaders } from "@azure/data-tables";
 import { QueueClient } from "@azure/storage-queue";
 import { TelemetryClient } from "../../utils/appinsights";
 import { mockProducerCompact } from "../../utils/kafka/__mocks__/KafkaProducerCompact";
@@ -26,8 +20,6 @@ import {
 // ----------------------
 // Variables
 // ----------------------
-
-const topic = "aTopic";
 
 const aListOfRightMessages = pipe(
   Array.from({ length: 10 }, i => aRetrievedMessageWithoutContent),
@@ -68,7 +60,7 @@ beforeEach(() => jest.clearAllMocks());
 
 describe("CosmosApiMessagesChangeFeed", () => {
   it("should send all retrieved messages", async () => {
-    const res = await handleMessageChange(
+    const res = await handle(
       aListOfRightMessages,
       mockTelemetryClient,
       mockMessageModel,
@@ -91,7 +83,7 @@ describe("CosmosApiMessagesChangeFeed", () => {
   });
 
   it("should enrich only non-pending messages", async () => {
-    const res = await handleMessageChange(
+    const res = await handle(
       aListOfRightMessages.map(m => ({
         ...m,
         isPending: true
@@ -125,7 +117,7 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
     async ({ getContentResult }) => {
       getContentFromBlobMock.mockImplementationOnce(() => getContentResult);
 
-      const res = await handleMessageChange(
+      const res = await handle(
         aListOfRightMessages,
         mockTelemetryClient,
         mockMessageModel,
@@ -148,7 +140,7 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
   );
 
   it("should send only decoded retrieved messages", async () => {
-    const res = await handleMessageChange(
+    const res = await handle(
       [...aListOfRightMessages, { error: "error" }],
       mockTelemetryClient,
       mockMessageModel,
@@ -179,7 +171,7 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
       throw Error("An error");
     });
 
-    const result = await handleMessageChange(
+    const result = await handle(
       [...aListOfRightMessages, { error: "error" }],
       mockTelemetryClient,
       mockMessageModel,

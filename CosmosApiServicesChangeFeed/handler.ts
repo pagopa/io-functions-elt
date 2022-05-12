@@ -8,7 +8,7 @@ import { publishOrStore } from "../utils/publish";
 import { IBulkOperationResult } from "../utils/bulkOperationResult";
 import { TelemetryClient } from "../utils/appinsights";
 
-export const handleServicesChange = (
+export const handle = (
   documents: ReadonlyArray<unknown>,
   telemetryClient: TelemetryClient,
   producerClient: KP.KafkaProducerCompact<RetrievedService>,

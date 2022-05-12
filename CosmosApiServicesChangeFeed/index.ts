@@ -9,7 +9,7 @@ import { getConfigOrThrow } from "../utils/config";
 import { IBulkOperationResult } from "../utils/bulkOperationResult";
 import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
 import { initTelemetryClient } from "../utils/appinsights";
-import { handleServicesChange } from "./handler";
+import { handle } from "./handler";
 
 // eslint-disable-next-line functional/no-let
 let logger: Context["log"] | undefined;
@@ -44,12 +44,7 @@ const run = async (
   documents: ReadonlyArray<unknown>
 ): Promise<IBulkOperationResult> => {
   logger = context.log;
-  return handleServicesChange(
-    documents,
-    telemetryClient,
-    kakfaClient,
-    queueClient
-  );
+  return handle(documents, telemetryClient, kakfaClient, queueClient);
 };
 
 export default run;
