@@ -5,7 +5,7 @@ import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 
-import { handleMessageChange } from "../handler";
+import { handle } from "../handler";
 import {
   MessageModel,
   RetrievedMessage
@@ -19,15 +19,15 @@ import { TelemetryClient } from "../../utils/appinsights";
 import { mockProducerCompact } from "../../utils/kafka/__mocks__/KafkaProducerCompact";
 import {
   aGenericContent,
-  aRetrievedMessageWithoutContent,
-  aRetrievedMessage
+  aRetrievedMessage,
+  aRetrievedMessageWithoutContent
 } from "../../__mocks__/messages.mock";
+
+const kerr = require("kafkajs/src/errors.js"); // due to suspected issue "KafkaJsError is not a costructor" whe using kafkajs type
 
 // ----------------------
 // Variables
 // ----------------------
-
-const topic = "aTopic";
 
 const aListOfRightMessages = pipe(
   Array.from({ length: 10 }, i => aRetrievedMessageWithoutContent),
@@ -68,13 +68,12 @@ beforeEach(() => jest.clearAllMocks());
 
 describe("CosmosApiMessagesChangeFeed", () => {
   it("should send all retrieved messages", async () => {
-    const res = await handleMessageChange(
+    const res = await handle(
       aListOfRightMessages,
       mockTelemetryClient,
       mockMessageModel,
       {} as any,
-      dummyProducerCompact.getClient,
-      mockQueueClient
+      dummyProducerCompact.getClient
     );
 
     expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(
@@ -91,7 +90,7 @@ describe("CosmosApiMessagesChangeFeed", () => {
   });
 
   it("should enrich only non-pending messages", async () => {
-    const res = await handleMessageChange(
+    const res = await handle(
       aListOfRightMessages.map(m => ({
         ...m,
         isPending: true
@@ -99,8 +98,7 @@ describe("CosmosApiMessagesChangeFeed", () => {
       mockTelemetryClient,
       mockMessageModel,
       {} as any,
-      dummyProducerCompact.getClient,
-      mockQueueClient
+      dummyProducerCompact.getClient
     );
 
     expect(mockMessageModel.getContentFromBlob).not.toHaveBeenCalled();
@@ -121,24 +119,23 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
     ${TE.left(Error("An error occurred"))}
     ${TE.of(O.none)}
   `(
-    "should store error if a content cannot be retrieved",
+    "should not enqueue error if a content cannot be retrieved",
     async ({ getContentResult }) => {
       getContentFromBlobMock.mockImplementationOnce(() => getContentResult);
 
-      const res = await handleMessageChange(
+      const res = await handle(
         aListOfRightMessages,
         mockTelemetryClient,
         mockMessageModel,
         {} as any,
-        dummyProducerCompact.getClient,
-        mockQueueClient
+        dummyProducerCompact.getClient
       );
 
       expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(
         aListOfRightMessages.length
       );
 
-      expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(1);
+      expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(0);
       expect(res).toMatchObject(
         expect.objectContaining({
           isSuccess: true
@@ -148,13 +145,12 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
   );
 
   it("should send only decoded retrieved messages", async () => {
-    const res = await handleMessageChange(
+    const res = await handle(
       [...aListOfRightMessages, { error: "error" }],
       mockTelemetryClient,
       mockMessageModel,
       {} as any,
-      dummyProducerCompact.getClient,
-      mockQueueClient
+      dummyProducerCompact.getClient
     );
 
     expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(
@@ -171,31 +167,30 @@ describe("CosmosApiMessagesChangeFeed - Errors", () => {
   });
 
   it("should throw an Error if storeMessageErrors fails", async () => {
-    getContentFromBlobMock.mockImplementationOnce(() =>
-      TE.left(Error("An error occurred"))
-    );
-
-    mockSendMessage.mockImplementationOnce(async () => {
-      throw Error("An error");
+    dummyProducerCompact.producer.send.mockImplementationOnce(async () => {
+      throw new kerr.KafkaJSError("ERROR", { retriable: true });
     });
 
-    const result = await handleMessageChange(
-      [...aListOfRightMessages, { error: "error" }],
-      mockTelemetryClient,
-      mockMessageModel,
-      {} as any,
-      dummyProducerCompact.getClient,
-      mockQueueClient
+    await expect(
+      handle(
+        [...aListOfRightMessages, { error: "error" }],
+        mockTelemetryClient,
+        mockMessageModel,
+        {} as any,
+        dummyProducerCompact.getClient
+      )
+    ).rejects.toEqual(
+      expect.objectContaining({
+        retriable: true,
+        name: "KafkaJSError",
+        body: expect.anything()
+      })
     );
-    expect(result).toEqual({
-      isSuccess: false,
-      result: `Documents sent ${aListOfRightMessages.length}. Retriable Errors: 0. Not Retriable Errors: 1.`
-    });
 
     expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(
       aListOfRightMessages.length
     );
 
-    expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(1);
+    expect(mockQueueClient.sendMessage).toHaveBeenCalledTimes(0);
   });
 });

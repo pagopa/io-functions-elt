@@ -3,10 +3,10 @@ import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
-import { getConfigOrThrow, withTopic } from "../utils/config";
+import { getConfigOrThrow } from "../utils/config";
 import { IBulkOperationResult } from "../utils/bulkOperationResult";
-import { messageStatusAvroFormatter } from "../utils/formatter/messageStatusAvroFormatter";
 import { initTelemetryClient } from "../utils/appinsights";
+import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
 import { handle } from "./handler";
 
 // eslint-disable-next-line functional/no-let
@@ -18,23 +18,18 @@ winston.add(contextTransport);
 
 const config = getConfigOrThrow();
 
-const messageStatusConfig = withTopic(
-  config.messageStatusKafkaTopicConfig.MESSAGE_STATUS_TOPIC_NAME,
-  config.messageStatusKafkaTopicConfig.MESSAGE_STATUS_TOPIC_CONNECTION_STRING
-)(config.targetKafka);
-
-const messageStatusTopic = {
-  ...messageStatusConfig,
-  messageFormatter: messageStatusAvroFormatter()
+const servicesTopic = {
+  ...config.targetKafka,
+  messageFormatter: avroServiceFormatter(config.SERVICEID_EXCLUSION_LIST)
 };
+
+const kakfaClient = KP.fromConfig(
+  config.targetKafka as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
+  servicesTopic
+);
 
 const telemetryClient = initTelemetryClient(
   config.APPINSIGHTS_INSTRUMENTATIONKEY
-);
-
-const kakfaClient = KP.fromConfig(
-  messageStatusConfig as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
-  messageStatusTopic
 );
 
 const run = async (

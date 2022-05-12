@@ -6,16 +6,12 @@ import { pipe } from "fp-ts/lib/function";
 import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { storeErrors, publishOrStore, publishOrThrow } from "../publish";
 import { aRetrievedService, aService } from "../../__mocks__/services.mock";
-import {
-  ValidableKafkaProducerConfig,
-  KafkaProducerTopicConfig
-} from "../kafka/KafkaTypes";
 import { QueueClient } from "@azure/storage-queue";
 import { TelemetryClient } from "../appinsights";
+import { ProducerRecord, RecordMetadata, Producer } from "kafkajs";
+import { mockProducerCompact } from "../kafka/__mocks__/KafkaProducerCompact";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const kerr = require("kafkajs/src/errors.js"); // due to suspected issue "KafkaJsError is not a costructor" whe using kafkajs type
-
-jest.mock("../kafka/KafkaProducerCompact");
 
 const aStorableError = new kerr.KafkaJSError("ERROR!");
 
@@ -27,10 +23,7 @@ const mockTelemetryClient = ({
   trackException: jest.fn(_ => void 0)
 } as unknown) as TelemetryClient;
 
-const mockProducer = KP.fromConfig(
-  {} as ValidableKafkaProducerConfig,
-  {} as KafkaProducerTopicConfig<RetrievedService>
-);
+const dummyProducerCompact = mockProducerCompact(aRetrievedService);
 
 describe("storeErrors test", () => {
   beforeEach(() => jest.clearAllMocks());
@@ -73,7 +66,7 @@ describe("publishOrStore test", () => {
       RA.map(RetrievedService.decode),
       T.of,
       publishOrStore(
-        mockProducer,
+        dummyProducerCompact.getClient,
         mockQueueClient,
         mockTelemetryClient,
         messages
@@ -94,7 +87,7 @@ describe("publishOrStore test", () => {
       RA.map(RetrievedService.decode),
       T.of,
       publishOrStore(
-        mockProducer,
+        dummyProducerCompact.getClient,
         mockQueueClient,
         mockTelemetryClient,
         messages
@@ -115,7 +108,7 @@ describe("publishOrStore test", () => {
       RA.map(RetrievedService.decode),
       T.of,
       publishOrStore(
-        mockProducer,
+        dummyProducerCompact.getClient,
         mockQueueClient,
         mockTelemetryClient,
         messages
@@ -130,14 +123,22 @@ describe("publishOrStore test", () => {
   });
 
   it("GIVEN a working queue client, a not working kafka producer and a valid service list WHEN publish is called THEN the publish return an error and the producer error is stored", async () => {
-    require("../kafka/KafkaProducerCompact").__setSendMessageError();
+    dummyProducerCompact.producer.send.mockImplementationOnce(
+      async (pr: ProducerRecord) => [
+        {
+          errorCode: 2, // a retriable error code
+          partition: 1,
+          topicName: pr.topic
+        } as RecordMetadata
+      ]
+    );
     const messages = [aRetrievedService];
     const response = await pipe(
       messages,
       RA.map(RetrievedService.decode),
       T.of,
       publishOrStore(
-        mockProducer,
+        dummyProducerCompact.getClient,
         mockQueueClient,
         mockTelemetryClient,
         messages
@@ -160,7 +161,11 @@ describe("publishOrThrow test", () => {
       messages,
       RA.map(RetrievedService.decode),
       T.of,
-      publishOrThrow(mockProducer, mockTelemetryClient, messages)
+      publishOrThrow(
+        dummyProducerCompact.getClient,
+        mockTelemetryClient,
+        messages
+      )
     )();
     expect(response).toStrictEqual({
       isSuccess: true,
@@ -175,7 +180,11 @@ describe("publishOrThrow test", () => {
       messages,
       RA.map(RetrievedService.decode),
       T.of,
-      publishOrThrow(mockProducer, mockTelemetryClient, messages)
+      publishOrThrow(
+        dummyProducerCompact.getClient,
+        mockTelemetryClient,
+        messages
+      )
     )();
     expect(response).toStrictEqual({
       isSuccess: false,
@@ -190,7 +199,11 @@ describe("publishOrThrow test", () => {
       messages,
       RA.map(RetrievedService.decode),
       T.of,
-      publishOrThrow(mockProducer, mockTelemetryClient, messages)
+      publishOrThrow(
+        dummyProducerCompact.getClient,
+        mockTelemetryClient,
+        messages
+      )
     )();
     expect(response).toStrictEqual({
       isSuccess: false,
@@ -200,13 +213,24 @@ describe("publishOrThrow test", () => {
   });
 
   it("GIVEN a not working kafka producer and a valid service list WHEN publish is called THEN the publish throw an error", async () => {
-    require("../kafka/KafkaProducerCompact").__setSendMessageError();
+    dummyProducerCompact.producer.send.mockImplementationOnce(
+      async (pr: ProducerRecord) =>
+        RA.replicate(2, {
+          errorCode: 2, // a retriable error code
+          partition: 1,
+          topicName: pr.topic
+        })
+    );
     const messages = [aRetrievedService, aRetrievedService];
     const responseTask = pipe(
       messages,
       RA.map(RetrievedService.decode),
       T.of,
-      publishOrThrow(mockProducer, mockTelemetryClient, messages)
+      publishOrThrow(
+        dummyProducerCompact.getClient,
+        mockTelemetryClient,
+        messages
+      )
     );
     await expect(responseTask()).rejects.toEqual(
       expect.objectContaining({ body: aRetrievedService })

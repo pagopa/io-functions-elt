@@ -7,6 +7,7 @@ import { TimeToLiveSeconds } from "@pagopa/io-functions-commons/dist/generated/d
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { RetrievedMessage } from "@pagopa/io-functions-commons/dist/src/models/message";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 
@@ -35,3 +36,5 @@ export const aGenericContent = {
   subject: "t".repeat(80),
   markdown: "t".repeat(120)
 };
+
+export const aRetrievedMessage: RetrievedMessage = aRetrievedMessageWithoutContent;

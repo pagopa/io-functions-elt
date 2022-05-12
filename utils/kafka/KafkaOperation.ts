@@ -68,7 +68,7 @@ export const storableSendFailureError = <T>(
     E.toError,
     E.fromPredicate(
       isKafkaJSError,
-      e => new kerr.KafkaJSError(e, { retriable: false })
+      e => new kerr.KafkaJSError(e, { retriable: true })
     ),
     E.toUnion,
     (ke: KafkaJSError) => messages.map(message => ({ ...ke, body: message }))

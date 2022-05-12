@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */ // disabled in order to use the naming convention used to flatten nested object to root ('_' char used as nested object separator)
 import * as winston from "winston";
 import { Context } from "@azure/functions";
-import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
 import { createBlobService } from "azure-storage";
 
 import {
@@ -11,6 +10,7 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 
+import { QueueClient } from "@azure/storage-queue";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow } from "../utils/config";
@@ -18,6 +18,7 @@ import { IBulkOperationResult } from "../utils/bulkOperationResult";
 import { avroMessageFormatter } from "../utils/formatter/messagesAvroFormatter";
 import { cosmosdbInstance } from "../utils/cosmosdb";
 
+import { initTelemetryClient } from "../utils/appinsights";
 import { handleMessageChange } from "./handler";
 
 // eslint-disable-next-line functional/no-let
@@ -38,23 +39,14 @@ const messagesConfig = {
   topic: config.MessagesKafkaTopicConfig.MESSAGES_TOPIC_NAME
 };
 
-const messageStatusTopic = {
+const messagesTopic = {
   ...messagesConfig,
   messageFormatter: avroMessageFormatter()
 };
 
 const kakfaClient = KP.fromConfig(
   messagesConfig as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
-  messageStatusTopic
-);
-
-const errorStorage = new TableClient(
-  `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
-  config.ERROR_STORAGE_TABLE_MESSAGES,
-  new AzureNamedKeyCredential(
-    config.ERROR_STORAGE_ACCOUNT,
-    config.ERROR_STORAGE_KEY
-  )
+  messagesTopic
 );
 
 const messageModel = new MessageModel(
@@ -66,15 +58,27 @@ const messageContentBlobService = createBlobService(
   config.MessageContentPrimaryStorageConnection
 );
 
+const queueClient = new QueueClient(
+  config.INTERNAL_STORAGE_CONNECTION_STRING,
+  config.MESSAGES_FAILURE_QUEUE_NAME
+);
+
+const telemetryClient = initTelemetryClient(
+  config.APPINSIGHTS_INSTRUMENTATIONKEY
+);
+
 const run = async (
   context: Context,
   documents: ReadonlyArray<unknown>
 ): Promise<IBulkOperationResult> => {
   logger = context.log;
-  return handleMessageChange(messageModel, messageContentBlobService)(
+  return handleMessageChange(
+    documents,
+    telemetryClient,
+    messageModel,
+    messageContentBlobService,
     kakfaClient,
-    errorStorage,
-    documents
+    queueClient
   );
 };
 

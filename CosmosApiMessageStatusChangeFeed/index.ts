@@ -2,12 +2,13 @@
 import * as winston from "winston";
 import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
-import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
+import { QueueClient } from "@azure/storage-queue";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow, withTopic } from "../utils/config";
 import { IBulkOperationResult } from "../utils/bulkOperationResult";
 import { messageStatusAvroFormatter } from "../utils/formatter/messageStatusAvroFormatter";
+import { initTelemetryClient } from "../utils/appinsights";
 import { handleMessageStatusChange } from "./handler";
 
 // eslint-disable-next-line functional/no-let
@@ -34,13 +35,13 @@ const kakfaClient = KP.fromConfig(
   messageStatusTopic
 );
 
-const errorStorage = new TableClient(
-  `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
-  config.ERROR_STORAGE_TABLE_MESSAGE_STATUS,
-  new AzureNamedKeyCredential(
-    config.ERROR_STORAGE_ACCOUNT,
-    config.ERROR_STORAGE_KEY
-  )
+const queueClient = new QueueClient(
+  config.INTERNAL_STORAGE_CONNECTION_STRING,
+  config.MESSAGE_STATUS_FAILURE_QUEUE_NAME
+);
+
+const telemetryClient = initTelemetryClient(
+  config.APPINSIGHTS_INSTRUMENTATIONKEY
 );
 
 const run = async (
@@ -48,7 +49,12 @@ const run = async (
   documents: ReadonlyArray<unknown>
 ): Promise<IBulkOperationResult> => {
   logger = context.log;
-  return handleMessageStatusChange(kakfaClient, errorStorage, documents);
+  return handleMessageStatusChange(
+    documents,
+    telemetryClient,
+    kakfaClient,
+    queueClient
+  );
 };
 
 export default run;
