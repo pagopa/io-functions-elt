@@ -8,8 +8,10 @@ import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definiti
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
+import { ThirdPartyData } from "@pagopa/io-functions-commons/dist/generated/definitions/ThirdPartyData";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
+export const aServiceId = "test" as ServiceId;
 
 const aNewMessageWithoutContent: NewMessageWithoutContent = {
   createdAt: new Date(),
@@ -19,7 +21,7 @@ const aNewMessageWithoutContent: NewMessageWithoutContent = {
   indexedId: "A_MESSAGE_ID" as NonEmptyString,
   isPending: false,
   kind: "INewMessageWithoutContent",
-  senderServiceId: "test" as ServiceId,
+  senderServiceId: aServiceId,
   senderUserId: "u123" as NonEmptyString,
   timeToLiveSeconds: 3600 as TimeToLiveSeconds
 };
@@ -36,4 +38,12 @@ export const aRetrievedMessageWithoutContent: RetrievedMessageWithoutContent = {
 export const aGenericContent = {
   subject: "t".repeat(80),
   markdown: "t".repeat(120)
+};
+
+export const aPnThirdPartyData: ThirdPartyData = {
+  id: "a-pn-id" as NonEmptyString,
+  original_sender: "an-original-sender" as NonEmptyString,
+  original_receipt_date: new Date(),
+  has_attachments: true,
+  summary: "a-summary" as NonEmptyString
 };

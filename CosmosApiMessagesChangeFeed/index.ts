@@ -11,13 +11,19 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 
+import * as E from "fp-ts/Either";
+import { pipe } from "fp-ts/lib/function";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow } from "../utils/config";
 import { IBulkOperationResult } from "../utils/bulkOperationResult";
-import { avroMessageFormatter } from "../utils/formatter/messagesAvroFormatter";
+import {
+  avroMessageFormatter,
+  ThirdPartyDataWithCategoryFetcher
+} from "../utils/formatter/messagesAvroFormatter";
 import { cosmosdbInstance } from "../utils/cosmosdb";
 
+import { MessageContentType } from "../generated/avro/dto/MessageContentTypeEnum";
 import { handleMessageChange } from "./handler";
 
 // eslint-disable-next-line functional/no-let
@@ -38,9 +44,22 @@ const messagesConfig = {
   topic: config.MessagesKafkaTopicConfig.MESSAGES_TOPIC_NAME
 };
 
+const thirdPartyDataWithCategoryFetcher: ThirdPartyDataWithCategoryFetcher = serviceId =>
+  pipe(
+    serviceId,
+    E.fromPredicate(
+      id => id === config.PN_SERVICE_ID,
+      id => Error(`Missing third-party service configuration for ${id}`)
+    ),
+    E.map(() => MessageContentType.PN),
+    E.mapLeft(e => logger?.error({ exception: e })),
+    E.mapLeft(() => MessageContentType.GENERIC),
+    E.toUnion
+  );
+
 const messageStatusTopic = {
   ...messagesConfig,
-  messageFormatter: avroMessageFormatter()
+  messageFormatter: avroMessageFormatter(thirdPartyDataWithCategoryFetcher)
 };
 
 const kakfaClient = KP.fromConfig(

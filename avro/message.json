@@ -61,7 +61,8 @@
           "GENERIC",
           "PAYMENT",
           "EU_COVID_CERT",
-          "LEGAL"
+          "LEGAL",
+          "PN"
         ]
       }],
       "default": null

@@ -149,6 +149,8 @@ export const IDecodableConfig = t.interface({
   // eslint-disable-next-line sort-keys
   MessageContentPrimaryStorageConnection: NonEmptyString,
 
+  PN_SERVICE_ID: NonEmptyString,
+
   // eslint-disable-next-line sort-keys
   SERVICEID_EXCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),

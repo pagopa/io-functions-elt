@@ -16,8 +16,14 @@ import { pipe } from "fp-ts/lib/function";
 import { TableClient, TableInsertEntityHeaders } from "@azure/data-tables";
 import {
   aGenericContent,
-  aRetrievedMessageWithoutContent
+  aPnThirdPartyData,
+  aRetrievedMessageWithoutContent,
+  aServiceId
 } from "../../__mocks__/messages.mock";
+import * as F from "../../utils/formatter/messagesAvroFormatter";
+import { TagEnum as TagEnumPN } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryPN";
+import { TagEnum as TagEnumBase } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryBase";
+import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
 
 // ----------------------
 // Variables
@@ -71,12 +77,27 @@ const mockKafkaProducerKompact: KafkaProducerCompact<RetrievedMessage> = () => (
   topic: { topic }
 });
 
+const dummyThirdPartyDataWithCategoryFetcher: F.ThirdPartyDataWithCategoryFetcher = jest
+  .fn()
+  .mockImplementation(serviceId =>
+    serviceId == aServiceId ? TagEnumPN.PN : TagEnumBase.GENERIC
+  );
+const formatter = F.avroMessageFormatter(
+  dummyThirdPartyDataWithCategoryFetcher
+);
+const dummyKafkaProducerKompactForPN: KafkaProducerCompact<RetrievedMessage> = () => ({
+  producer: (producerMock as unknown) as Producer,
+  topic: { topic, messageFormatter: formatter }
+});
+
 const createEntityMock = jest.fn(
   async (_entity, _options) => ({} as TableInsertEntityHeaders)
 );
 const tableClient: TableClient = ({
   createEntity: createEntityMock
 } as unknown) as TableClient;
+
+const buildAvroMessagesObject = jest.spyOn(F, "buildAvroMessagesObject");
 
 // ----------------------
 // Tests
@@ -96,6 +117,41 @@ describe("CosmosApiMessagesChangeFeed", () => {
 
     expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(
       aListOfRightMessages.length
+    );
+
+    expect(tableClient.createEntity).not.toHaveBeenCalled();
+    expect(res).toMatchObject(
+      expect.objectContaining({
+        isSuccess: true,
+        result: `Documents sent (${aListOfRightMessages.length}). No decoding errors.`
+      })
+    );
+  });
+
+  it("should send all retrieved messages witn PN category", async () => {
+    const handler = handleMessageChange(mockMessageModel, {} as any);
+
+    getContentFromBlobMock.mockImplementation(() =>
+      TE.of(O.some({ ...aGenericContent, third_party_data: aPnThirdPartyData }))
+    );
+
+    const res = await handler(
+      dummyKafkaProducerKompactForPN,
+      tableClient,
+      aListOfRightMessages
+    );
+
+    expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(
+      aListOfRightMessages.length
+    );
+
+    expect(buildAvroMessagesObject).toHaveNthReturnedWith(
+      1,
+      expect.objectContaining({
+        content_type: "PN",
+        featureLevelType: "STANDARD",
+        senderServiceId: aServiceId
+      })
     );
 
     expect(tableClient.createEntity).not.toHaveBeenCalled();
