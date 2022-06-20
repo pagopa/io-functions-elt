@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable sort-keys */
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as avro from "avsc";
@@ -17,6 +18,8 @@ import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/defi
 import { EUCovidCert } from "@pagopa/io-functions-commons/dist/generated/definitions/EUCovidCert";
 import { PaymentData } from "@pagopa/io-functions-commons/dist/generated/definitions/PaymentData";
 import { LegalData } from "@pagopa/io-functions-commons/dist/generated/definitions/LegalData";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { ThirdPartyData } from "@pagopa/io-functions-commons/dist/generated/definitions/ThirdPartyData";
 
 import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
 import { MessageFormatter } from "../kafka/KafkaTypes";
@@ -25,8 +28,15 @@ import { MessageCrudOperation } from "../../generated/avro/dto/MessageCrudOperat
 import { MessageContentType } from "../../generated/avro/dto/MessageContentTypeEnum";
 import { MessageFeatureLevelType } from "../../generated/avro/dto/MessageFeatureLevelTypeEnum";
 
+export type ThirdPartyDataWithCategoryFetcher = (
+  serviceId: ServiceId
+) => MessageContentType;
+
 interface IMessageCategoryMapping {
-  readonly tag: MessageContentType;
+  readonly tag: (
+    message: RetrievedMessageWithContent,
+    categoryFetcher: ThirdPartyDataWithCategoryFetcher
+  ) => MessageContentType;
   readonly pattern: t.Type<Partial<MessageContent>>;
 }
 
@@ -35,32 +45,41 @@ const messageCategoryMappings: ReadonlyArray<IMessageCategoryMapping> = [
     pattern: t.interface({ eu_covid_cert: EUCovidCert }) as t.Type<
       Partial<MessageContent>
     >,
-    tag: MessageContentType.EU_COVID_CERT
+    tag: () => MessageContentType.EU_COVID_CERT
   },
   {
     pattern: t.interface({ legal_data: LegalData }) as t.Type<
       Partial<MessageContent>
     >,
-    tag: MessageContentType.LEGAL
+    tag: () => MessageContentType.LEGAL
+  },
+  {
+    pattern: t.interface({ third_party_data: ThirdPartyData }) as t.Type<
+      Partial<MessageContent>
+    >,
+    tag: (message, fetcher) => fetcher(message.senderServiceId)
   },
   {
     pattern: t.interface({ payment_data: PaymentData }) as t.Type<
       Partial<MessageContent>
     >,
-    tag: MessageContentType.PAYMENT
+    tag: () => MessageContentType.PAYMENT
   }
 ];
 
-const getCategory = (content: MessageContent): MessageContentType =>
+const getCategory = (
+  message: RetrievedMessageWithContent,
+  categoryFetcher: ThirdPartyDataWithCategoryFetcher
+): MessageContentType =>
   pipe(
     messageCategoryMappings,
     RA.map(mapping =>
       pipe(
-        content,
+        message.content,
         mapping.pattern.decode,
         E.fold(
           () => O.none,
-          _ => O.some(mapping.tag)
+          () => O.some(mapping.tag(message, categoryFetcher))
         )
       )
     ),
@@ -76,7 +95,8 @@ const formatFeatureLevelType = (
   MessageFeatureLevelType[featureLevelType] ?? MessageFeatureLevelType.STANDARD;
 
 export const buildAvroMessagesObject = (
-  retrievedMessage: RetrievedMessage
+  retrievedMessage: RetrievedMessage,
+  categoryFetcher: ThirdPartyDataWithCategoryFetcher
 ): Omit<avroMessage, "schema" | "subject"> =>
   // eslint-disable-next-line no-console, no-underscore-dangle
   {
@@ -104,7 +124,7 @@ export const buildAvroMessagesObject = (
         ? retrievedMessage.content.subject
         : "",
       content_type: RetrievedMessageWithContent.is(retrievedMessage)
-        ? getCategory(retrievedMessage.content)
+        ? getCategory(retrievedMessage, categoryFetcher)
         : null,
       content_paymentData_amount: paymentData?.amount ?? 0,
       content_paymentData_noticeNumber: paymentData?.notice_number ?? "",
@@ -119,10 +139,17 @@ export const buildAvroMessagesObject = (
     };
   };
 
-export const avroMessageFormatter = (): // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const avroMessageFormatter = (
+  categoryFetcher: ThirdPartyDataWithCategoryFetcher
+): // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 MessageFormatter<RetrievedMessage> => message => ({
   key: message.id,
   value: avro.Type.forSchema(
     avroMessage.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
-  ).toBuffer(Object.assign(new avroMessage(), buildAvroMessagesObject(message)))
+  ).toBuffer(
+    Object.assign(
+      new avroMessage(),
+      buildAvroMessagesObject(message, categoryFetcher)
+    )
+  )
 });
