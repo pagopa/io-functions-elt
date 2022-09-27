@@ -1,0 +1,18 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "cosmosDBTrigger",
+      "name": "cosmosApiMessageStatusTrigger",
+      "direction": "in",
+      "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
+      "databaseName": "%COSMOSDB_NAME%",
+      "collectionName": "message-status",
+      "leaseCollectionPrefix": "%MESSAGE_STATUS_LEASES_PREFIX%-",
+      "leaseCollectionName": "pdnd-leases",
+      "createLeaseCollectionIfNotExists": true,
+      "startFromBeginning": true
+    }
+  ],
+  "scriptFile": "../dist/AnalyticsMessageStatusFromChangeFeed/index.js"
+}
