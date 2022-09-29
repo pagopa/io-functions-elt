@@ -1,4 +1,4 @@
-export declare enum SeverityLevel {
+export enum SeverityLevel {
   Verbose = 0,
   Information = 1,
   Warning = 2,
@@ -6,6 +6,7 @@ export declare enum SeverityLevel {
   Critical = 4
 }
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type OutboundTracker = {
   readonly trackError: (error: Error, level?: SeverityLevel) => void;
 };

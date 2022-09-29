@@ -36,13 +36,16 @@ export const processMessageStatus = (
         pipe(
           mainPublisher.publish(messageStatus),
           TE.orElse(_error => fallbackPublisher.publish(messageStatus)),
+          TE.mapLeft(error => {
+            throw error;
+          }),
           TE.toUnion,
           T.map(constVoid)
         )
       )
     ),
-    TT.fold(T.sequenceArray, T.sequenceArray, (e, r) =>
-      T.sequenceArray(RA.concat(r)(e))
+    TT.fold(T.sequenceArray, T.sequenceArray, (errorTasks, publishTasks) =>
+      T.sequenceArray(RA.concat(publishTasks)(errorTasks))
     ),
     T.map(constVoid)
   );

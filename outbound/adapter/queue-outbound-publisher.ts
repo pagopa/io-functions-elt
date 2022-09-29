@@ -5,7 +5,7 @@ import { pipe } from "fp-ts/lib/function";
 import { OutboundPublisher } from "../port/outbound-publisher";
 
 export const create = <T>(producer: QueueClient): OutboundPublisher<T> => ({
-  publish: (document: T): TE.TaskEither<never, T> =>
+  publish: (document: T): TE.TaskEither<Error, T> =>
     pipe(
       TE.tryCatch(
         () =>
@@ -14,9 +14,6 @@ export const create = <T>(producer: QueueClient): OutboundPublisher<T> => ({
           ),
         E.toError
       ),
-      TE.mapLeft(error => {
-        throw error;
-      }),
       TE.map(() => document)
     )
 });

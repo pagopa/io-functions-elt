@@ -33,15 +33,12 @@ const telemetryAdapter = TA.create(
   TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
 );
 
-const run = (
-  _context: Context,
-  documents: ReadonlyArray<unknown>
-): Promise<void> =>
+const run = (_context: Context, document: unknown): Promise<void> =>
   processMessageStatus(
     telemetryAdapter,
     messageStatusOnKafkaAdapter,
     throwAdapter,
-    documents
+    [document]
   )();
 
 export default run;

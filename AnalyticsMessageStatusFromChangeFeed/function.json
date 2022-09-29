@@ -14,5 +14,11 @@
       "startFromBeginning": true
     }
   ],
+  "retry": {
+    "strategy": "exponentialBackoff",
+    "maxRetryCount": -1,
+    "minimumInterval": "00:00:05",
+    "maximumInterval": "00:30:00"
+  },
   "scriptFile": "../dist/AnalyticsMessageStatusFromChangeFeed/index.js"
 }
