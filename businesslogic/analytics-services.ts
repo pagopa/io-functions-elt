@@ -1,27 +1,24 @@
-import { RetrievedMessageStatus } from "@pagopa/io-functions-commons/dist/src/models/message_status";
 import { constVoid, flow, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as T from "fp-ts/Task";
 import * as TT from "fp-ts/TaskThese";
 import * as RA from "fp-ts/ReadonlyArray";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { OutboundTracker } from "../outbound/port/outbound-tracker";
 
-export const processMessageStatus = (
+export const processService = (
   tracker: OutboundTracker,
-  mainPublisher: OutboundPublisher<RetrievedMessageStatus>,
-  fallbackPublisher: OutboundPublisher<RetrievedMessageStatus>,
+  mainPublisher: OutboundPublisher<RetrievedService>,
+  fallbackPublisher: OutboundPublisher<RetrievedService>,
   documents: ReadonlyArray<unknown>
 ): T.Task<void> =>
   pipe(
     documents,
-    RA.map(RetrievedMessageStatus.decode),
-    messageStatusOrErrors =>
-      TT.both(
-        RA.lefts(messageStatusOrErrors),
-        RA.rights(messageStatusOrErrors)
-      ),
+    RA.map(RetrievedService.decode),
+    serviceOrErrors =>
+      TT.both(RA.lefts(serviceOrErrors), RA.rights(serviceOrErrors)),
     TT.mapLeft(
       RA.map(
         flow(
@@ -32,10 +29,10 @@ export const processMessageStatus = (
       )
     ),
     TT.map(
-      RA.map(messageStatus =>
+      RA.map(service =>
         pipe(
-          mainPublisher.publish(messageStatus),
-          TE.orElse(_error => fallbackPublisher.publish(messageStatus)),
+          mainPublisher.publish(service),
+          TE.orElse(_error => fallbackPublisher.publish(service)),
           TE.mapLeft(error => {
             throw error;
           }),

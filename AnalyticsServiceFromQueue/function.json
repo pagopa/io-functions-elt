@@ -3,8 +3,8 @@
       {
         "type": "queueTrigger",
         "direction": "in",
-        "name": "messageviewfailure",
-        "queueName": "%MESSAGE_STATUS_FAILURE_QUEUE_NAME%",
+        "name": "serviceFailure",
+        "queueName": "%SERVICES_FAILURE_QUEUE_NAME%",
         "connection":"INTERNAL_STORAGE_CONNECTION_STRING"
       }
     ],

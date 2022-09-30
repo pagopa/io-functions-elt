@@ -3,15 +3,15 @@
     {
       "authLevel": "function",
       "type": "cosmosDBTrigger",
-      "name": "cosmosApiMessageStatusTrigger",
+      "name": "cosmosApiProfilesTrigger",
       "direction": "in",
       "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
       "databaseName": "%COSMOSDB_NAME%",
-      "collectionName": "message-status",
-      "leaseCollectionPrefix": "%MESSAGE_STATUS_LEASES_PREFIX%-",
-      "leaseCollectionName": "pdnd-leases",
+      "collectionName": "services",
+      "leaseCollectionName": "leases-services-2",
       "createLeaseCollectionIfNotExists": true,
       "startFromBeginning": true
+
     }
   ],
   "retry": {
@@ -20,5 +20,5 @@
     "minimumInterval": "00:00:05",
     "maximumInterval": "00:30:00"
   },
-  "scriptFile": "../dist/AnalyticsMessageStatusFromChangeFeed/index.js"
+  "scriptFile": "../dist/AnalyticsServiceFromChangeFeed/index.js"
 }

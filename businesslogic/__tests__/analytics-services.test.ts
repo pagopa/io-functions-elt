@@ -1,7 +1,6 @@
 import { pipe } from "fp-ts/lib/function";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as E from "fp-ts/Either";
-import { processMessageStatus } from "../analytics-message-status";
 import { Producer, ProducerRecord } from "kafkajs";
 import { QueueClient } from "@azure/storage-queue";
 import * as KA from "../../outbound/adapter/kafka-outbound-publisher";
@@ -9,26 +8,37 @@ import * as QA from "../../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../../outbound/adapter/tracker-outbound-publisher";
 import { TelemetryClient } from "applicationinsights";
 import {
-  MessageStatus,
-  RetrievedMessageStatus
-} from "@pagopa/io-functions-commons/dist/src/models/message_status";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { MessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageStatusValue";
+  NonEmptyString,
+  OrganizationFiscalCode
+} from "@pagopa/ts-commons/lib/strings";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { OutboundPublisher } from "../../outbound/port/outbound-publisher";
 import { SeverityLevel } from "../../outbound/port/outbound-tracker";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { identity } from "lodash";
 import { ValidationError } from "io-ts";
+import { processService } from "../analytics-services";
+import {
+  RetrievedService,
+  toAuthorizedCIDRs
+} from "@pagopa/io-functions-commons/dist/src/models/service";
+import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 
 const aTopic = "a-topic";
-const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
-const aMessageStatus: MessageStatus = {
-  messageId: aMessageId,
-  status: MessageStatusValueEnum.ACCEPTED,
-  updatedAt: new Date("2022-09-29T15:41:34.826Z"),
-  isRead: false,
-  isArchived: false
+const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
+const aServiceId = "s123" as NonEmptyString;
+const aService = {
+  authorizedCIDRs: toAuthorizedCIDRs([]),
+  authorizedRecipients: new Set([]),
+  departmentName: "IT" as NonEmptyString,
+  isVisible: true,
+  maxAllowedPaymentAmount: 0 as MaxAllowedPaymentAmount,
+  organizationFiscalCode: anOrganizationFiscalCode,
+  organizationName: "AgID" as NonEmptyString,
+  requireSecureChannels: false,
+  serviceId: aServiceId,
+  serviceName: "Test" as NonEmptyString,
+  version: 1 as NonNegativeInteger
 };
 const aCosmosMetadata = {
   _etag: "_etag",
@@ -36,13 +46,18 @@ const aCosmosMetadata = {
   _self: "xyz",
   _ts: 1
 };
-const aRetrievedMessageStatus: RetrievedMessageStatus = {
-  ...aCosmosMetadata,
-  ...aMessageStatus,
-  id: aMessageStatus.messageId,
-  version: 1 as NonNegativeInteger,
-  kind: "IRetrievedMessageStatus"
-};
+const aRetrievedService: RetrievedService = pipe(
+  {
+    ...aCosmosMetadata,
+    ...aService,
+    id: aService.serviceId,
+    kind: "IRetrievedService"
+  },
+  RetrievedService.decode,
+  E.getOrElseW(e => {
+    throw e;
+  })
+);
 const anError = new Error("An error");
 const aKafkaResponse = {
   errorCode: 0,
@@ -76,10 +91,10 @@ const trackerMock = ({
 } as unknown) as TelemetryClient;
 
 const mainAdapter = KA.create(producerMock) as OutboundPublisher<
-  RetrievedMessageStatus
+  RetrievedService
 >;
 const fallbackAdapter = QA.create(mockQueueClient) as OutboundPublisher<
-  RetrievedMessageStatus
+  RetrievedService
 >;
 const trackerAdapter = TA.create(trackerMock);
 
@@ -89,18 +104,17 @@ describe("publish", () => {
   it("GIVEN a valid list of message status, WHEN processing the list, THEN publish it to the topic", async () => {
     // Given
     const documents = [
-      aRetrievedMessageStatus,
-      { ...aRetrievedMessageStatus, version: 2 }
+      aRetrievedService /*, { ...aRetrievedService, version: 2 }*/
     ];
     // When
-    await processMessageStatus(
+    await processService(
       trackerAdapter,
       mainAdapter,
       fallbackAdapter,
       documents
     )();
     // Then
-    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(2);
+    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(documents.length);
     RA.mapWithIndex((i, document) =>
       expect(mockSendMessageViaTopic).toHaveBeenNthCalledWith(i + 1, {
         messages: [{ value: JSON.stringify(document) }],
@@ -115,7 +129,7 @@ describe("publish", () => {
     // Given
     const documents = [{ name: "1" }, { name: "2" }];
     // When
-    await processMessageStatus(
+    await processService(
       trackerAdapter,
       mainAdapter,
       fallbackAdapter,
@@ -127,7 +141,7 @@ describe("publish", () => {
       expect(mockTrackException).toHaveBeenNthCalledWith(i + 1, {
         exception: pipe(
           document,
-          RetrievedMessageStatus.decode,
+          RetrievedService.decode,
           E.fold(identity, () => {
             throw new Error("You should not be here!");
           }),
@@ -147,12 +161,9 @@ describe("publish", () => {
     mockSendMessageViaTopic.mockImplementationOnce(async () => {
       throw anError;
     });
-    const documents = [
-      aRetrievedMessageStatus,
-      { ...aRetrievedMessageStatus, version: 2 }
-    ];
+    const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
     // When
-    await processMessageStatus(
+    await processService(
       trackerAdapter,
       mainAdapter,
       fallbackAdapter,
@@ -173,12 +184,9 @@ describe("publish", () => {
     mockSendMessageViaTopic.mockImplementation(async () => {
       throw anError;
     });
-    const documents = [
-      aRetrievedMessageStatus,
-      { ...aRetrievedMessageStatus, version: 2 }
-    ];
+    const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
     // When
-    await processMessageStatus(
+    await processService(
       trackerAdapter,
       mainAdapter,
       fallbackAdapter,
@@ -205,18 +213,10 @@ it("GIVEN a valid list of message status and both a not working Kafka Producer C
   mockSendMessageViaQueue.mockImplementation(async () => {
     throw anError;
   });
-  const documents = [
-    aRetrievedMessageStatus,
-    { ...aRetrievedMessageStatus, version: 2 }
-  ];
+  const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
   // When
   const publishOrThrow = expect(
-    processMessageStatus(
-      trackerAdapter,
-      mainAdapter,
-      fallbackAdapter,
-      documents
-    )()
+    processService(trackerAdapter, mainAdapter, fallbackAdapter, documents)()
   );
   // Then
   await publishOrThrow.rejects.toThrow();
