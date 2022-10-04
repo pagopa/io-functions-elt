@@ -17,7 +17,7 @@ import { SeverityLevel } from "../../outbound/port/outbound-tracker";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { identity } from "lodash";
 import { ValidationError } from "io-ts";
-import { processService } from "../analytics-services";
+import { getAnalyticsProcessorForService } from "../analytics-services";
 import {
   RetrievedService,
   toAuthorizedCIDRs
@@ -106,13 +106,13 @@ describe("publish", () => {
     const documents = [
       aRetrievedService /*, { ...aRetrievedService, version: 2 }*/
     ];
-    // When
-    await processService(
+    const processorAdapter = getAnalyticsProcessorForService(
       trackerAdapter,
       mainAdapter,
-      fallbackAdapter,
-      documents
-    )();
+      fallbackAdapter
+    );
+    // When
+    await processorAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(documents.length);
     RA.mapWithIndex((i, document) =>
@@ -128,13 +128,13 @@ describe("publish", () => {
   it("GIVEN a not valid list of message status, WHEN processing the list, THEN track the exception", async () => {
     // Given
     const documents = [{ name: "1" }, { name: "2" }];
-    // When
-    await processService(
+    const processorAdapter = getAnalyticsProcessorForService(
       trackerAdapter,
       mainAdapter,
-      fallbackAdapter,
-      documents
-    )();
+      fallbackAdapter
+    );
+    // When
+    await processorAdapter.process(documents)();
     // Then
     expect(mockTrackException).toHaveBeenCalledTimes(2);
     RA.mapWithIndex((i, document) =>
@@ -162,13 +162,13 @@ describe("publish", () => {
       throw anError;
     });
     const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-    // When
-    await processService(
+    const processorAdapter = getAnalyticsProcessorForService(
       trackerAdapter,
       mainAdapter,
-      fallbackAdapter,
-      documents
-    )();
+      fallbackAdapter
+    );
+    // When
+    await processorAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(1);
     expect(mockSendMessageViaQueue).toHaveBeenNthCalledWith(
@@ -185,13 +185,13 @@ describe("publish", () => {
       throw anError;
     });
     const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-    // When
-    await processService(
+    const processorAdapter = getAnalyticsProcessorForService(
       trackerAdapter,
       mainAdapter,
-      fallbackAdapter,
-      documents
-    )();
+      fallbackAdapter
+    );
+    // When
+    await processorAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(2);
     RA.mapWithIndex((i, document) =>
@@ -214,10 +214,13 @@ it("GIVEN a valid list of message status and both a not working Kafka Producer C
     throw anError;
   });
   const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-  // When
-  const publishOrThrow = expect(
-    processService(trackerAdapter, mainAdapter, fallbackAdapter, documents)()
+  const processorAdapter = getAnalyticsProcessorForService(
+    trackerAdapter,
+    mainAdapter,
+    fallbackAdapter
   );
+  // When
+  const publishOrThrow = expect(processorAdapter.process(documents)());
   // Then
   await publishOrThrow.rejects.toThrow();
 });

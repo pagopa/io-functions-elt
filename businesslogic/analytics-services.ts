@@ -7,15 +7,14 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { OutboundTracker } from "../outbound/port/outbound-tracker";
+import { InboundDocumentsProcessor } from "../inbound/port/inbound-documents-processor";
 
-export const processService = (
+export const getAnalyticsProcessorForService = (
   tracker: OutboundTracker,
   mainPublisher: OutboundPublisher<RetrievedService>,
-  fallbackPublisher: OutboundPublisher<RetrievedService>,
-  documents: ReadonlyArray<unknown>
-): T.Task<void> =>
-  pipe(
-    documents,
+  fallbackPublisher: OutboundPublisher<RetrievedService>
+): InboundDocumentsProcessor => ({
+  process: flow(
     RA.map(RetrievedService.decode),
     serviceOrErrors =>
       TT.both(RA.lefts(serviceOrErrors), RA.rights(serviceOrErrors)),
@@ -45,4 +44,5 @@ export const processService = (
       T.sequenceArray(RA.concat(publishTasks)(errorTasks))
     ),
     T.map(constVoid)
-  );
+  )
+});
