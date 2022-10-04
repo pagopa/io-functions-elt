@@ -1,7 +1,7 @@
 import { pipe } from "fp-ts/lib/function";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as E from "fp-ts/Either";
-import { processMessageStatus } from "../analytics-message-status";
+import { getAnalyticsProcessForMessageStatus } from "../analytics-message-status";
 import { Producer, ProducerRecord } from "kafkajs";
 import { QueueClient } from "@azure/storage-queue";
 import * as KA from "../../outbound/adapter/kafka-outbound-publisher";
@@ -92,13 +92,13 @@ describe("publish", () => {
       aRetrievedMessageStatus,
       { ...aRetrievedMessageStatus, version: 2 }
     ];
-    // When
-    await processMessageStatus(
+    const processAdapter = getAnalyticsProcessForMessageStatus(
       trackerAdapter,
       mainAdapter,
-      fallbackAdapter,
-      documents
-    )();
+      fallbackAdapter
+    );
+    // When
+    await processAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(2);
     RA.mapWithIndex((i, document) =>
@@ -114,13 +114,13 @@ describe("publish", () => {
   it("GIVEN a not valid list of message status, WHEN processing the list, THEN track the exception", async () => {
     // Given
     const documents = [{ name: "1" }, { name: "2" }];
-    // When
-    await processMessageStatus(
+    const processAdapter = getAnalyticsProcessForMessageStatus(
       trackerAdapter,
       mainAdapter,
-      fallbackAdapter,
-      documents
-    )();
+      fallbackAdapter
+    );
+    // When
+    await processAdapter.process(documents)();
     // Then
     expect(mockTrackException).toHaveBeenCalledTimes(2);
     RA.mapWithIndex((i, document) =>
@@ -151,13 +151,13 @@ describe("publish", () => {
       aRetrievedMessageStatus,
       { ...aRetrievedMessageStatus, version: 2 }
     ];
-    // When
-    await processMessageStatus(
+    const processAdapter = getAnalyticsProcessForMessageStatus(
       trackerAdapter,
       mainAdapter,
-      fallbackAdapter,
-      documents
-    )();
+      fallbackAdapter
+    );
+    // When
+    await processAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(1);
     expect(mockSendMessageViaQueue).toHaveBeenNthCalledWith(
@@ -177,13 +177,13 @@ describe("publish", () => {
       aRetrievedMessageStatus,
       { ...aRetrievedMessageStatus, version: 2 }
     ];
-    // When
-    await processMessageStatus(
+    const processAdapter = getAnalyticsProcessForMessageStatus(
       trackerAdapter,
       mainAdapter,
-      fallbackAdapter,
-      documents
-    )();
+      fallbackAdapter
+    );
+    // When
+    await processAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(2);
     RA.mapWithIndex((i, document) =>
@@ -209,15 +209,13 @@ it("GIVEN a valid list of message status and both a not working Kafka Producer C
     aRetrievedMessageStatus,
     { ...aRetrievedMessageStatus, version: 2 }
   ];
-  // When
-  const publishOrThrow = expect(
-    processMessageStatus(
-      trackerAdapter,
-      mainAdapter,
-      fallbackAdapter,
-      documents
-    )()
+  const processAdapter = getAnalyticsProcessForMessageStatus(
+    trackerAdapter,
+    mainAdapter,
+    fallbackAdapter
   );
+  // When
+  const publishOrThrow = expect(processAdapter.process(documents)());
   // Then
   await publishOrThrow.rejects.toThrow();
 });

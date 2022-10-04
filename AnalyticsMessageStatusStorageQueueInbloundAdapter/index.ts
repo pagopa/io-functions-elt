@@ -1,14 +1,13 @@
 import { Context } from "@azure/functions";
-import { QueueClient } from "@azure/storage-queue";
 import { RetrievedMessageStatus } from "@pagopa/io-functions-commons/dist/src/models/message_status";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow, withTopic } from "../utils/config";
 import { messageStatusAvroFormatter } from "../utils/formatter/messageStatusAvroFormatter";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
-import * as QA from "../outbound/adapter/queue-outbound-publisher";
+import * as EA from "../outbound/adapter/throw-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
-import { processMessageStatus } from "../businesslogic/analytics-message-status";
+import { getAnalyticsProcessForMessageStatus } from "../businesslogic/analytics-message-status";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 
 const config = getConfigOrThrow();
@@ -28,26 +27,17 @@ const messageStatusOnKafkaAdapter: OutboundPublisher<RetrievedMessageStatus> = K
   )
 );
 
-const messageStatusOnQueueAdapter: OutboundPublisher<RetrievedMessageStatus> = QA.create(
-  new QueueClient(
-    config.INTERNAL_STORAGE_CONNECTION_STRING,
-    config.MESSAGE_STATUS_FAILURE_QUEUE_NAME
-  )
-);
+const throwAdapter: OutboundPublisher<RetrievedMessageStatus> = EA.create();
 
 const telemetryAdapter = TA.create(
   TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
 );
 
-const run = (
-  _context: Context,
-  documents: ReadonlyArray<unknown>
-): Promise<void> =>
-  processMessageStatus(
+const run = (_context: Context, document: unknown): Promise<void> =>
+  getAnalyticsProcessForMessageStatus(
     telemetryAdapter,
     messageStatusOnKafkaAdapter,
-    messageStatusOnQueueAdapter,
-    documents
-  )();
+    throwAdapter
+  ).process([document])();
 
 export default run;

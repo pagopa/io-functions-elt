@@ -7,15 +7,14 @@ import * as RA from "fp-ts/ReadonlyArray";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { OutboundTracker } from "../outbound/port/outbound-tracker";
+import { InboundDocumentsProcessor } from "../inbound/port/inbound-documents-processor";
 
-export const processMessageStatus = (
+export const getAnalyticsProcessForMessageStatus = (
   tracker: OutboundTracker,
   mainPublisher: OutboundPublisher<RetrievedMessageStatus>,
-  fallbackPublisher: OutboundPublisher<RetrievedMessageStatus>,
-  documents: ReadonlyArray<unknown>
-): T.Task<void> =>
-  pipe(
-    documents,
+  fallbackPublisher: OutboundPublisher<RetrievedMessageStatus>
+): InboundDocumentsProcessor => ({
+  process: flow(
     RA.map(RetrievedMessageStatus.decode),
     messageStatusOrErrors =>
       TT.both(
@@ -48,4 +47,5 @@ export const processMessageStatus = (
       T.sequenceArray(RA.concat(publishTasks)(errorTasks))
     ),
     T.map(constVoid)
-  );
+  )
+});
