@@ -10,27 +10,15 @@ import * as QA from "../../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../../outbound/adapter/tracker-outbound-publisher";
 import * as EA from "../../outbound/adapter/messages-outbound-enricher";
 import { TelemetryClient } from "applicationinsights";
-import {
-  FiscalCode,
-  NonEmptyString,
-  OrganizationFiscalCode
-} from "@pagopa/ts-commons/lib/strings";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { OutboundPublisher } from "../../outbound/port/outbound-publisher";
 import { SeverityLevel } from "../../outbound/port/outbound-tracker";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { identity } from "lodash";
 import { ValidationError } from "io-ts";
 import {
-  RetrievedService,
-  toAuthorizedCIDRs
-} from "@pagopa/io-functions-commons/dist/src/models/service";
-import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
-import {
-  MessageModel,
   NewMessageWithoutContent,
   RetrievedMessage,
-  RetrievedMessageWithContent,
   RetrievedMessageWithoutContent
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
@@ -74,17 +62,6 @@ const aRetrievedMessageWithoutContent: RetrievedMessageWithoutContent = pipe(
     kind: "IRetrievedMessageWithoutContent"
   },
   RetrievedMessageWithoutContent.decode,
-  E.getOrElseW(e => {
-    throw e;
-  })
-);
-const aRetrievedMessageWithContent: RetrievedMessageWithContent = pipe(
-  {
-    ...aRetrievedMessageWithoutContent,
-    content: aMessageContent,
-    kind: "IRetrievedMessageWithContent"
-  },
-  RetrievedMessageWithContent.decode,
   E.getOrElseW(e => {
     throw e;
   })
