@@ -8,16 +8,15 @@ import { RetrievedMessage } from "@pagopa/io-functions-commons/dist/src/models/m
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { OutboundTracker } from "../outbound/port/outbound-tracker";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
+import { InboundDocumentsProcessor } from "../inbound/port/inbound-documents-processor";
 
-export const processMessages = (
+export const getAnalyticsProcessorForMessages = (
   tracker: OutboundTracker,
   contentEnricher: OutboundEnricher<RetrievedMessage>,
   mainPublisher: OutboundPublisher<RetrievedMessage>,
-  fallbackPublisher: OutboundPublisher<RetrievedMessage>,
-  documents: ReadonlyArray<unknown>
-): T.Task<void> =>
-  pipe(
-    documents,
+  fallbackPublisher: OutboundPublisher<RetrievedMessage>
+): InboundDocumentsProcessor => ({
+  process: flow(
     RA.map(RetrievedMessage.decode),
     messageOrErrors =>
       TT.both(RA.lefts(messageOrErrors), RA.rights(messageOrErrors)),
@@ -33,7 +32,9 @@ export const processMessages = (
     TT.map(
       RA.map(message =>
         pipe(
-          contentEnricher.enrich(message),
+          message.isPending === false
+            ? contentEnricher.enrich(message)
+            : TE.of(message),
           TE.chain(mainPublisher.publish),
           TE.orElse(_error => fallbackPublisher.publish(message)),
           TE.mapLeft(error => {
@@ -48,4 +49,5 @@ export const processMessages = (
       T.sequenceArray(RA.concat(publishTasks)(errorTasks))
     ),
     T.map(constVoid)
-  );
+  )
+});

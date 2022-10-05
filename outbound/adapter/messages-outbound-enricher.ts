@@ -28,8 +28,7 @@ export const create = (
         ...message,
         content,
         kind: "IRetrievedMessageWithContent"
-      })),
-      TE.map(() => message)
+      }))
     );
 
   return {

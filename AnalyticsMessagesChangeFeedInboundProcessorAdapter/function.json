@@ -1,0 +1,24 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "cosmosDBTrigger",
+      "name": "cosmosApiMessagesTrigger",
+      "direction": "in",
+      "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
+      "databaseName": "%COSMOSDB_NAME%",
+      "collectionName": "messages",
+      "leaseCollectionPrefix": "%MESSAGES_LEASES_PREFIX%-",
+      "leaseCollectionName": "pdnd-leases",
+      "createLeaseCollectionIfNotExists": true,
+      "startFromBeginning": true
+    }
+  ],
+  "retry": {
+    "strategy": "exponentialBackoff",
+    "maxRetryCount": -1,
+    "minimumInterval": "00:00:05",
+    "maximumInterval": "00:01:00"
+  },
+  "scriptFile": "../dist/AnalyticsMessageChangeFeedInboundProcessorAdapter/index.js"
+}
