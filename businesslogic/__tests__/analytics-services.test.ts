@@ -101,7 +101,7 @@ const trackerAdapter = TA.create(trackerMock);
 describe("publish", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("GIVEN a valid list of message status, WHEN processing the list, THEN publish it to the topic", async () => {
+  it("GIVEN a valid list of services, WHEN processing the list, THEN publish it to the topic", async () => {
     // Given
     const documents = [
       aRetrievedService /*, { ...aRetrievedService, version: 2 }*/
