@@ -2,7 +2,8 @@ import * as TE from "fp-ts/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as O from "fp-ts/Option";
-import { OutboundPublisher } from "../port/outbound-publisher";
+import * as T from "fp-ts/Task";
+import { OutboundPublisher, Result } from "../port/outbound-publisher";
 import { KafkaProducerCompact } from "../../utils/kafka/KafkaProducerCompact";
 import * as KP from "../../utils/kafka/KafkaProducerCompact";
 
@@ -25,5 +26,25 @@ export const create = <T>(
         )
       ),
       TE.map(() => document)
+    ),
+
+  publishes: (documents: ReadonlyArray<T>): T.Task<ReadonlyArray<Result<T>>> =>
+    pipe(
+      documents,
+      KP.sendMessages(producer),
+      TE.map(() =>
+        pipe(
+          documents,
+          RA.map(document => ({ document, success: true }))
+        )
+      ),
+      TE.mapLeft(
+        RA.map(e => ({
+          document: e.body,
+          error: new Error(e.message),
+          success: false
+        }))
+      ),
+      TE.toUnion
     )
 });
