@@ -1,12 +1,12 @@
 import { constVoid, flow, identity, pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
 import * as T from "fp-ts/Task";
 import * as TT from "fp-ts/TaskThese";
-import * as TH from "fp-ts/These";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as O from "fp-ts/Option";
+import * as S from "fp-ts/string";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
+import { not } from "fp-ts/lib/Predicate";
 import {
   isFailure,
   OutboundPublisher
@@ -53,11 +53,15 @@ export const getAnalyticsProcessorForService = (
                 (message, failure) => `${message}|${failure.error.message}`
               )
             ),
-            T.map(m => {
-              if (m.length > 0) {
-                throw new Error(m);
-              }
-            })
+            T.map(
+              flow(
+                O.fromPredicate(not(S.isEmpty)),
+                O.map(errorMessage => {
+                  throw new Error(errorMessage);
+                }),
+                constVoid
+              )
+            )
           )
         )
       )
