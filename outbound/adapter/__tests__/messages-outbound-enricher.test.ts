@@ -2,6 +2,7 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as EA from "../messages-outbound-enricher";
+import * as RA from "fp-ts/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
 import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
 import { MessageBodyMarkdown } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageBodyMarkdown";
@@ -14,6 +15,7 @@ import {
   RetrievedMessageWithoutContent
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { isFailure, isSuccess } from "../../port/outbound-publisher";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aCosmosMetadata = {
@@ -53,20 +55,132 @@ const aRetrievedMessageWithoutContent: RetrievedMessageWithoutContent = pipe(
 );
 const anError = new Error("An error");
 
-const mockGetContentFromBlob = jest
-  .fn()
-  .mockImplementation(() => TE.of(O.some(aMessageContent)));
+const mockGetContentFromBlob = jest.fn();
 const adapter = EA.create(
   {
     getContentFromBlob: mockGetContentFromBlob
   } as any,
   {} as any
 );
+const useWorkingGetContentFromBlob = () =>
+  mockGetContentFromBlob.mockImplementation(() =>
+    TE.of(O.some(aMessageContent))
+  );
 
-describe("publish", () => {
+describe("enrichs", () => {
+  beforeAll(() => jest.clearAllMocks());
   it("GIVEN a working Blob Storage client, WHEN enriching a document, THEN retrieve the message content and enrich it", async () => {
     // Given
+    useWorkingGetContentFromBlob();
+    const documents = RA.makeBy(10, i => ({
+      ...aRetrievedMessageWithoutContent,
+      senderUserId: `${aRetrievedMessageWithoutContent.senderServiceId}_${i}` as NonEmptyString
+    }));
+    // When
+    const messageOrErrors = await adapter.enrichs(documents)();
+    // Then
+    pipe(
+      documents,
+      RA.mapWithIndex((i, originalMessage) => {
+        expect(isSuccess(messageOrErrors[i])).toBeTruthy();
+        expect(messageOrErrors[i]).toEqual(
+          expect.objectContaining({
+            document: {
+              ...originalMessage,
+              content: aMessageContent,
+              kind: "IRetrievedMessageWithContent"
+            }
+          })
+        );
+      })
+    );
+  });
 
+  it("GIVEN an empty content blob, WHEN enriching a document, THEN return a left", async () => {
+    // Given
+    mockGetContentFromBlob.mockImplementation(() => TE.of(O.none));
+    const documents = RA.makeBy(10, i => ({
+      ...aRetrievedMessageWithoutContent,
+      senderUserId: `${aRetrievedMessageWithoutContent.senderServiceId}_${i}` as NonEmptyString
+    }));
+    // When
+    const messageOrErrors = await adapter.enrichs(documents)();
+    // Then
+    pipe(
+      documents,
+      RA.mapWithIndex((i, originalMessage) => {
+        expect(isFailure(messageOrErrors[i])).toBeTruthy();
+        expect(messageOrErrors[i]).toEqual(
+          expect.objectContaining({
+            document: originalMessage
+          })
+        );
+      })
+    );
+  });
+
+  it("GIVEN a not working Blob Storage client, WHEN enriching a document, THEN return a left", async () => {
+    // Given
+    mockGetContentFromBlob.mockImplementation(() => TE.left(anError));
+    const documents = RA.makeBy(10, i => ({
+      ...aRetrievedMessageWithoutContent,
+      senderUserId: `${aRetrievedMessageWithoutContent.senderServiceId}_${i}` as NonEmptyString
+    }));
+    // When
+    const messageOrErrors = await adapter.enrichs(documents)();
+    // Then
+    pipe(
+      documents,
+      RA.mapWithIndex((i, originalMessage) => {
+        expect(isFailure(messageOrErrors[i])).toBeTruthy();
+        expect(messageOrErrors[i]).toEqual(
+          expect.objectContaining({
+            document: originalMessage,
+            error: anError
+          })
+        );
+      })
+    );
+  });
+
+  it("GIVEN a first-time-only not working Blob Storage client, WHEN enriching a document, THEN return a left", async () => {
+    // Given
+    useWorkingGetContentFromBlob();
+    mockGetContentFromBlob.mockImplementationOnce(() => TE.left(anError));
+    const documents = RA.makeBy(10, i => ({
+      ...aRetrievedMessageWithoutContent,
+      senderUserId: `${aRetrievedMessageWithoutContent.senderServiceId}_${i}` as NonEmptyString
+    }));
+    // When
+    const messageOrErrors = await adapter.enrichs(documents)();
+    // Then
+    pipe(
+      documents,
+      RA.mapWithIndex((i, originalMessage) => {
+        expect(isSuccess(messageOrErrors[i])).toEqual(i != 0);
+        expect(messageOrErrors[i]).toEqual(
+          expect.objectContaining({
+            document:
+              i == 0
+                ? originalMessage
+                : {
+                    ...originalMessage,
+                    content: aMessageContent,
+                    kind: "IRetrievedMessageWithContent"
+                  }
+          })
+        );
+      })
+    );
+  });
+});
+
+describe("enrich", () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it("GIVEN a working Blob Storage client, WHEN enriching a document, THEN retrieve the message content and enrich it", async () => {
+    // Given
+    useWorkingGetContentFromBlob();
     // When
     const messageOrError = await adapter.enrich(
       aRetrievedMessageWithoutContent

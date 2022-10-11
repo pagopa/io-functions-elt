@@ -7,6 +7,7 @@ import { QueueClient } from "@azure/storage-queue";
 import * as KA from "../../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../../outbound/adapter/tracker-outbound-publisher";
+import * as EEA from "../../outbound/adapter/empty-outbound-enricher";
 import { TelemetryClient } from "applicationinsights";
 import {
   MessageStatus,
@@ -20,6 +21,7 @@ import { SeverityLevel } from "../../outbound/port/outbound-tracker";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { identity } from "lodash";
 import { ValidationError } from "io-ts";
+import { OutboundEnricher } from "../../outbound/port/outbound-enricher";
 
 const aTopic = "a-topic";
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
@@ -82,6 +84,7 @@ const fallbackAdapter = QA.create(mockQueueClient) as OutboundPublisher<
   RetrievedMessageStatus
 >;
 const trackerAdapter = TA.create(trackerMock);
+const emptyEnricher: OutboundEnricher<RetrievedMessageStatus> = EEA.create();
 
 describe("publish", () => {
   beforeEach(() => jest.clearAllMocks());
@@ -95,6 +98,7 @@ describe("publish", () => {
     const processAdapter = getAnalyticsProcessorForDocuments(
       RetrievedMessageStatus,
       trackerAdapter,
+      emptyEnricher,
       mainAdapter,
       fallbackAdapter
     );
@@ -118,6 +122,7 @@ describe("publish", () => {
     const processAdapter = getAnalyticsProcessorForDocuments(
       RetrievedMessageStatus,
       trackerAdapter,
+      emptyEnricher,
       mainAdapter,
       fallbackAdapter
     );
@@ -156,6 +161,7 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedMessageStatus,
       trackerAdapter,
+      emptyEnricher,
       mainAdapter,
       fallbackAdapter
     );
@@ -185,6 +191,7 @@ describe("publish", () => {
     const processAdapter = getAnalyticsProcessorForDocuments(
       RetrievedMessageStatus,
       trackerAdapter,
+      emptyEnricher,
       mainAdapter,
       fallbackAdapter
     );
@@ -201,28 +208,29 @@ describe("publish", () => {
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockTrackException).toHaveBeenCalledTimes(0);
   });
-});
 
-it("GIVEN a valid list of message status and both a not working Kafka Producer Client and a not working Queue Storage Client, WHEN processing the list, THEN throw an exception ", async () => {
-  // Given
-  mockSendMessageViaTopic.mockImplementation(async () => {
-    throw anError;
+  it("GIVEN a valid list of message status and both a not working Kafka Producer Client and a not working Queue Storage Client, WHEN processing the list, THEN throw an exception ", async () => {
+    // Given
+    mockSendMessageViaTopic.mockImplementation(async () => {
+      throw anError;
+    });
+    mockSendMessageViaQueue.mockImplementation(async () => {
+      throw anError;
+    });
+    const documents = [
+      aRetrievedMessageStatus,
+      { ...aRetrievedMessageStatus, version: 2 }
+    ];
+    const processAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessageStatus,
+      trackerAdapter,
+      emptyEnricher,
+      mainAdapter,
+      fallbackAdapter
+    );
+    // When
+    const publishOrThrow = expect(processAdapter.process(documents)());
+    // Then
+    await publishOrThrow.rejects.toThrow();
   });
-  mockSendMessageViaQueue.mockImplementation(async () => {
-    throw anError;
-  });
-  const documents = [
-    aRetrievedMessageStatus,
-    { ...aRetrievedMessageStatus, version: 2 }
-  ];
-  const processAdapter = getAnalyticsProcessorForDocuments(
-    RetrievedMessageStatus,
-    trackerAdapter,
-    mainAdapter,
-    fallbackAdapter
-  );
-  // When
-  const publishOrThrow = expect(processAdapter.process(documents)());
-  // Then
-  await publishOrThrow.rejects.toThrow();
 });

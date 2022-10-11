@@ -5,11 +5,11 @@ import {
   RetrievedMessage
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 import { BlobService } from "azure-storage";
-import * as TT from "fp-ts/TaskThese";
-import * as TH from "fp-ts/These";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as T from "fp-ts/Task";
+import * as E from "fp-ts/Either";
 import { OutboundEnricher } from "../port/outbound-enricher";
+import { failure, success } from "../port/outbound-publisher";
 
 const DEFAULT_THROTTLING = 500;
 
@@ -32,37 +32,27 @@ export const create = (
     );
 
   return {
-    enrich: (
-      message: RetrievedMessage
-    ): TE.TaskEither<Error, RetrievedMessage> => enrichASingleMessage(message),
+    enrich: enrichASingleMessage,
 
-    enrichs: (
-      messages: ReadonlyArray<RetrievedMessage>
-    ): TT.TaskThese<
-      ReadonlyArray<RetrievedMessage>,
-      ReadonlyArray<RetrievedMessage>
-    > =>
-      pipe(
-        messages,
-        RA.chunksOf(maxParallelThrottling),
-        RA.map(
-          flow(
-            RA.map(m =>
-              m.isPending === false
-                ? pipe(
-                    enrichASingleMessage(m),
-                    TE.mapLeft(() => m)
-                  )
-                : TE.of(m)
-            ),
-            RA.sequence(T.ApplicativePar)
-          )
-        ),
-        RA.sequence(T.ApplicativeSeq),
-        T.map(RA.flatten),
-        T.map(enrichedMessages =>
-          TH.both(RA.lefts(enrichedMessages), RA.rights(enrichedMessages))
+    enrichs: flow(
+      RA.chunksOf(maxParallelThrottling),
+      RA.map(
+        flow(
+          RA.map(message =>
+            message.isPending === false
+              ? pipe(
+                  enrichASingleMessage(message),
+                  TE.map(success),
+                  TE.mapLeft(error => failure(error, message))
+                )
+              : TE.of(success(message))
+          ),
+          RA.sequence(T.ApplicativePar)
         )
-      )
+      ),
+      RA.sequence(T.ApplicativeSeq),
+      T.map(RA.flatten),
+      T.map(RA.map(E.toUnion))
+    )
   };
 };

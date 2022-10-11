@@ -8,8 +8,10 @@ import { messageStatusAvroFormatter } from "../utils/formatter/messageStatusAvro
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
+import * as EEA from "../outbound/adapter/empty-outbound-enricher";
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
+import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 
 const config = getConfigOrThrow();
 
@@ -39,6 +41,8 @@ const telemetryAdapter = TA.create(
   TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
 );
 
+const emptyEnricherAdapter: OutboundEnricher<RetrievedMessageStatus> = EEA.create();
+
 const run = (
   _context: Context,
   documents: ReadonlyArray<unknown>
@@ -46,6 +50,7 @@ const run = (
   getAnalyticsProcessorForDocuments(
     RetrievedMessageStatus,
     telemetryAdapter,
+    emptyEnricherAdapter,
     messageStatusOnKafkaAdapter,
     messageStatusOnQueueAdapter
   ).process(documents)();

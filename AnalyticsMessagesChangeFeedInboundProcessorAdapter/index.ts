@@ -16,7 +16,7 @@ import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import * as MA from "../outbound/adapter/messages-outbound-enricher";
-import { getAnalyticsProcessorForMessages } from "../businesslogic/analytics-messages";
+import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import {
   avroMessageFormatter,
@@ -80,7 +80,8 @@ const run = (
   _context: Context,
   documents: ReadonlyArray<unknown>
 ): Promise<void> =>
-  getAnalyticsProcessorForMessages(
+  getAnalyticsProcessorForDocuments(
+    RetrievedMessage,
     telemetryAdapter,
     messageEnricherAdapter,
     retrievedMessagesOnKafkaAdapter,

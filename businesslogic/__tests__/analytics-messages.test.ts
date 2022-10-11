@@ -27,7 +27,7 @@ import { TimeToLiveSeconds } from "@pagopa/io-functions-commons/dist/generated/d
 import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
 import { MessageBodyMarkdown } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageBodyMarkdown";
 import { MessageSubject } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageSubject";
-import { getAnalyticsProcessorForMessages } from "../analytics-messages";
+import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
 
 const aTopic = "a-topic";
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
@@ -122,7 +122,8 @@ describe("publish", () => {
     // Given
     mockGetContentFromBlob.mockImplementationOnce(() => TE.left(anError));
     const documents = [aRetrievedMessageWithoutContent];
-    const processorAdapter = getAnalyticsProcessorForMessages(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessage,
       trackerAdapter,
       enrichAdapter,
       mainAdapter,
@@ -143,7 +144,8 @@ describe("publish", () => {
   it("GIVEN a valid list of pending messages, WHEN processing the list, THEN publish it to the topic without enrichment", async () => {
     // Given
     const documents = [{ ...aRetrievedMessageWithoutContent, isPending: true }];
-    const processorAdapter = getAnalyticsProcessorForMessages(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessage,
       trackerAdapter,
       enrichAdapter,
       mainAdapter,
@@ -171,7 +173,8 @@ describe("publish", () => {
       aRetrievedMessageWithoutContent,
       { ...aRetrievedMessageWithoutContent, id: "another-id" }
     ];
-    const processorAdapter = getAnalyticsProcessorForMessages(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessage,
       trackerAdapter,
       enrichAdapter,
       mainAdapter,
@@ -180,24 +183,17 @@ describe("publish", () => {
     // When
     await processorAdapter.process(documents)();
     // Then
-    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(documents.length);
-    pipe(
-      documents,
-      RA.mapWithIndex((i, document) =>
-        expect(mockSendMessageViaTopic).toHaveBeenNthCalledWith(i + 1, {
-          messages: [
-            {
-              value: JSON.stringify({
-                ...document,
-                content: aMessageContent,
-                kind: "IRetrievedMessageWithContent"
-              })
-            }
-          ],
-          topic: aTopic
+    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
+    expect(mockSendMessageViaTopic).toHaveBeenCalledWith({
+      messages: documents.map(document => ({
+        value: JSON.stringify({
+          ...document,
+          content: aMessageContent,
+          kind: "IRetrievedMessageWithContent"
         })
-      )
-    );
+      })),
+      topic: aTopic
+    });
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(0);
     expect(mockTrackException).toHaveBeenCalledTimes(0);
   });
@@ -205,7 +201,8 @@ describe("publish", () => {
   it("GIVEN a not valid list of messages, WHEN processing the list, THEN track the exception", async () => {
     // Given
     const documents = [{ name: "1" }, { name: "2" }];
-    const processorAdapter = getAnalyticsProcessorForMessages(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessage,
       trackerAdapter,
       enrichAdapter,
       mainAdapter,
@@ -234,16 +231,17 @@ describe("publish", () => {
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(0);
   });
 
-  it("GIVEN a valid list of messages and a Kafka Producer Client not working the first time, WHEN processing the list, THEN send one message to the topic and one message to the queue", async () => {
+  it("GIVEN a valid list of over 500 messages and a Kafka Producer Client not working the first time, WHEN processing the list, THEN send only the first 500 (batch size) messages to the queue", async () => {
     // Given
     mockSendMessageViaTopic.mockImplementationOnce(async () => {
       throw anError;
     });
-    const documents = [
-      aRetrievedMessageWithoutContent,
-      { ...aRetrievedMessageWithoutContent, id: "another-id" }
-    ];
-    const processorAdapter = getAnalyticsProcessorForMessages(
+    const documents = RA.makeBy(1000, i => ({
+      ...aRetrievedMessageWithoutContent,
+      id: `another-id_${i}`
+    }));
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessage,
       trackerAdapter,
       enrichAdapter,
       mainAdapter,
@@ -252,10 +250,21 @@ describe("publish", () => {
     // When
     await processorAdapter.process(documents)();
     // Then
-    expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(1);
-    expect(mockSendMessageViaQueue).toHaveBeenNthCalledWith(
-      1,
-      Buffer.from(JSON.stringify(documents[0])).toString("base64")
+    expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(500);
+    pipe(
+      documents.slice(0, 500),
+      RA.mapWithIndex((i, document) =>
+        expect(mockSendMessageViaQueue).toHaveBeenNthCalledWith(
+          i + 1,
+          Buffer.from(
+            JSON.stringify({
+              ...document,
+              content: aMessageContent,
+              kind: "IRetrievedMessageWithContent"
+            })
+          ).toString("base64")
+        )
+      )
     );
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(2);
     expect(mockTrackException).toHaveBeenCalledTimes(0);
@@ -270,7 +279,8 @@ describe("publish", () => {
       aRetrievedMessageWithoutContent,
       { ...aRetrievedMessageWithoutContent, id: "another-id" }
     ];
-    const processorAdapter = getAnalyticsProcessorForMessages(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessage,
       trackerAdapter,
       enrichAdapter,
       mainAdapter,
@@ -280,13 +290,22 @@ describe("publish", () => {
     await processorAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(2);
-    RA.mapWithIndex((i, document) =>
-      expect(mockSendMessageViaQueue).toHaveBeenNthCalledWith(
-        i + 1,
-        Buffer.from(JSON.stringify(document)).toString("base64")
+    pipe(
+      documents,
+      RA.mapWithIndex((i, document) =>
+        expect(mockSendMessageViaQueue).toHaveBeenNthCalledWith(
+          i + 1,
+          Buffer.from(
+            JSON.stringify({
+              ...document,
+              content: aMessageContent,
+              kind: "IRetrievedMessageWithContent"
+            })
+          ).toString("base64")
+        )
       )
-    )(documents);
-    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(2);
+    );
+    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockTrackException).toHaveBeenCalledTimes(0);
   });
 
@@ -302,7 +321,8 @@ describe("publish", () => {
       aRetrievedMessageWithoutContent,
       { ...aRetrievedMessageWithoutContent, id: "another-id" }
     ];
-    const processorAdapter = getAnalyticsProcessorForMessages(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessage,
       trackerAdapter,
       enrichAdapter,
       mainAdapter,
