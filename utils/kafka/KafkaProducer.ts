@@ -72,7 +72,7 @@ export const publishChunks = <B>(
         e => storableSendFailureError(e, chunks)
       )
     ),
-    RA.sequence(TE.ApplicativeSeq),
+    RA.sequence(TE.ApplicativePar),
     TE.map(RA.flatten)
   );
 

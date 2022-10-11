@@ -14,5 +14,5 @@
       "minimumInterval": "00:00:05",
       "maximumInterval": "00:30:00"
     },
-    "scriptFile": "../dist/AnalyticsMessageStatusFromQueue/index.js"
+    "scriptFile": "../dist/AnalyticsServiceStorageQueueInboundProcessorAdapter/index.js"
   }

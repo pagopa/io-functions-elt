@@ -101,11 +101,9 @@ const trackerAdapter = TA.create(trackerMock);
 describe("publish", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("GIVEN a valid list of message status, WHEN processing the list, THEN publish it to the topic", async () => {
+  it("GIVEN a valid list of services, WHEN processing the list, THEN publish it to the topic", async () => {
     // Given
-    const documents = [
-      aRetrievedService /*, { ...aRetrievedService, version: 2 }*/
-    ];
+    const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
     const processorAdapter = getAnalyticsProcessorForService(
       trackerAdapter,
       mainAdapter,
@@ -114,18 +112,18 @@ describe("publish", () => {
     // When
     await processorAdapter.process(documents)();
     // Then
-    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(documents.length);
-    RA.mapWithIndex((i, document) =>
-      expect(mockSendMessageViaTopic).toHaveBeenNthCalledWith(i + 1, {
-        messages: [{ value: JSON.stringify(document) }],
-        topic: aTopic
-      })
-    )(documents);
+    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
+    expect(mockSendMessageViaTopic).toHaveBeenCalledWith({
+      messages: documents.map(document => ({
+        value: JSON.stringify(document)
+      })),
+      topic: aTopic
+    });
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(0);
     expect(mockTrackException).toHaveBeenCalledTimes(0);
   });
 
-  it("GIVEN a not valid list of message status, WHEN processing the list, THEN track the exception", async () => {
+  it("GIVEN a not valid list of services, WHEN processing the list, THEN track the exception", async () => {
     // Given
     const documents = [{ name: "1" }, { name: "2" }];
     const processorAdapter = getAnalyticsProcessorForService(
@@ -156,12 +154,15 @@ describe("publish", () => {
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(0);
   });
 
-  it("GIVEN a valid list of message status and a Kafka Producer Client not working the first time, WHEN processing the list, THEN send one message to the topic and one message to the queue", async () => {
+  it("GIVEN a valid list of over 500 services and a Kafka Producer Client not working the first time, WHEN processing the list, THEN send only the first 500 (batch size) services to the queue", async () => {
     // Given
     mockSendMessageViaTopic.mockImplementationOnce(async () => {
       throw anError;
     });
-    const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
+    const documents = RA.makeBy(1000, i => ({
+      ...aRetrievedService,
+      version: i + 1
+    }));
     const processorAdapter = getAnalyticsProcessorForService(
       trackerAdapter,
       mainAdapter,
@@ -170,16 +171,18 @@ describe("publish", () => {
     // When
     await processorAdapter.process(documents)();
     // Then
-    expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(1);
-    expect(mockSendMessageViaQueue).toHaveBeenNthCalledWith(
-      1,
-      Buffer.from(JSON.stringify(documents[0])).toString("base64")
-    );
+    expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(500);
+    RA.mapWithIndex((i, document) =>
+      expect(mockSendMessageViaQueue).toHaveBeenNthCalledWith(
+        i + 1,
+        Buffer.from(JSON.stringify(document)).toString("base64")
+      )
+    )(documents.slice(0, 500));
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(2);
     expect(mockTrackException).toHaveBeenCalledTimes(0);
   });
 
-  it("GIVEN a valid list of message status and a not working Kafka Producer Client, WHEN processing the list, THEN send it to the queue", async () => {
+  it("GIVEN a valid list of services and a not working Kafka Producer Client, WHEN processing the list, THEN send it to the queue", async () => {
     // Given
     mockSendMessageViaTopic.mockImplementation(async () => {
       throw anError;
@@ -200,12 +203,12 @@ describe("publish", () => {
         Buffer.from(JSON.stringify(document)).toString("base64")
       )
     )(documents);
-    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(2);
+    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockTrackException).toHaveBeenCalledTimes(0);
   });
 });
 
-it("GIVEN a valid list of message status and both a not working Kafka Producer Client and a not working Queue Storage Client, WHEN processing the list, THEN throw an exception ", async () => {
+it("GIVEN a valid list of services and both a not working Kafka Producer Client and a not working Queue Storage Client, WHEN processing the list, THEN throw an exception ", async () => {
   // Given
   mockSendMessageViaTopic.mockImplementation(async () => {
     throw anError;
