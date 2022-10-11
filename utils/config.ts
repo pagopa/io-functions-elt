@@ -155,6 +155,7 @@ export const IDecodableConfig = t.interface({
   INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
   SERVICES_FAILURE_QUEUE_NAME: NonEmptyString,
   MESSAGES_FAILURE_QUEUE_NAME: NonEmptyString,
+  MESSAGE_STATUS_FAILURE_QUEUE_NAME: NonEmptyString,
 
   PN_SERVICE_ID: NonEmptyString,
 

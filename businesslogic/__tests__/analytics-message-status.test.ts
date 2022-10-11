@@ -1,6 +1,7 @@
 import { pipe } from "fp-ts/lib/function";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as E from "fp-ts/Either";
+import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
 import { Producer, ProducerRecord } from "kafkajs";
 import { QueueClient } from "@azure/storage-queue";
 import * as KA from "../../outbound/adapter/kafka-outbound-publisher";
@@ -8,37 +9,26 @@ import * as QA from "../../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../../outbound/adapter/tracker-outbound-publisher";
 import { TelemetryClient } from "applicationinsights";
 import {
-  NonEmptyString,
-  OrganizationFiscalCode
-} from "@pagopa/ts-commons/lib/strings";
+  MessageStatus,
+  RetrievedMessageStatus
+} from "@pagopa/io-functions-commons/dist/src/models/message_status";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { MessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageStatusValue";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { OutboundPublisher } from "../../outbound/port/outbound-publisher";
 import { SeverityLevel } from "../../outbound/port/outbound-tracker";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { identity } from "lodash";
 import { ValidationError } from "io-ts";
-import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
-import {
-  RetrievedService,
-  toAuthorizedCIDRs
-} from "@pagopa/io-functions-commons/dist/src/models/service";
-import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 
 const aTopic = "a-topic";
-const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
-const aServiceId = "s123" as NonEmptyString;
-const aService = {
-  authorizedCIDRs: toAuthorizedCIDRs([]),
-  authorizedRecipients: new Set([]),
-  departmentName: "IT" as NonEmptyString,
-  isVisible: true,
-  maxAllowedPaymentAmount: 0 as MaxAllowedPaymentAmount,
-  organizationFiscalCode: anOrganizationFiscalCode,
-  organizationName: "AgID" as NonEmptyString,
-  requireSecureChannels: false,
-  serviceId: aServiceId,
-  serviceName: "Test" as NonEmptyString,
-  version: 1 as NonNegativeInteger
+const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
+const aMessageStatus: MessageStatus = {
+  messageId: aMessageId,
+  status: MessageStatusValueEnum.ACCEPTED,
+  updatedAt: new Date("2022-09-29T15:41:34.826Z"),
+  isRead: false,
+  isArchived: false
 };
 const aCosmosMetadata = {
   _etag: "_etag",
@@ -46,18 +36,13 @@ const aCosmosMetadata = {
   _self: "xyz",
   _ts: 1
 };
-const aRetrievedService: RetrievedService = pipe(
-  {
-    ...aCosmosMetadata,
-    ...aService,
-    id: aService.serviceId,
-    kind: "IRetrievedService"
-  },
-  RetrievedService.decode,
-  E.getOrElseW(e => {
-    throw e;
-  })
-);
+const aRetrievedMessageStatus: RetrievedMessageStatus = {
+  ...aCosmosMetadata,
+  ...aMessageStatus,
+  id: aMessageStatus.messageId,
+  version: 1 as NonNegativeInteger,
+  kind: "IRetrievedMessageStatus"
+};
 const anError = new Error("An error");
 const aKafkaResponse = {
   errorCode: 0,
@@ -91,27 +76,30 @@ const trackerMock = ({
 } as unknown) as TelemetryClient;
 
 const mainAdapter = KA.create(producerMock) as OutboundPublisher<
-  RetrievedService
+  RetrievedMessageStatus
 >;
 const fallbackAdapter = QA.create(mockQueueClient) as OutboundPublisher<
-  RetrievedService
+  RetrievedMessageStatus
 >;
 const trackerAdapter = TA.create(trackerMock);
 
 describe("publish", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("GIVEN a valid list of services, WHEN processing the list, THEN publish it to the topic", async () => {
+  it("GIVEN a valid list of message status, WHEN processing the list, THEN publish it to the topic", async () => {
     // Given
-    const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-    const processorAdapter = getAnalyticsProcessorForDocuments(
-      RetrievedService,
+    const documents = [
+      aRetrievedMessageStatus,
+      { ...aRetrievedMessageStatus, version: 2 }
+    ];
+    const processAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessageStatus,
       trackerAdapter,
       mainAdapter,
       fallbackAdapter
     );
     // When
-    await processorAdapter.process(documents)();
+    await processAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockSendMessageViaTopic).toHaveBeenCalledWith({
@@ -124,24 +112,24 @@ describe("publish", () => {
     expect(mockTrackException).toHaveBeenCalledTimes(0);
   });
 
-  it("GIVEN a not valid list of services, WHEN processing the list, THEN track the exception", async () => {
+  it("GIVEN a not valid list of message status, WHEN processing the list, THEN track the exception", async () => {
     // Given
     const documents = [{ name: "1" }, { name: "2" }];
-    const processorAdapter = getAnalyticsProcessorForDocuments(
-      RetrievedService,
+    const processAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessageStatus,
       trackerAdapter,
       mainAdapter,
       fallbackAdapter
     );
     // When
-    await processorAdapter.process(documents)();
+    await processAdapter.process(documents)();
     // Then
     expect(mockTrackException).toHaveBeenCalledTimes(2);
     RA.mapWithIndex((i, document) =>
       expect(mockTrackException).toHaveBeenNthCalledWith(i + 1, {
         exception: pipe(
           document,
-          RetrievedService.decode,
+          RetrievedMessageStatus.decode,
           E.fold(identity, () => {
             throw new Error("You should not be here!");
           }),
@@ -156,17 +144,17 @@ describe("publish", () => {
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(0);
   });
 
-  it("GIVEN a valid list of over 500 services and a Kafka Producer Client not working the first time, WHEN processing the list, THEN send only the first 500 (batch size) services to the queue", async () => {
+  it("GIVEN a valid list of over 500 message status and a Kafka Producer Client not working the first time, WHEN processing the list, THEN send only the first 500 (batch size) message status to the queue", async () => {
     // Given
     mockSendMessageViaTopic.mockImplementationOnce(async () => {
       throw anError;
     });
     const documents = RA.makeBy(1000, i => ({
-      ...aRetrievedService,
+      ...aRetrievedMessageStatus,
       version: i + 1
     }));
     const processorAdapter = getAnalyticsProcessorForDocuments(
-      RetrievedService,
+      RetrievedMessageStatus,
       trackerAdapter,
       mainAdapter,
       fallbackAdapter
@@ -185,20 +173,23 @@ describe("publish", () => {
     expect(mockTrackException).toHaveBeenCalledTimes(0);
   });
 
-  it("GIVEN a valid list of services and a not working Kafka Producer Client, WHEN processing the list, THEN send it to the queue", async () => {
+  it("GIVEN a valid list of message status and a not working Kafka Producer Client, WHEN processing the list, THEN send it to the queue", async () => {
     // Given
     mockSendMessageViaTopic.mockImplementation(async () => {
       throw anError;
     });
-    const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-    const processorAdapter = getAnalyticsProcessorForDocuments(
-      RetrievedService,
+    const documents = [
+      aRetrievedMessageStatus,
+      { ...aRetrievedMessageStatus, version: 2 }
+    ];
+    const processAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessageStatus,
       trackerAdapter,
       mainAdapter,
       fallbackAdapter
     );
     // When
-    await processorAdapter.process(documents)();
+    await processAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(2);
     RA.mapWithIndex((i, document) =>
@@ -212,7 +203,7 @@ describe("publish", () => {
   });
 });
 
-it("GIVEN a valid list of services and both a not working Kafka Producer Client and a not working Queue Storage Client, WHEN processing the list, THEN throw an exception ", async () => {
+it("GIVEN a valid list of message status and both a not working Kafka Producer Client and a not working Queue Storage Client, WHEN processing the list, THEN throw an exception ", async () => {
   // Given
   mockSendMessageViaTopic.mockImplementation(async () => {
     throw anError;
@@ -220,15 +211,18 @@ it("GIVEN a valid list of services and both a not working Kafka Producer Client 
   mockSendMessageViaQueue.mockImplementation(async () => {
     throw anError;
   });
-  const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-  const processorAdapter = getAnalyticsProcessorForDocuments(
-    RetrievedService,
+  const documents = [
+    aRetrievedMessageStatus,
+    { ...aRetrievedMessageStatus, version: 2 }
+  ];
+  const processAdapter = getAnalyticsProcessorForDocuments(
+    RetrievedMessageStatus,
     trackerAdapter,
     mainAdapter,
     fallbackAdapter
   );
   // When
-  const publishOrThrow = expect(processorAdapter.process(documents)());
+  const publishOrThrow = expect(processAdapter.process(documents)());
   // Then
   await publishOrThrow.rejects.toThrow();
 });

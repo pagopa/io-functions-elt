@@ -3,8 +3,8 @@
       {
         "type": "queueTrigger",
         "direction": "in",
-        "name": "serviceFailure",
-        "queueName": "%SERVICES_FAILURE_QUEUE_NAME%",
+        "name": "messageviewfailure",
+        "queueName": "%MESSAGE_STATUS_FAILURE_QUEUE_NAME%",
         "connection":"INTERNAL_STORAGE_CONNECTION_STRING"
       }
     ],
@@ -14,5 +14,5 @@
       "minimumInterval": "00:00:05",
       "maximumInterval": "00:30:00"
     },
-    "scriptFile": "../dist/AnalyticsServiceStorageQueueInboundProcessorAdapter/index.js"
+    "scriptFile": "../dist/AnalyticsMessageStatusFromQueue/index.js"
   }
