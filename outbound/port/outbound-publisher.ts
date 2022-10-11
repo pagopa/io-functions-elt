@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
+import { Task } from "fp-ts/lib/Task";
 import * as TE from "fp-ts/TaskEither";
-import * as T from "fp-ts/Task";
 
 export type Success<T> = { readonly success: boolean; readonly document: T };
 export type Failure<T> = {
@@ -16,5 +16,5 @@ export type OutboundPublisher<T> = {
   readonly publish: (document: T) => TE.TaskEither<Error, T>;
   readonly publishes: (
     document: ReadonlyArray<T>
-  ) => T.Task<ReadonlyArray<Result<T>>>;
+  ) => Task<ReadonlyArray<Result<T>>>;
 };
