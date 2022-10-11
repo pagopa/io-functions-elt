@@ -5,8 +5,8 @@ import * as RA from "fp-ts/ReadonlyArray";
 import * as O from "fp-ts/Option";
 import * as S from "fp-ts/string";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { not } from "fp-ts/lib/Predicate";
+import * as t from "io-ts";
 import {
   isFailure,
   OutboundPublisher
@@ -14,13 +14,14 @@ import {
 import { OutboundTracker } from "../outbound/port/outbound-tracker";
 import { InboundDocumentsProcessor } from "../inbound/port/inbound-documents-processor";
 
-export const getAnalyticsProcessorForService = (
+export const getAnalyticsProcessorForDocuments = <I>(
+  decoder: t.Decoder<unknown, I>,
   tracker: OutboundTracker,
-  mainPublisher: OutboundPublisher<RetrievedService>,
-  fallbackPublisher: OutboundPublisher<RetrievedService>
+  mainPublisher: OutboundPublisher<I>,
+  fallbackPublisher: OutboundPublisher<I>
 ): InboundDocumentsProcessor => ({
   process: flow(
-    RA.map(RetrievedService.decode),
+    RA.map(decoder.decode),
     serviceOrErrors =>
       TT.both(RA.lefts(serviceOrErrors), RA.rights(serviceOrErrors)),
     TT.mapLeft(

@@ -8,7 +8,7 @@ import { messageStatusAvroFormatter } from "../utils/formatter/messageStatusAvro
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
-import { getAnalyticsProcessForMessageStatus } from "../businesslogic/analytics-message-status";
+import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 
 const config = getConfigOrThrow();
@@ -43,7 +43,8 @@ const run = (
   _context: Context,
   documents: ReadonlyArray<unknown>
 ): Promise<void> =>
-  getAnalyticsProcessForMessageStatus(
+  getAnalyticsProcessorForDocuments(
+    RetrievedMessageStatus,
     telemetryAdapter,
     messageStatusOnKafkaAdapter,
     messageStatusOnQueueAdapter

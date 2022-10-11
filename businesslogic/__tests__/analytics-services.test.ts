@@ -17,7 +17,7 @@ import { SeverityLevel } from "../../outbound/port/outbound-tracker";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { identity } from "lodash";
 import { ValidationError } from "io-ts";
-import { getAnalyticsProcessorForService } from "../analytics-services";
+import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
 import {
   RetrievedService,
   toAuthorizedCIDRs
@@ -104,7 +104,8 @@ describe("publish", () => {
   it("GIVEN a valid list of services, WHEN processing the list, THEN publish it to the topic", async () => {
     // Given
     const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-    const processorAdapter = getAnalyticsProcessorForService(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedService,
       trackerAdapter,
       mainAdapter,
       fallbackAdapter
@@ -126,7 +127,8 @@ describe("publish", () => {
   it("GIVEN a not valid list of services, WHEN processing the list, THEN track the exception", async () => {
     // Given
     const documents = [{ name: "1" }, { name: "2" }];
-    const processorAdapter = getAnalyticsProcessorForService(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedService,
       trackerAdapter,
       mainAdapter,
       fallbackAdapter
@@ -163,7 +165,8 @@ describe("publish", () => {
       ...aRetrievedService,
       version: i + 1
     }));
-    const processorAdapter = getAnalyticsProcessorForService(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedService,
       trackerAdapter,
       mainAdapter,
       fallbackAdapter
@@ -188,7 +191,8 @@ describe("publish", () => {
       throw anError;
     });
     const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-    const processorAdapter = getAnalyticsProcessorForService(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedService,
       trackerAdapter,
       mainAdapter,
       fallbackAdapter
@@ -217,7 +221,8 @@ it("GIVEN a valid list of services and both a not working Kafka Producer Client 
     throw anError;
   });
   const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-  const processorAdapter = getAnalyticsProcessorForService(
+  const processorAdapter = getAnalyticsProcessorForDocuments(
+    RetrievedService,
     trackerAdapter,
     mainAdapter,
     fallbackAdapter

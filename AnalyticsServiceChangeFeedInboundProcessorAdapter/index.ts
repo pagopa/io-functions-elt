@@ -7,7 +7,7 @@ import { getConfigOrThrow } from "../utils/config";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
-import { getAnalyticsProcessorForService } from "../businesslogic/analytics-services";
+import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
 
@@ -39,7 +39,8 @@ const run = (
   _context: Context,
   documents: ReadonlyArray<unknown>
 ): Promise<void> =>
-  getAnalyticsProcessorForService(
+  getAnalyticsProcessorForDocuments(
+    RetrievedService,
     telemetryAdapter,
     retrievedServiceOnKafkaAdapter,
     retrievedServiceOnQueueAdapter

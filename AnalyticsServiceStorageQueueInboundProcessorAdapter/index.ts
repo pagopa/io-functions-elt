@@ -7,7 +7,7 @@ import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as EA from "../outbound/adapter/throw-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
-import { getAnalyticsProcessorForService } from "../businesslogic/analytics-services";
+import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
 
 const config = getConfigOrThrow();
@@ -30,7 +30,8 @@ const telemetryAdapter = TA.create(
 );
 
 const run = (_context: Context, document: unknown): Promise<void> =>
-  getAnalyticsProcessorForService(
+  getAnalyticsProcessorForDocuments(
+    RetrievedService,
     telemetryAdapter,
     retrievedServiceOnKafkaAdapter,
     throwAdapter
