@@ -1,0 +1,24 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "cosmosDBTrigger",
+      "name": "cosmosApiProfilesTrigger",
+      "direction": "in",
+      "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
+      "databaseName": "%COSMOSDB_NAME%",
+      "collectionName": "services",
+      "leaseCollectionName": "leases-services-2",
+      "createLeaseCollectionIfNotExists": true,
+      "startFromBeginning": true
+
+    }
+  ],
+  "retry": {
+    "strategy": "exponentialBackoff",
+    "maxRetryCount": -1,
+    "minimumInterval": "00:00:05",
+    "maximumInterval": "00:30:00"
+  },
+  "scriptFile": "../dist/AnalyticsServiceChangeFeedInboundProcessorAdapter/index.js"
+}

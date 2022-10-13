@@ -1,3 +1,4 @@
+/* eslint-disable sort-keys */
 /**
  * Config module
  *
@@ -113,6 +114,8 @@ export const KafkaProducerCompactConfigFromEnv = new t.Type<
 // global app configuration
 export type IDecodableConfig = t.TypeOf<typeof IDecodableConfig>;
 export const IDecodableConfig = t.interface({
+  APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
+
   COSMOSDB_KEY: NonEmptyString,
   COSMOSDB_NAME: NonEmptyString,
   COSMOSDB_URI: NonEmptyString,
@@ -148,6 +151,9 @@ export const IDecodableConfig = t.interface({
 
   // eslint-disable-next-line sort-keys
   MessageContentPrimaryStorageConnection: NonEmptyString,
+
+  INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
+  SERVICES_FAILURE_QUEUE_NAME: NonEmptyString,
 
   PN_SERVICE_ID: NonEmptyString,
 
