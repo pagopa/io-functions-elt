@@ -7,9 +7,11 @@ import { getConfigOrThrow } from "../utils/config";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
-import { getAnalyticsProcessorForService } from "../businesslogic/analytics-services";
+import * as EEA from "../outbound/adapter/empty-outbound-enricher";
+import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
+import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 
 const config = getConfigOrThrow();
 
@@ -35,12 +37,16 @@ const telemetryAdapter = TA.create(
   TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
 );
 
+const emptyEnricherAdapter: OutboundEnricher<RetrievedService> = EEA.create();
+
 const run = (
   _context: Context,
   documents: ReadonlyArray<unknown>
 ): Promise<void> =>
-  getAnalyticsProcessorForService(
+  getAnalyticsProcessorForDocuments(
+    RetrievedService,
     telemetryAdapter,
+    emptyEnricherAdapter,
     retrievedServiceOnKafkaAdapter,
     retrievedServiceOnQueueAdapter
   ).process(documents)();
