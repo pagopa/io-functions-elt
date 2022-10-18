@@ -6,6 +6,7 @@ import { QueueClient } from "@azure/storage-queue";
 import * as KA from "../../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../../outbound/adapter/tracker-outbound-publisher";
+import * as EEA from "../../outbound/adapter/empty-outbound-enricher";
 import { TelemetryClient } from "applicationinsights";
 import {
   NonEmptyString,
@@ -23,6 +24,7 @@ import {
   toAuthorizedCIDRs
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
+import { OutboundEnricher } from "../../outbound/port/outbound-enricher";
 
 const aTopic = "a-topic";
 const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
@@ -97,6 +99,7 @@ const fallbackAdapter = QA.create(mockQueueClient) as OutboundPublisher<
   RetrievedService
 >;
 const trackerAdapter = TA.create(trackerMock);
+const emptyEnricher: OutboundEnricher<RetrievedService> = EEA.create();
 
 describe("publish", () => {
   beforeEach(() => jest.clearAllMocks());
@@ -107,6 +110,7 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedService,
       trackerAdapter,
+      emptyEnricher,
       mainAdapter,
       fallbackAdapter
     );
@@ -130,6 +134,7 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedService,
       trackerAdapter,
+      emptyEnricher,
       mainAdapter,
       fallbackAdapter
     );
@@ -168,6 +173,7 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedService,
       trackerAdapter,
+      emptyEnricher,
       mainAdapter,
       fallbackAdapter
     );
@@ -194,6 +200,7 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedService,
       trackerAdapter,
+      emptyEnricher,
       mainAdapter,
       fallbackAdapter
     );
@@ -210,25 +217,26 @@ describe("publish", () => {
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockTrackException).toHaveBeenCalledTimes(0);
   });
-});
 
-it("GIVEN a valid list of services and both a not working Kafka Producer Client and a not working Queue Storage Client, WHEN processing the list, THEN throw an exception ", async () => {
-  // Given
-  mockSendMessageViaTopic.mockImplementation(async () => {
-    throw anError;
+  it("GIVEN a valid list of services and both a not working Kafka Producer Client and a not working Queue Storage Client, WHEN processing the list, THEN throw an exception ", async () => {
+    // Given
+    mockSendMessageViaTopic.mockImplementation(async () => {
+      throw anError;
+    });
+    mockSendMessageViaQueue.mockImplementation(async () => {
+      throw anError;
+    });
+    const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedService,
+      trackerAdapter,
+      emptyEnricher,
+      mainAdapter,
+      fallbackAdapter
+    );
+    // When
+    const publishOrThrow = expect(processorAdapter.process(documents)());
+    // Then
+    await publishOrThrow.rejects.toThrow();
   });
-  mockSendMessageViaQueue.mockImplementation(async () => {
-    throw anError;
-  });
-  const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-  const processorAdapter = getAnalyticsProcessorForDocuments(
-    RetrievedService,
-    trackerAdapter,
-    mainAdapter,
-    fallbackAdapter
-  );
-  // When
-  const publishOrThrow = expect(processorAdapter.process(documents)());
-  // Then
-  await publishOrThrow.rejects.toThrow();
 });
