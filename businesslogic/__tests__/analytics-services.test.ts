@@ -6,6 +6,7 @@ import { QueueClient } from "@azure/storage-queue";
 import * as KA from "../../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../../outbound/adapter/tracker-outbound-publisher";
+import * as EEA from "../../outbound/adapter/empty-outbound-enricher";
 import { TelemetryClient } from "applicationinsights";
 import {
   NonEmptyString,
@@ -17,12 +18,13 @@ import { SeverityLevel } from "../../outbound/port/outbound-tracker";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { identity } from "lodash";
 import { ValidationError } from "io-ts";
-import { getAnalyticsProcessorForService } from "../analytics-services";
+import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
 import {
   RetrievedService,
   toAuthorizedCIDRs
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
+import { OutboundEnricher } from "../../outbound/port/outbound-enricher";
 
 const aTopic = "a-topic";
 const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
@@ -97,6 +99,7 @@ const fallbackAdapter = QA.create(mockQueueClient) as OutboundPublisher<
   RetrievedService
 >;
 const trackerAdapter = TA.create(trackerMock);
+const emptyEnricher: OutboundEnricher<RetrievedService> = EEA.create();
 
 describe("publish", () => {
   beforeEach(() => jest.clearAllMocks());
@@ -104,8 +107,10 @@ describe("publish", () => {
   it("GIVEN a valid list of services, WHEN processing the list, THEN publish it to the topic", async () => {
     // Given
     const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-    const processorAdapter = getAnalyticsProcessorForService(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedService,
       trackerAdapter,
+      emptyEnricher,
       mainAdapter,
       fallbackAdapter
     );
@@ -126,8 +131,10 @@ describe("publish", () => {
   it("GIVEN a not valid list of services, WHEN processing the list, THEN track the exception", async () => {
     // Given
     const documents = [{ name: "1" }, { name: "2" }];
-    const processorAdapter = getAnalyticsProcessorForService(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedService,
       trackerAdapter,
+      emptyEnricher,
       mainAdapter,
       fallbackAdapter
     );
@@ -163,8 +170,10 @@ describe("publish", () => {
       ...aRetrievedService,
       version: i + 1
     }));
-    const processorAdapter = getAnalyticsProcessorForService(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedService,
       trackerAdapter,
+      emptyEnricher,
       mainAdapter,
       fallbackAdapter
     );
@@ -188,8 +197,10 @@ describe("publish", () => {
       throw anError;
     });
     const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-    const processorAdapter = getAnalyticsProcessorForService(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedService,
       trackerAdapter,
+      emptyEnricher,
       mainAdapter,
       fallbackAdapter
     );
@@ -206,24 +217,26 @@ describe("publish", () => {
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockTrackException).toHaveBeenCalledTimes(0);
   });
-});
 
-it("GIVEN a valid list of services and both a not working Kafka Producer Client and a not working Queue Storage Client, WHEN processing the list, THEN throw an exception ", async () => {
-  // Given
-  mockSendMessageViaTopic.mockImplementation(async () => {
-    throw anError;
+  it("GIVEN a valid list of services and both a not working Kafka Producer Client and a not working Queue Storage Client, WHEN processing the list, THEN throw an exception ", async () => {
+    // Given
+    mockSendMessageViaTopic.mockImplementation(async () => {
+      throw anError;
+    });
+    mockSendMessageViaQueue.mockImplementation(async () => {
+      throw anError;
+    });
+    const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedService,
+      trackerAdapter,
+      emptyEnricher,
+      mainAdapter,
+      fallbackAdapter
+    );
+    // When
+    const publishOrThrow = expect(processorAdapter.process(documents)());
+    // Then
+    await publishOrThrow.rejects.toThrow();
   });
-  mockSendMessageViaQueue.mockImplementation(async () => {
-    throw anError;
-  });
-  const documents = [aRetrievedService, { ...aRetrievedService, version: 2 }];
-  const processorAdapter = getAnalyticsProcessorForService(
-    trackerAdapter,
-    mainAdapter,
-    fallbackAdapter
-  );
-  // When
-  const publishOrThrow = expect(processorAdapter.process(documents)());
-  // Then
-  await publishOrThrow.rejects.toThrow();
 });
