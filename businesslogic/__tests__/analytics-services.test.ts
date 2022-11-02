@@ -25,7 +25,6 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 import { OutboundEnricher } from "../../outbound/port/outbound-enricher";
-import { OutboundFilterer } from "../../outbound/port/outboud-filterer";
 
 const aTopic = "a-topic";
 const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
