@@ -25,8 +25,8 @@ export const getAnalyticsProcessorForDocuments = <I>(
 ): InboundDocumentsProcessor => ({
   process: flow(
     RA.map(decoder.decode),
-    serviceOrErrors =>
-      TT.both(RA.lefts(serviceOrErrors), RA.rights(serviceOrErrors)),
+    documentsOrErrors =>
+      TT.both(RA.lefts(documentsOrErrors), RA.rights(documentsOrErrors)),
     TT.mapLeft(
       flow(
         RA.map(
