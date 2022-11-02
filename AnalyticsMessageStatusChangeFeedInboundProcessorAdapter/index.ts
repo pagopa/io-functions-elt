@@ -13,7 +13,7 @@ import * as PF from "../outbound/adapter/predicate-outbound-filterer";
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
-import { OutboundFilterer } from "../outbound/port/outboud-filterer";
+import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 
 const config = getConfigOrThrow();
 

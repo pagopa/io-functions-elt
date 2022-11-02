@@ -23,7 +23,7 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { identity } from "lodash";
 import { ValidationError } from "io-ts";
 import { OutboundEnricher } from "../../outbound/port/outbound-enricher";
-import { OutboundFilterer } from "../../outbound/port/outboud-filterer";
+import { OutboundFilterer } from "../../outbound/port/outbound-filterer";
 
 const aTopic = "a-topic";
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
