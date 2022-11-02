@@ -9,9 +9,11 @@ import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import * as EEA from "../outbound/adapter/empty-outbound-enricher";
+import * as PF from "../outbound/adapter/predicate-outbound-filterer";
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
+import { OutboundFilterer } from "../outbound/port/outboud-filterer";
 
 const config = getConfigOrThrow();
 
@@ -41,6 +43,12 @@ const telemetryAdapter = TA.create(
   TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
 );
 
+const messageStatusFilterer: OutboundFilterer<RetrievedMessageStatus> = PF.create(
+  retrievedMessageStatus =>
+    !config.INTERNAL_TEST_FISCAL_CODES.includes(
+      retrievedMessageStatus.fiscalCode
+    )
+);
 const emptyEnricherAdapter: OutboundEnricher<RetrievedMessageStatus> = EEA.create();
 
 const run = (
@@ -52,7 +60,8 @@ const run = (
     telemetryAdapter,
     emptyEnricherAdapter,
     messageStatusOnKafkaAdapter,
-    messageStatusOnQueueAdapter
+    messageStatusOnQueueAdapter,
+    messageStatusFilterer
   ).process(documents)();
 
 export default run;

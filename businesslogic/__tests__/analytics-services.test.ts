@@ -7,6 +7,7 @@ import * as KA from "../../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../../outbound/adapter/tracker-outbound-publisher";
 import * as EEA from "../../outbound/adapter/empty-outbound-enricher";
+import * as DOF from "../../outbound/adapter/dummy-outbound-filterer";
 import { TelemetryClient } from "applicationinsights";
 import {
   NonEmptyString,
@@ -25,6 +26,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 import { OutboundEnricher } from "../../outbound/port/outbound-enricher";
+import { OutboundFilterer } from "../../outbound/port/outboud-filterer";
 
 const aTopic = "a-topic";
 const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
@@ -101,6 +103,8 @@ const fallbackAdapter = QA.create(mockQueueClient) as OutboundPublisher<
 const trackerAdapter = TA.create(trackerMock);
 const emptyEnricher: OutboundEnricher<RetrievedService> = EEA.create();
 
+const dummyFilterer: OutboundFilterer<RetrievedService> = DOF.create();
+
 describe("publish", () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -112,7 +116,8 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter
+      fallbackAdapter,
+      dummyFilterer
     );
     // When
     await processorAdapter.process(documents)();
@@ -136,7 +141,8 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter
+      fallbackAdapter,
+      dummyFilterer
     );
     // When
     await processorAdapter.process(documents)();
@@ -175,7 +181,8 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter
+      fallbackAdapter,
+      dummyFilterer
     );
     // When
     await processorAdapter.process(documents)();
@@ -202,7 +209,8 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter
+      fallbackAdapter,
+      dummyFilterer
     );
     // When
     await processorAdapter.process(documents)();
@@ -232,7 +240,8 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter
+      fallbackAdapter,
+      dummyFilterer
     );
     // When
     const publishOrThrow = expect(processorAdapter.process(documents)());

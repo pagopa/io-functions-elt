@@ -15,7 +15,7 @@ import { set } from "lodash";
 
 import { CommaSeparatedListOf } from "@pagopa/ts-commons/lib/comma-separated-list";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 
@@ -163,6 +163,8 @@ export const IDecodableConfig = t.interface({
     CommaSeparatedListOf(NonEmptyString),
     []
   ),
+
+  INTERNAL_TEST_FISCAL_CODES: withDefault(CommaSeparatedListOf(FiscalCode), []),
 
   isProduction: t.boolean
 });

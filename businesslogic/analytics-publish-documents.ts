@@ -15,13 +15,17 @@ import {
 import { OutboundTracker } from "../outbound/port/outbound-tracker";
 import { InboundDocumentsProcessor } from "../inbound/port/inbound-documents-processor";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
+import { OutboundFilterer } from "../outbound/port/outboud-filterer";
+import * as DOF from "../outbound/adapter/dummy-outbound-filterer";
 
 export const getAnalyticsProcessorForDocuments = <I>(
   decoder: t.Decoder<unknown, I>,
   tracker: OutboundTracker,
   contentEnricher: OutboundEnricher<I>,
   mainPublisher: OutboundPublisher<I>,
-  fallbackPublisher: OutboundPublisher<I>
+  fallbackPublisher: OutboundPublisher<I>,
+  dataFilterer: OutboundFilterer<I> = DOF.create()
+  // eslint-disable-next-line max-params
 ): InboundDocumentsProcessor => ({
   process: flow(
     RA.map(decoder.decode),
@@ -42,6 +46,7 @@ export const getAnalyticsProcessorForDocuments = <I>(
     ),
     TT.map(
       flow(
+        dataFilterer.filterArray,
         // Enrich and publish documents with the main publisher, then return the errors
         contentEnricher.enrichs,
         T.chain(enrichResults =>
