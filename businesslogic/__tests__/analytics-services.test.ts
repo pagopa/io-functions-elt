@@ -103,8 +103,6 @@ const fallbackAdapter = QA.create(mockQueueClient) as OutboundPublisher<
 const trackerAdapter = TA.create(trackerMock);
 const emptyEnricher: OutboundEnricher<RetrievedService> = EEA.create();
 
-const dummyFilterer: OutboundFilterer<RetrievedService> = DOF.create();
-
 describe("publish", () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -116,8 +114,7 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter,
-      dummyFilterer
+      fallbackAdapter
     );
     // When
     await processorAdapter.process(documents)();
@@ -141,8 +138,7 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter,
-      dummyFilterer
+      fallbackAdapter
     );
     // When
     await processorAdapter.process(documents)();
@@ -181,8 +177,7 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter,
-      dummyFilterer
+      fallbackAdapter
     );
     // When
     await processorAdapter.process(documents)();
@@ -209,8 +204,7 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter,
-      dummyFilterer
+      fallbackAdapter
     );
     // When
     await processorAdapter.process(documents)();
@@ -240,8 +234,7 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter,
-      dummyFilterer
+      fallbackAdapter
     );
     // When
     const publishOrThrow = expect(processorAdapter.process(documents)());
