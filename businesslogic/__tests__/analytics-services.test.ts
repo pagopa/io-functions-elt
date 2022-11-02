@@ -7,7 +7,6 @@ import * as KA from "../../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../../outbound/adapter/tracker-outbound-publisher";
 import * as EEA from "../../outbound/adapter/empty-outbound-enricher";
-import * as DOF from "../../outbound/adapter/dummy-outbound-filterer";
 import { TelemetryClient } from "applicationinsights";
 import {
   NonEmptyString,
