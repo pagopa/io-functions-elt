@@ -60,7 +60,8 @@ const adapter = EA.create(
   {
     getContentFromBlob: mockGetContentFromBlob
   } as any,
-  {} as any
+  {} as any,
+  500
 );
 const useWorkingGetContentFromBlob = () =>
   mockGetContentFromBlob.mockImplementation(() =>
