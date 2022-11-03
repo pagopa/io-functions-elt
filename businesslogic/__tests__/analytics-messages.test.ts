@@ -112,7 +112,8 @@ const enrichAdapter = EA.create(
   {
     getContentFromBlob: mockGetContentFromBlob
   } as any,
-  {} as any
+  {} as any,
+  500
 );
 
 describe("publish", () => {
