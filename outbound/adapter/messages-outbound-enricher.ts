@@ -11,12 +11,10 @@ import * as E from "fp-ts/Either";
 import { OutboundEnricher } from "../port/outbound-enricher";
 import { failure, success } from "../port/outbound-publisher";
 
-const DEFAULT_THROTTLING = 500;
-
 export const create = (
   messageModel: MessageModel,
   blobService: BlobService,
-  maxParallelThrottling: number = DEFAULT_THROTTLING
+  maxParallelThrottling: number
 ): OutboundEnricher<RetrievedMessage> => {
   const enrichASingleMessage = (
     message: RetrievedMessage

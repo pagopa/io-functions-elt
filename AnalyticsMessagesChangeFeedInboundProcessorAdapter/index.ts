@@ -62,7 +62,8 @@ const messageEnricherAdapter = MA.create(
     cosmosdbInstance.container(MESSAGE_COLLECTION_NAME),
     "message-content" as NonEmptyString
   ),
-  createBlobService(config.MessageContentPrimaryStorageConnection)
+  createBlobService(config.MessageContentPrimaryStorageConnection),
+  config.ENRICH_MESSAGE_THROTTLING
 );
 
 const retrievedMessageOnQueueAdapter: OutboundPublisher<RetrievedMessage> = QA.create(
