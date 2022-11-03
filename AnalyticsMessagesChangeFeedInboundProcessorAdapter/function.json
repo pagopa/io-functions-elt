@@ -20,5 +20,5 @@
     "minimumInterval": "00:00:05",
     "maximumInterval": "00:01:00"
   },
-  "scriptFile": "../dist/AnalyticsMessageChangeFeedInboundProcessorAdapter/index.js"
+  "scriptFile": "../dist/AnalyticsMessagesChangeFeedInboundProcessorAdapter/index.js"
 }

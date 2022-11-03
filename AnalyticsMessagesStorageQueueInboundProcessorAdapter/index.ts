@@ -82,6 +82,6 @@ const run = (
     messageEnricherAdapter,
     retrievedMessagesOnKafkaAdapter,
     throwAdapter
-  ).process(documents)();
+  ).process([documents])();
 
 export default run;
