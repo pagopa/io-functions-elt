@@ -9,6 +9,7 @@ import * as KA from "../../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../../outbound/adapter/tracker-outbound-publisher";
 import * as EA from "../../outbound/adapter/messages-outbound-enricher";
+import * as PF from "../../outbound/adapter/predicate-outbound-filterer";
 import { TelemetryClient } from "applicationinsights";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { OutboundPublisher } from "../../outbound/port/outbound-publisher";
@@ -28,9 +29,11 @@ import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/defi
 import { MessageBodyMarkdown } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageBodyMarkdown";
 import { MessageSubject } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageSubject";
 import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
+import { OutboundFilterer } from "../../outbound/port/outbound-filterer";
 
 const aTopic = "a-topic";
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
+const aTestFiscalCode = "AAAAAA00A00A011T" as FiscalCode;
 const aCosmosMetadata = {
   _etag: "_etag",
   _rid: "_rid",
@@ -116,6 +119,12 @@ const enrichAdapter = EA.create(
   500
 );
 
+const aMessagePredicate = (retrievedMessage: RetrievedMessage) =>
+  aTestFiscalCode !== retrievedMessage.fiscalCode;
+const messageFilterer: OutboundFilterer<RetrievedMessage> = PF.create(
+  aMessagePredicate
+);
+
 describe("publish", () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -187,6 +196,42 @@ describe("publish", () => {
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockSendMessageViaTopic).toHaveBeenCalledWith({
       messages: documents.map(document => ({
+        value: JSON.stringify({
+          ...document,
+          content: aMessageContent,
+          kind: "IRetrievedMessageWithContent"
+        })
+      })),
+      topic: aTopic
+    });
+    expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(0);
+    expect(mockTrackException).toHaveBeenCalledTimes(0);
+  });
+
+  it("GIVEN a valid list of messages, WHEN processing the list, THEN publish only elements NOT related to Test Fiscal Codes to the topic", async () => {
+    // Given
+    const documents = [
+      aRetrievedMessageWithoutContent,
+      {
+        ...aRetrievedMessageWithoutContent,
+        id: "another-id" as NonEmptyString
+      },
+      { ...aRetrievedMessageWithoutContent, fiscalCode: aTestFiscalCode }
+    ];
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessage,
+      trackerAdapter,
+      enrichAdapter,
+      mainAdapter,
+      fallbackAdapter,
+      messageFilterer
+    );
+    // When
+    await processorAdapter.process(documents)();
+    // Then
+    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
+    expect(mockSendMessageViaTopic).toHaveBeenCalledWith({
+      messages: documents.filter(aMessagePredicate).map(document => ({
         value: JSON.stringify({
           ...document,
           content: aMessageContent,
