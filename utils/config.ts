@@ -16,7 +16,10 @@ import { set } from "lodash";
 import { CommaSeparatedListOf } from "@pagopa/ts-commons/lib/comma-separated-list";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
+import {
+  IntegerFromString,
+  NonNegativeInteger
+} from "@pagopa/ts-commons/lib/numbers";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 
 import { KafkaProducerCompactConfig } from "./IoKafkaTypes";
@@ -155,6 +158,12 @@ export const IDecodableConfig = t.interface({
   INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
   SERVICES_FAILURE_QUEUE_NAME: NonEmptyString,
   MESSAGE_STATUS_FAILURE_QUEUE_NAME: NonEmptyString,
+  MESSAGES_FAILURE_QUEUE_NAME: NonEmptyString,
+
+  ENRICH_MESSAGE_THROTTLING: withDefault(
+    NonNegativeInteger,
+    500 as NonNegativeInteger
+  ),
 
   PN_SERVICE_ID: NonEmptyString,
 
