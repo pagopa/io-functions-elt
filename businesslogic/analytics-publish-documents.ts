@@ -16,7 +16,7 @@ import { OutboundTracker } from "../outbound/port/outbound-tracker";
 import { InboundDocumentsProcessor } from "../inbound/port/inbound-documents-processor";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
-import * as DOF from "../outbound/adapter/dummy-outbound-filterer";
+import * as DOF from "../outbound/adapter/allow-all-outbound-filterer";
 
 export const getAnalyticsProcessorForDocuments = <I>(
   decoder: t.Decoder<unknown, I>,
