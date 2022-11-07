@@ -16,6 +16,7 @@ import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import * as MA from "../outbound/adapter/messages-outbound-enricher";
+import * as PF from "../outbound/adapter/predicate-outbound-filterer";
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import {
@@ -24,6 +25,7 @@ import {
 } from "../utils/formatter/messagesAvroFormatter";
 import { MessageContentType } from "../generated/avro/dto/MessageContentTypeEnum";
 import { cosmosdbInstance } from "../utils/cosmosdb";
+import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 
 const config = getConfigOrThrow();
 
@@ -77,6 +79,11 @@ const telemetryAdapter = TA.create(
   TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
 );
 
+const messageFilterer: OutboundFilterer<RetrievedMessage> = PF.create(
+  retrievedMessage =>
+    !config.INTERNAL_TEST_FISCAL_CODES.includes(retrievedMessage.fiscalCode)
+);
+
 const run = (
   _context: Context,
   documents: ReadonlyArray<unknown>
@@ -86,7 +93,8 @@ const run = (
     telemetryAdapter,
     messageEnricherAdapter,
     retrievedMessagesOnKafkaAdapter,
-    retrievedMessageOnQueueAdapter
+    retrievedMessageOnQueueAdapter,
+    messageFilterer
   ).process(documents)();
 
 export default run;

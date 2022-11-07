@@ -8,12 +8,13 @@ import * as KA from "../../outbound/adapter/kafka-outbound-publisher";
 import * as QA from "../../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../../outbound/adapter/tracker-outbound-publisher";
 import * as EEA from "../../outbound/adapter/empty-outbound-enricher";
+import * as PF from "../../outbound/adapter/predicate-outbound-filterer";
 import { TelemetryClient } from "applicationinsights";
 import {
   MessageStatus,
   RetrievedMessageStatus
 } from "@pagopa/io-functions-commons/dist/src/models/message_status";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { MessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageStatusValue";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { OutboundPublisher } from "../../outbound/port/outbound-publisher";
@@ -22,10 +23,14 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { identity } from "lodash";
 import { ValidationError } from "io-ts";
 import { OutboundEnricher } from "../../outbound/port/outbound-enricher";
+import { OutboundFilterer } from "../../outbound/port/outbound-filterer";
 
 const aTopic = "a-topic";
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
+const aFiscalCode = "AAAAAA00A00A011D" as FiscalCode;
+const aTestFiscalCode = "AAAAAA00A00A011T" as FiscalCode;
 const aMessageStatus: MessageStatus = {
+  fiscalCode: aFiscalCode,
   messageId: aMessageId,
   status: MessageStatusValueEnum.ACCEPTED,
   updatedAt: new Date("2022-09-29T15:41:34.826Z"),
@@ -86,6 +91,13 @@ const fallbackAdapter = QA.create(mockQueueClient) as OutboundPublisher<
 const trackerAdapter = TA.create(trackerMock);
 const emptyEnricher: OutboundEnricher<RetrievedMessageStatus> = EEA.create();
 
+const aMessageStatusPredicate = (
+  retrievedMessageStatus: RetrievedMessageStatus
+) => aTestFiscalCode !== retrievedMessageStatus.fiscalCode;
+const messageStatusFilterer: OutboundFilterer<RetrievedMessageStatus> = PF.create(
+  aMessageStatusPredicate
+);
+
 describe("publish", () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -100,7 +112,8 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter
+      fallbackAdapter,
+      messageStatusFilterer
     );
     // When
     await processAdapter.process(documents)();
@@ -108,6 +121,38 @@ describe("publish", () => {
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockSendMessageViaTopic).toHaveBeenCalledWith({
       messages: documents.map(document => ({
+        value: JSON.stringify(document)
+      })),
+      topic: aTopic
+    });
+    expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(0);
+    expect(mockTrackException).toHaveBeenCalledTimes(0);
+  });
+
+  it("GIVEN a valid list of message status, WHEN processing the list, THEN publish only elements NOT related to Test Fiscal Codes to the topic", async () => {
+    // Given
+    const documents = [
+      aRetrievedMessageStatus,
+      {
+        ...aRetrievedMessageStatus,
+        fiscalCode: aTestFiscalCode,
+        version: 2
+      } as RetrievedMessageStatus
+    ];
+    const processAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessageStatus,
+      trackerAdapter,
+      emptyEnricher,
+      mainAdapter,
+      fallbackAdapter,
+      messageStatusFilterer
+    );
+    // When
+    await processAdapter.process(documents)();
+    // Then
+    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
+    expect(mockSendMessageViaTopic).toHaveBeenCalledWith({
+      messages: documents.filter(aMessageStatusPredicate).map(document => ({
         value: JSON.stringify(document)
       })),
       topic: aTopic
@@ -124,7 +169,8 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter
+      fallbackAdapter,
+      messageStatusFilterer
     );
     // When
     await processAdapter.process(documents)();
@@ -163,7 +209,8 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter
+      fallbackAdapter,
+      messageStatusFilterer
     );
     // When
     await processorAdapter.process(documents)();
@@ -193,7 +240,8 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter
+      fallbackAdapter,
+      messageStatusFilterer
     );
     // When
     await processAdapter.process(documents)();
@@ -226,7 +274,8 @@ describe("publish", () => {
       trackerAdapter,
       emptyEnricher,
       mainAdapter,
-      fallbackAdapter
+      fallbackAdapter,
+      messageStatusFilterer
     );
     // When
     const publishOrThrow = expect(processAdapter.process(documents)());
