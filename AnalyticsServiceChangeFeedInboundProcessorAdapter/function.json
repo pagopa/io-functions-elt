@@ -8,10 +8,10 @@
       "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
       "databaseName": "%COSMOSDB_NAME%",
       "collectionName": "services",
-      "leaseCollectionName": "leases-services-2",
+      "leaseCollectionPrefix": "%SERVICES_LEASES_PREFIX%-",
+      "leaseCollectionName": "pdnd-leases",
       "createLeaseCollectionIfNotExists": true,
       "startFromBeginning": true
-
     }
   ],
   "retry": {
