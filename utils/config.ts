@@ -175,6 +175,8 @@ export const IDecodableConfig = t.interface({
 
   INTERNAL_TEST_FISCAL_CODES: withDefault(CommaSeparatedListOf(FiscalCode), []),
 
+  SERVICES_LEASES_PREFIX: NonEmptyString,
+
   isProduction: t.boolean
 });
 
