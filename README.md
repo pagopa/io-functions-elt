@@ -15,18 +15,18 @@ Install the [Azure Functions Core Tools](https://github.com/Azure/azure-function
 
 Install the dependencies:
 
-```
+```bash
 $ yarn install
 ```
 
 Create a file `local.settings.json` in your cloned repo by running:
 
-```console
-cp ./local.settings.json.example ./local.settings.json
+```bash
+$ cp ./local.settings.json.example ./local.settings.json
 ```
 
 ### Starting the functions runtime
 
-```
+```bash
 $ yarn start
 ```
