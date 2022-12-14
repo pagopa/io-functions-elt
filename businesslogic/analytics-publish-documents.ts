@@ -58,27 +58,29 @@ export const getAnalyticsProcessorForDocuments = <I>(
             RA.map(success => success.document),
             mainPublisher.publishes,
             T.map(RA.concat(enrichResults)),
-            T.map(RA.filter(isFailure))
+            T.map(RA.filter(isFailure)),
+            T.map(
+              RA.map(failure =>
+                pipe(
+                  enablePublishTracking,
+                  B.fold(constVoid, () =>
+                    tracker.trackEvent({
+                      name: "elt.publishing.error",
+                      properties: {
+                        error: failure.error
+                      },
+                      tagOverrides: { samplingEnabled: "false" }
+                    })
+                  ),
+                  () => failure
+                )
+              )
+            )
           )
         ),
         // Publish documents in error with the fallback publisher: if the fallback fails, throw an error
         T.chain(
           flow(
-            RA.map(failure =>
-              pipe(
-                enablePublishTracking,
-                B.fold(constVoid, () =>
-                  tracker.trackEvent({
-                    name: "elt.publishing.error",
-                    properties: {
-                      error: failure.error
-                    },
-                    tagOverrides: { samplingEnabled: "false" }
-                  })
-                ),
-                () => failure
-              )
-            ),
             RA.map(failed => failed.document),
             fallbackPublisher.publishes,
             T.map(RA.filter(isFailure)),
