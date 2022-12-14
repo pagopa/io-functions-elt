@@ -67,7 +67,15 @@ export const getAnalyticsProcessorForDocuments = <I>(
             RA.map(failure =>
               pipe(
                 enablePublishTracking,
-                B.fold(constVoid, () => tracker.trackError(failure.error)),
+                B.fold(constVoid, () =>
+                  tracker.trackEvent({
+                    name: "elt.publishing.error",
+                    properties: {
+                      error: failure.error
+                    },
+                    tagOverrides: { samplingEnabled: "false" }
+                  })
+                ),
                 () => failure
               )
             ),

@@ -40,5 +40,12 @@ export const create = (aiClient: TelemetryClient): OutboundTracker => ({
         )
       )
     );
+  },
+  trackEvent: (evtTelemetry: ai.Contracts.EventTelemetry): void => {
+    pipe(
+      aiClient,
+      O.fromNullable,
+      O.map(client => client.trackEvent(evtTelemetry))
+    );
   }
 });
