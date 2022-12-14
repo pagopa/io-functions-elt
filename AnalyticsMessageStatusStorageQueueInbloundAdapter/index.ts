@@ -11,6 +11,7 @@ import * as EEA from "../outbound/adapter/empty-outbound-enricher";
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
+import * as DOF from "../outbound/adapter/allow-all-outbound-filterer";
 
 const config = getConfigOrThrow();
 
@@ -43,7 +44,9 @@ const run = (_context: Context, document: unknown): Promise<void> =>
     telemetryAdapter,
     emptyEnricherAdapter,
     messageStatusOnKafkaAdapter,
-    throwAdapter
+    throwAdapter,
+    DOF.create(),
+    true
   ).process([document])();
 
 export default run;
