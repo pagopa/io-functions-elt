@@ -12,7 +12,7 @@ import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow } from "../utils/config";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
-import * as EA from "../outbound/adapter/throw-outbound-publisher";
+import * as EA from "../outbound/adapter/empty-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import * as MA from "../outbound/adapter/messages-outbound-enricher";
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";

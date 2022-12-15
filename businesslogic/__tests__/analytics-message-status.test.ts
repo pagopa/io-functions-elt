@@ -213,7 +213,9 @@ describe("publish", () => {
       messageStatusFilterer
     );
     // When
-    await processorAdapter.process(documents)();
+    await expect(processorAdapter.process(documents)()).rejects.toEqual(
+      expect.anything()
+    );
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(500);
     RA.mapWithIndex((i, document) =>
@@ -235,7 +237,7 @@ describe("publish", () => {
       aRetrievedMessageStatus,
       { ...aRetrievedMessageStatus, version: 2 }
     ];
-    const processAdapter = getAnalyticsProcessorForDocuments(
+    const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedMessageStatus,
       trackerAdapter,
       emptyEnricher,
@@ -244,7 +246,9 @@ describe("publish", () => {
       messageStatusFilterer
     );
     // When
-    await processAdapter.process(documents)();
+    await expect(processorAdapter.process(documents)()).rejects.toEqual(
+      expect.anything()
+    );
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(2);
     RA.mapWithIndex((i, document) =>

@@ -5,7 +5,7 @@ import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow, withTopic } from "../utils/config";
 import { messageStatusAvroFormatter } from "../utils/formatter/messageStatusAvroFormatter";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
-import * as EA from "../outbound/adapter/throw-outbound-publisher";
+import * as EA from "../outbound/adapter/empty-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import * as EEA from "../outbound/adapter/empty-outbound-enricher";
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
