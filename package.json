@@ -71,7 +71,7 @@
     "kafka-node": "^5.0.0",
     "kafkajs": "^1.15.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.7",
     "winston": "^3.2.1"
   },
   "resolutions": {
