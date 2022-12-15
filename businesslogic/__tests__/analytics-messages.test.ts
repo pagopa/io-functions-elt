@@ -140,9 +140,7 @@ describe("publish", () => {
       fallbackAdapter
     );
     // When
-    await expect(processorAdapter.process(documents)()).rejects.toEqual(
-      expect.anything()
-    );
+    await processorAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(1);
     expect(mockSendMessageViaQueue).toHaveBeenNthCalledWith(
@@ -296,9 +294,7 @@ describe("publish", () => {
       fallbackAdapter
     );
     // When
-    await expect(processorAdapter.process(documents)()).rejects.toEqual(
-      expect.anything()
-    );
+    await processorAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(500);
     pipe(
@@ -337,9 +333,7 @@ describe("publish", () => {
       fallbackAdapter
     );
     // When
-    await expect(processorAdapter.process(documents)()).rejects.toEqual(
-      expect.anything()
-    );
+    await processorAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(2);
     pipe(

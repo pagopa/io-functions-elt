@@ -213,9 +213,7 @@ describe("publish", () => {
       messageStatusFilterer
     );
     // When
-    await expect(processorAdapter.process(documents)()).rejects.toEqual(
-      expect.anything()
-    );
+    await processorAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(500);
     RA.mapWithIndex((i, document) =>
@@ -246,9 +244,7 @@ describe("publish", () => {
       messageStatusFilterer
     );
     // When
-    await expect(processorAdapter.process(documents)()).rejects.toEqual(
-      expect.anything()
-    );
+    await processorAdapter.process(documents)();
     // Then
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(2);
     RA.mapWithIndex((i, document) =>

@@ -66,14 +66,18 @@ export const getAnalyticsProcessorForDocuments = <I>(
             RA.map(failed => failed.document),
             fallbackPublisher.publishes,
             T.map(RA.filter(isFailure)),
-            T.map(
-              flow(
-                RA.concat(faileds),
-                RA.reduce(
-                  "",
-                  (message, failure) => `${message}|${failure.error.message}`
-                )
-              )
+            T.map(ffs =>
+              ffs.length === 0
+                ? ""
+                : pipe(
+                    ffs,
+                    RA.concat(faileds),
+                    RA.reduce(
+                      "",
+                      (message, failure) =>
+                        `${message}|${failure.error.message}`
+                    )
+                  )
             ),
             T.map(
               flow(
