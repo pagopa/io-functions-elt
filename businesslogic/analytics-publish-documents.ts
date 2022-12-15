@@ -60,15 +60,19 @@ export const getAnalyticsProcessorForDocuments = <I>(
           )
         ),
         // Publish documents in error with the fallback publisher: if the fallback fails, throw an error
-        T.chain(
-          flow(
+        T.chain(faileds =>
+          pipe(
+            faileds,
             RA.map(failed => failed.document),
             fallbackPublisher.publishes,
             T.map(RA.filter(isFailure)),
             T.map(
-              RA.reduce(
-                "",
-                (message, failure) => `${message}|${failure.error.message}`
+              flow(
+                RA.concat(faileds),
+                RA.reduce(
+                  "",
+                  (message, failure) => `${message}|${failure.error.message}`
+                )
               )
             ),
             T.map(
