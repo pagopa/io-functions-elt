@@ -1,6 +1,8 @@
 import { Context } from "@azure/functions";
 import { QueueClient } from "@azure/storage-queue";
 import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
+import * as winston from "winston";
+import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow } from "../utils/config";
@@ -40,15 +42,21 @@ const telemetryAdapter = TA.create(
 const emptyEnricherAdapter: OutboundEnricher<RetrievedService> = EEA.create();
 
 const run = (
-  _context: Context,
+  context: Context,
   documents: ReadonlyArray<unknown>
-): Promise<void> =>
-  getAnalyticsProcessorForDocuments(
+): Promise<void> => {
+  const contextTransport = new AzureContextTransport(() => context.log, {
+    level: "debug"
+  });
+  winston.add(contextTransport);
+
+  return getAnalyticsProcessorForDocuments(
     RetrievedService,
     telemetryAdapter,
     emptyEnricherAdapter,
     retrievedServiceOnKafkaAdapter,
     retrievedServiceOnQueueAdapter
   ).process(documents)();
+};
 
 export default run;
