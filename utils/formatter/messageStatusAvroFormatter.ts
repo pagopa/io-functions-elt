@@ -1,12 +1,12 @@
 /* eslint-disable sort-keys */
 import { RetrievedMessageStatus } from "@pagopa/io-functions-commons/dist/src/models/message_status";
 import * as avro from "avsc";
+import { NotRejectedMessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotRejectedMessageStatusValue";
+import { RejectedMessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/RejectedMessageStatusValue";
 import { MessageFormatter } from "../kafka/KafkaTypes";
 import { messageStatus } from "../../generated/avro/dto/messageStatus";
 import { MessageStatusCrudOperation as CrudOperation } from "../../generated/avro/dto/MessageStatusCrudOperationEnum";
 import { MessageStatus as AvroMessageStatus } from "../../generated/avro/dto/MessageStatusEnum";
-import { NotRejectedMessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotRejectedMessageStatusValue";
-import { RejectedMessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/RejectedMessageStatusValue";
 
 const formatStatus = (
   status: NotRejectedMessageStatusValueEnum | RejectedMessageStatusValueEnum
