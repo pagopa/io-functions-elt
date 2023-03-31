@@ -15,7 +15,7 @@ import {
   RetrievedMessageStatus
 } from "@pagopa/io-functions-commons/dist/src/models/message_status";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { MessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageStatusValue";
+import { NotRejectedMessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotRejectedMessageStatusValue";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { OutboundPublisher } from "../../outbound/port/outbound-publisher";
 import { SeverityLevel } from "../../outbound/port/outbound-tracker";
@@ -32,7 +32,7 @@ const aTestFiscalCode = "AAAAAA00A00A011T" as FiscalCode;
 const aMessageStatus: MessageStatus = {
   fiscalCode: aFiscalCode,
   messageId: aMessageId,
-  status: MessageStatusValueEnum.ACCEPTED,
+  status: NotRejectedMessageStatusValueEnum.ACCEPTED,
   updatedAt: new Date("2022-09-29T15:41:34.826Z"),
   isRead: false,
   isArchived: false
@@ -197,8 +197,15 @@ describe("publish", () => {
 
   it("GIVEN a valid list of over 500 message status and a Kafka Producer Client not working the first time, WHEN processing the list, THEN send only the first 500 (batch size) message status to the queue", async () => {
     // Given
-    mockSendMessageViaTopic.mockImplementationOnce(async () => {
-      throw anError;
+    // publish is called in parallel so we check the version of the first value to esure a throw with the first chunk
+    mockSendMessageViaTopic.mockImplementation(async i => {
+      if (JSON.parse(i.messages[0].value as any).version === 1) {
+        throw anError;
+      } else
+        return pipe(
+          i.messages,
+          RA.map(() => aKafkaResponse)
+        );
     });
     const documents = RA.makeBy(1000, i => ({
       ...aRetrievedMessageStatus,

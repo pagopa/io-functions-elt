@@ -279,8 +279,15 @@ describe("publish", () => {
 
   it("GIVEN a valid list of over 500 messages and a Kafka Producer Client not working the first time, WHEN processing the list, THEN send only the first 500 (batch size) messages to the queue", async () => {
     // Given
-    mockSendMessageViaTopic.mockImplementationOnce(async () => {
-      throw anError;
+    // publish is called in parallel so we check the id of the first value to esure a throw with the first chunk
+    mockSendMessageViaTopic.mockImplementation(async i => {
+      if (JSON.parse(i.messages[0].value as any).id === "another-id_0") {
+        throw anError;
+      } else
+        return pipe(
+          i.messages,
+          RA.map(() => aKafkaResponse)
+        );
     });
     const documents = RA.makeBy(1000, i => ({
       ...aRetrievedMessageWithoutContent,
