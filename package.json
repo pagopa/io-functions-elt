@@ -3,7 +3,7 @@
   "description": "Integration between IO data and PDND",
   "author": "IO team",
   "repository": "https://github.com/pagopa/io-functions-elt",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "license": "MIT",
   "scripts": {
     "prebuild": "shx rm -rf dist && yarn generate",
