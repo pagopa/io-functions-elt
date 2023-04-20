@@ -1,14 +1,16 @@
 /* eslint-disable sort-keys */
 import { RetrievedMessageStatus } from "@pagopa/io-functions-commons/dist/src/models/message_status";
 import * as avro from "avsc";
-import { MessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageStatusValue";
+import { NotRejectedMessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotRejectedMessageStatusValue";
+import { RejectedMessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/RejectedMessageStatusValue";
 import { MessageFormatter } from "../kafka/KafkaTypes";
 import { messageStatus } from "../../generated/avro/dto/messageStatus";
 import { MessageStatusCrudOperation as CrudOperation } from "../../generated/avro/dto/MessageStatusCrudOperationEnum";
 import { MessageStatus as AvroMessageStatus } from "../../generated/avro/dto/MessageStatusEnum";
 
-const formatStatus = (status: MessageStatusValueEnum): AvroMessageStatus =>
-  AvroMessageStatus[status];
+const formatStatus = (
+  status: NotRejectedMessageStatusValueEnum | RejectedMessageStatusValueEnum
+): AvroMessageStatus => AvroMessageStatus[status];
 
 export const buildAvroServiceObject = (
   retrievedMessageStatus: RetrievedMessageStatus
