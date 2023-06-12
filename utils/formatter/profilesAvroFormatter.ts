@@ -13,7 +13,7 @@ import { toBirthDate } from "../../utils/date";
 export const buildAvroServiceObject = (
   retrievedProfile: RetrievedProfileWithToken
 ): Omit<profiles, "schema" | "subject"> => ({
-  token: retrievedProfile.token,
+  token: retrievedProfile.token || "UNKNOWN",
   version: retrievedProfile.version,
   lastAppVersion: retrievedProfile.lastAppVersion || "UNKNOWN",
   monthOfBirth: pipe(

@@ -1,14 +1,11 @@
-import * as t from "io-ts";
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-export const HasFiscalCode = t.type({
-  fiscalCode: t.string
-});
-export type HasFiscalCode = t.TypeOf<typeof HasFiscalCode>;
+export type HasFiscalCode = {
+  readonly fiscalCode: string;
+};
 
-export const HasToken = t.type({
-  token: t.string
-});
-export type HasToken = t.TypeOf<typeof HasToken>;
+export type HasToken = {
+  readonly token: string | undefined;
+};
 
-export const HasFiscalCodeAndToken = t.intersection([HasFiscalCode, HasToken]);
-export type HasFiscalCodeAndToken = t.TypeOf<typeof HasFiscalCodeAndToken>;
+export type HasFiscalCodeAndToken = HasFiscalCode & HasToken;
