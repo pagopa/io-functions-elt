@@ -26,6 +26,7 @@ const fetchWithTimeout = toFetch(
 const fetchApi: typeof fetchWithTimeout = fetchWithTimeout;
 
 export const personalDataVaultClient = createClient<"api_key">({
+  basePath: "",
   baseUrl: personalDataVaultBaseUrl,
   fetchApi,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
