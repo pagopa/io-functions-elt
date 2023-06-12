@@ -182,6 +182,9 @@ export const IDecodableConfig = t.interface({
   PERSONAL_DATA_VAULT_BASE_URL: NonEmptyString,
   PERSONAL_DATA_VAULT_API_KEY: NonEmptyString,
 
+  PROFILES_TOPIC_CONNECTION_STRING: NonEmptyString,
+  PROFILES_TOPIC_NAME: NonEmptyString,
+
   isProduction: t.boolean
 });
 
@@ -199,18 +202,11 @@ type MessageStatusKafkaTopicConfig = t.TypeOf<
   typeof MessageStatusKafkaTopicConfig
 >;
 
-const ProfilesKafkaTopicConfig = t.type({
-  PROFILES_TOPIC_CONNECTION_STRING: NonEmptyString,
-  PROFILES_TOPIC_NAME: NonEmptyString
-});
-type ProfilesKafkaTopicConfig = t.TypeOf<typeof ProfilesKafkaTopicConfig>;
-
 export interface IParsableConfig {
   readonly targetKafka: KafkaProducerCompactConfig;
 
   readonly MessagesKafkaTopicConfig: MessagesKafkaTopicConfig;
   readonly messageStatusKafkaTopicConfig: MessageStatusKafkaTopicConfig;
-  readonly profilesKafkaTopicConfig: ProfilesKafkaTopicConfig;
 }
 
 export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
@@ -224,9 +220,6 @@ export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
     ),
     E.bind("messageStatusKafkaTopicConfig", () =>
       MessageStatusKafkaTopicConfig.decode(input)
-    ),
-    E.bind("profilesKafkaTopicConfig", () =>
-      ProfilesKafkaTopicConfig.decode(input)
     )
   );
 

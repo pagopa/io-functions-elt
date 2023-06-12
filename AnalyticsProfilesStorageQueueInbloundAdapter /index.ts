@@ -17,8 +17,8 @@ const config = getConfigOrThrow();
 
 const profilesTopic = {
   ...withTopic(
-    config.profilesKafkaTopicConfig.PROFILES_TOPIC_NAME,
-    config.profilesKafkaTopicConfig.PROFILES_TOPIC_CONNECTION_STRING
+    config.PROFILES_TOPIC_NAME,
+    config.PROFILES_TOPIC_CONNECTION_STRING
   )(config.targetKafka),
   messageFormatter: profilesAvroFormatter()
 };
