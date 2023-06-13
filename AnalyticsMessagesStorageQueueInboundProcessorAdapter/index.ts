@@ -23,6 +23,11 @@ import {
 } from "../utils/formatter/messagesAvroFormatter";
 import { MessageContentType } from "../generated/avro/dto/MessageContentTypeEnum";
 import { cosmosdbInstance } from "../utils/cosmosdb";
+import { personalDataVaultClient } from "../clients/personalDataValult";
+import { OutboundEnricher } from "../outbound/port/outbound-enricher";
+import { RetrievedMessageWithToken } from "../utils/types/retrievedMessageWithToken";
+import * as CAE from "../outbound/adapter/combine-outbound-enricher";
+import * as PDVEA from "../outbound/adapter/personaldatavault-outbound-enricher";
 
 const config = getConfigOrThrow();
 
@@ -66,6 +71,13 @@ const messageEnricherAdapter = MA.create(
   createBlobService(config.MessageContentPrimaryStorageConnection),
   config.ENRICH_MESSAGE_THROTTLING
 );
+const personalDataVaultEnricherAdapter: OutboundEnricher<RetrievedMessageWithToken> = PDVEA.create(
+  personalDataVaultClient
+);
+const messageEnricherWithTokenAdapater = CAE.create(
+  messageEnricherAdapter,
+  personalDataVaultEnricherAdapter
+);
 
 const throwAdapter: OutboundPublisher<RetrievedMessage> = EA.create();
 
@@ -80,7 +92,7 @@ const run = (
   getAnalyticsProcessorForDocuments(
     RetrievedMessage,
     telemetryAdapter,
-    messageEnricherAdapter,
+    messageEnricherWithTokenAdapater,
     retrievedMessagesOnKafkaAdapter,
     throwAdapter
   ).process([documents])();

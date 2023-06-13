@@ -71,7 +71,7 @@ const messageEnricherAdapter = MA.create(
   ),
   createBlobService(config.MessageContentPrimaryStorageConnection),
   config.ENRICH_MESSAGE_THROTTLING
-)
+);
 const personalDataVaultEnricherAdapter: OutboundEnricher<RetrievedMessageWithToken> = PDVEA.create(
   personalDataVaultClient
 );

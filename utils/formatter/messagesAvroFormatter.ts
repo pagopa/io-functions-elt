@@ -27,6 +27,7 @@ import { message as avroMessage } from "../../generated/avro/dto/message";
 import { MessageCrudOperation } from "../../generated/avro/dto/MessageCrudOperationEnum";
 import { MessageContentType } from "../../generated/avro/dto/MessageContentTypeEnum";
 import { MessageFeatureLevelType } from "../../generated/avro/dto/MessageFeatureLevelTypeEnum";
+import { RetrievedMessageWithToken } from "../types/retrievedMessageWithToken";
 
 export type ThirdPartyDataWithCategoryFetcher = (
   serviceId: ServiceId
@@ -95,7 +96,7 @@ const formatFeatureLevelType = (
   MessageFeatureLevelType[featureLevelType] ?? MessageFeatureLevelType.STANDARD;
 
 export const buildAvroMessagesObject = (
-  retrievedMessage: RetrievedMessage,
+  retrievedMessage: RetrievedMessageWithToken,
   categoryFetcher: ThirdPartyDataWithCategoryFetcher
 ): Omit<avroMessage, "schema" | "subject"> =>
   // eslint-disable-next-line no-console, no-underscore-dangle
@@ -115,6 +116,7 @@ export const buildAvroMessagesObject = (
       senderServiceId: retrievedMessage.senderServiceId,
       senderUserId: retrievedMessage.senderUserId,
       id: retrievedMessage.id,
+      token: retrievedMessage.token || "UNKNOWN",
       isPending:
         retrievedMessage.isPending === undefined
           ? true
