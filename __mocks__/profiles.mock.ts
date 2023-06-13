@@ -19,11 +19,48 @@ import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/gener
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
+import { Profile, RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 
 export const aFiscalCode = "AAABBB01C02D345D" as FiscalCode;
 export const anotherFiscalCode = "AAABBB01C02D345W" as FiscalCode;
 
 export const aToken = "123456789";
+
+export const aCosmosMetadata = {
+  _etag: "_etag",
+  _rid: "_rid",
+  _self: "xyz",
+  _ts: 1
+};
+
+export const aProfile: Profile = {
+  fiscalCode: aFiscalCode,
+  email: "xxx@xxx.xx" as EmailString,
+  servicePreferencesSettings:{
+    mode: ServicesPreferencesModeEnum.AUTO,
+    version: 0 as NonNegativeInteger
+  },
+  acceptedTosVersion: 1,
+  blockedInboxOrChannels: {a: []},
+  isEmailEnabled: true,
+  isEmailValidated: true,
+  isInboxEnabled: true,
+  isTestProfile: true,
+  isWebhookEnabled: true,
+  lastAppVersion: "UNKNOWN",
+  preferredLanguages: [],
+  pushNotificationsContentType: "UNSET",
+  reminderStatus: "UNSET",
+};
+
+export const aRetrievedProfile: RetrievedProfile = {
+  id: `${aFiscalCode}-00000001` as NonEmptyString,
+  version: 1 as NonNegativeInteger,
+  kind: "IRetrievedProfile",
+  ...aProfile,
+  ...aCosmosMetadata
+};
 
 // const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
 // const anEmail = "test@example.com" as EmailString;
