@@ -23,6 +23,7 @@ import {
 } from "../utils/formatter/messagesAvroFormatter";
 import { MessageContentType } from "../generated/avro/dto/MessageContentTypeEnum";
 import { cosmosdbInstance } from "../utils/cosmosdb";
+import * as DOF from "../outbound/adapter/allow-all-outbound-filterer";
 
 const config = getConfigOrThrow();
 
@@ -82,7 +83,9 @@ const run = (
     telemetryAdapter,
     messageEnricherAdapter,
     retrievedMessagesOnKafkaAdapter,
-    throwAdapter
+    throwAdapter,
+    DOF.create(),
+    true
   ).process([documents])();
 
 export default run;
