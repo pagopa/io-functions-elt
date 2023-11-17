@@ -3,7 +3,10 @@
   "functionTimeout": "02:30:00",
   "logging": {
     "logLevel": {
-      "default": "Trace"
+      "default": "Information",
+      "Function.AnalyticsMessagesStorageQueueInboundProcessorAdapter.User": "Trace",
+      "Function.AnalyticsMessageStatusStorageQueueInbloundAdapter.User": "Trace",
+      "Function.AnalyticsServiceStorageQueueInboundProcessorAdapter.User": "Trace"
     }
   },
   "extensions": {
