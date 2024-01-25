@@ -159,6 +159,7 @@ export const IDecodableConfig = t.interface({
   SERVICES_FAILURE_QUEUE_NAME: NonEmptyString,
   MESSAGE_STATUS_FAILURE_QUEUE_NAME: NonEmptyString,
   MESSAGES_FAILURE_QUEUE_NAME: NonEmptyString,
+  PROFILES_FAILURE_QUEUE_NAME: NonEmptyString,
 
   ENRICH_MESSAGE_THROTTLING: withDefault(
     NonNegativeInteger,
@@ -176,6 +177,13 @@ export const IDecodableConfig = t.interface({
   INTERNAL_TEST_FISCAL_CODES: withDefault(CommaSeparatedListOf(FiscalCode), []),
 
   SERVICES_LEASES_PREFIX: NonEmptyString,
+  PROFILES_LEASES_PREFIX: NonEmptyString,
+
+  PERSONAL_DATA_VAULT_BASE_URL: NonEmptyString,
+  PERSONAL_DATA_VAULT_API_KEY: NonEmptyString,
+
+  PROFILES_TOPIC_CONNECTION_STRING: NonEmptyString,
+  PROFILES_TOPIC_NAME: NonEmptyString,
 
   isProduction: t.boolean
 });

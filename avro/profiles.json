@@ -1,0 +1,45 @@
+{
+  "name": "profiles",
+  "type": "record",
+  "namespace": "dto",
+  "doc": "Kafka JS schema for cosmos api container 'profiles'",
+  "fields": [
+    {
+      "name": "op",
+      "type": {
+        "type": "enum",
+        "name": "ProfilesCrudOperation",
+        "symbols": [
+          "CREATE",
+          "UPDATE",
+          "DELETE"
+        ]
+      }
+    },
+    {
+      "name": "token",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "version",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "lastAppVersion",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
+      "name": "monthOfBirth",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "yearOfBirth",
+      "type": "int",
+      "default": 0
+    }
+  ]
+}
