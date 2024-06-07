@@ -174,6 +174,10 @@ export const IDecodableConfig = t.interface({
   ),
 
   INTERNAL_TEST_FISCAL_CODES: withDefault(CommaSeparatedListOf(FiscalCode), []),
+  TEST_FISCAL_CODE_REGEX: withDefault(
+    NonEmptyString,
+    "EEEEEE00E00E000A" as NonEmptyString
+  ),
 
   SERVICES_LEASES_PREFIX: NonEmptyString,
 
