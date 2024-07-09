@@ -10,7 +10,7 @@
       "default":"undefined"
     },
     {
-      "name":"fiscalCode",
+      "name":"userPDVId",
       "type":"string",
       "default":"undefined"
     },
@@ -22,17 +22,17 @@
     {
       "name":"isInboxEnabled",
       "type":"boolean",
-      "default":"false"
+      "default":false
     },
     {
       "name":"isEmailEnabled",
       "type":"boolean",
-      "default":"false"
+      "default":false
     },
     {
       "name":"isWebhookEnabled",
       "type":"boolean",
-      "default":"false"
+      "default":false
     },
     {
       "name":"accessReadMessageStatus",
