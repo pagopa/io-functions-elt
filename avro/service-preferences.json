@@ -10,6 +10,11 @@
       "default":"undefined"
     },
     {
+      "name": "timestamp",
+      "type": "long",
+      "default": 0
+    },
+    {
       "name":"userPDVId",
       "type":"string",
       "default":"undefined"
