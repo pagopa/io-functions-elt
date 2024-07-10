@@ -12,6 +12,7 @@
     {
       "name": "timestamp",
       "type": "long",
+      "logicalType": "timestamp-millis",
       "default": 0
     },
     {
