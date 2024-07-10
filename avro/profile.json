@@ -93,7 +93,7 @@
     },
     {
       "name":"pushNotificationsContentType",
-      "type":["null",{
+      "type":{
         "name":"PushNotificationsContentTypeEnum",
         "type":"enum",
         "symbols":[
@@ -101,20 +101,21 @@
           "FULL",
           "ANONYMOUS"
         ]
-      }],
+      },
       "default": "UNSET"
     },
     {
       "name": "reminderStatus",
-      "type": ["null",{
+      "type": {
         "type":"enum",
         "name":"ReminderStatus",
         "symbols":[
           "ENABLED",
-          "DISABLED"
+          "DISABLED",
+          "UNSET"
         ]
-      }],
-      "default":null
+      },
+      "default": "UNSET"
     },
     {
       "name":"servicePreferencesSettings",
