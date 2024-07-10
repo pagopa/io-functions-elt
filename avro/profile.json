@@ -15,6 +15,11 @@
       "default":0
     },
     {
+      "name": "timestamp",
+      "type": "long",
+      "default": 0
+    },
+    {
       "name":"acceptedTosVersion",
       "type": "string",
       "default": "0"
