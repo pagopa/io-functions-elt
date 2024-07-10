@@ -22,6 +22,11 @@
       "default": "undefined"
     },
     {
+      "name": "token",
+      "type": "string",
+      "default": "undefined"
+    },
+    {
       "name": "senderServiceId",
       "type": "string",
       "default": "undefined"
@@ -54,17 +59,20 @@
     },
     {
       "name": "content_type",
-      "type": ["null", {
-        "type": "enum",
-        "name": "MessageContentType",
-        "symbols": [
-          "GENERIC",
-          "PAYMENT",
-          "EU_COVID_CERT",
-          "LEGAL",
-          "PN"
-        ]
-      }],
+      "type": [
+        "null",
+        {
+          "type": "enum",
+          "name": "MessageContentType",
+          "symbols": [
+            "GENERIC",
+            "PAYMENT",
+            "EU_COVID_CERT",
+            "LEGAL",
+            "PN"
+          ]
+        }
+      ],
       "default": null
     },
     {

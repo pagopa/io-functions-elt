@@ -9,6 +9,9 @@ import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definiti
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
 import { ThirdPartyData } from "@pagopa/io-functions-commons/dist/generated/definitions/ThirdPartyData";
+import { MessageBodyMarkdown } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageBodyMarkdown";
+import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
+import { MessageSubject } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageSubject";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 export const aServiceId = "test" as ServiceId;
@@ -46,4 +49,10 @@ export const aPnThirdPartyData: ThirdPartyData = {
   original_receipt_date: new Date(),
   has_attachments: true,
   summary: "a-summary" as NonEmptyString
+};
+
+export const aMessageBodyMarkdown = "test".repeat(80) as MessageBodyMarkdown;
+export const aMessageContent: MessageContent = {
+  markdown: aMessageBodyMarkdown,
+  subject: "test".repeat(10) as MessageSubject
 };

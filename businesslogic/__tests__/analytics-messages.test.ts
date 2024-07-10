@@ -12,7 +12,7 @@ import * as EA from "../../outbound/adapter/messages-outbound-enricher";
 import * as PF from "../../outbound/adapter/predicate-outbound-filterer";
 import { TelemetryClient } from "applicationinsights";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { OutboundPublisher } from "../../outbound/port/outbound-publisher";
+import { OutboundPublisher, success } from "../../outbound/port/outbound-publisher";
 import { SeverityLevel } from "../../outbound/port/outbound-tracker";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { identity } from "lodash";
@@ -30,7 +30,12 @@ import { MessageBodyMarkdown } from "@pagopa/io-functions-commons/dist/generated
 import { MessageSubject } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageSubject";
 import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
 import { OutboundFilterer } from "../../outbound/port/outbound-filterer";
+import { OutboundEnricher } from "../../outbound/port/outbound-enricher";
+import * as T from "fp-ts/Task";
+import {RetrievedMessageWithToken} from "../../utils/types/retrievedMessageWithToken"
+import * as CAE from "../../outbound/adapter/combine-outbound-enricher";
 
+const aToken = "a-token";
 const aTopic = "a-topic";
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aTestFiscalCode = "AAAAAA00A00A011T" as FiscalCode;
@@ -119,6 +124,19 @@ const enrichAdapter = EA.create(
   500
 );
 
+const mockPersonalDataVaultEnricher = () => {
+  const mockEnrich = jest.fn(d => TE.right(d) as TE.TaskEither<Error, RetrievedMessageWithToken>);
+  const mockEnrichs = jest.fn(ds => T.of(ds.map((d: any) => success({...d, token: aToken}))));
+  return {
+      mockEnrich,
+      mockEnrichs,
+      enricher: {
+          enrich: mockEnrich,
+          enrichs: mockEnrichs
+      } as OutboundEnricher<RetrievedMessageWithToken>
+  }
+}
+
 const aMessagePredicate = (retrievedMessage: RetrievedMessage) =>
   aTestFiscalCode !== retrievedMessage.fiscalCode;
 const messageFilterer: OutboundFilterer<RetrievedMessage> = PF.create(
@@ -130,18 +148,25 @@ describe("publish", () => {
 
   it("GIVEN a valid list of not pending messages and a not working content enricher, WHEN processing the list, THEN send the message to the queue without publishing it on the topic", async () => {
     // Given
+    const mockPdv = mockPersonalDataVaultEnricher();
+    const messageEnricherWithTokenAdapater = CAE.create(
+      enrichAdapter,
+      mockPdv.enricher
+    );
     mockGetContentFromBlob.mockImplementationOnce(() => TE.left(anError));
     const documents = [aRetrievedMessageWithoutContent];
     const processorAdapter = getAnalyticsProcessorForDocuments(
-      RetrievedMessage,
+      RetrievedMessageWithToken,
       trackerAdapter,
-      enrichAdapter,
+      messageEnricherWithTokenAdapater,
       mainAdapter,
       fallbackAdapter
     );
     // When
     await processorAdapter.process(documents)();
     // Then
+    expect(mockPdv.mockEnrichs).toHaveBeenCalledTimes(1);
+    expect(mockPdv.mockEnrichs).toHaveBeenCalledWith([]);
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(1);
     expect(mockSendMessageViaQueue).toHaveBeenNthCalledWith(
       1,
@@ -153,22 +178,29 @@ describe("publish", () => {
 
   it("GIVEN a valid list of pending messages, WHEN processing the list, THEN publish it to the topic without enrichment", async () => {
     // Given
+    const mockPdv = mockPersonalDataVaultEnricher();
+    const messageEnricherWithTokenAdapater = CAE.create(
+      enrichAdapter,
+      mockPdv.enricher
+    );
     const documents = [{ ...aRetrievedMessageWithoutContent, isPending: true }];
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedMessage,
       trackerAdapter,
-      enrichAdapter,
+      messageEnricherWithTokenAdapater,
       mainAdapter,
       fallbackAdapter
     );
     // When
     await processorAdapter.process(documents)();
     // Then
+    expect(mockPdv.mockEnrichs).toHaveBeenCalledTimes(1);
+    expect(mockPdv.mockEnrichs).toHaveBeenCalledWith(documents);
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockSendMessageViaTopic).toHaveBeenNthCalledWith(1, {
       messages: [
         {
-          value: JSON.stringify(documents[0])
+          value: JSON.stringify({...documents[0], token: aToken})
         }
       ],
       topic: aTopic
@@ -179,6 +211,11 @@ describe("publish", () => {
 
   it("GIVEN a valid list of messages, WHEN processing the list, THEN publish it to the topic", async () => {
     // Given
+    const mockPdv = mockPersonalDataVaultEnricher();
+    const messageEnricherWithTokenAdapater = CAE.create(
+      enrichAdapter,
+      mockPdv.enricher
+    );
     const documents = [
       aRetrievedMessageWithoutContent,
       { ...aRetrievedMessageWithoutContent, id: "another-id" }
@@ -186,7 +223,7 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedMessage,
       trackerAdapter,
-      enrichAdapter,
+      messageEnricherWithTokenAdapater,
       mainAdapter,
       fallbackAdapter
     );
@@ -199,7 +236,8 @@ describe("publish", () => {
         value: JSON.stringify({
           ...document,
           content: aMessageContent,
-          kind: "IRetrievedMessageWithContent"
+          kind: "IRetrievedMessageWithContent",
+          token: aToken,
         })
       })),
       topic: aTopic
@@ -210,6 +248,11 @@ describe("publish", () => {
 
   it("GIVEN a valid list of messages, WHEN processing the list, THEN publish only elements NOT related to Test Fiscal Codes to the topic", async () => {
     // Given
+    const mockPdv = mockPersonalDataVaultEnricher();
+    const messageEnricherWithTokenAdapater = CAE.create(
+      enrichAdapter,
+      mockPdv.enricher
+    );
     const documents = [
       aRetrievedMessageWithoutContent,
       {
@@ -221,7 +264,7 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedMessage,
       trackerAdapter,
-      enrichAdapter,
+      messageEnricherWithTokenAdapater,
       mainAdapter,
       fallbackAdapter,
       messageFilterer
@@ -235,7 +278,8 @@ describe("publish", () => {
         value: JSON.stringify({
           ...document,
           content: aMessageContent,
-          kind: "IRetrievedMessageWithContent"
+          kind: "IRetrievedMessageWithContent",
+          token: aToken,
         })
       })),
       topic: aTopic
@@ -279,6 +323,11 @@ describe("publish", () => {
 
   it("GIVEN a valid list of over 500 messages and a Kafka Producer Client not working the first time, WHEN processing the list, THEN send only the first 500 (batch size) messages to the queue", async () => {
     // Given
+    const mockPdv = mockPersonalDataVaultEnricher();
+    const messageEnricherWithTokenAdapater = CAE.create(
+      enrichAdapter,
+      mockPdv.enricher
+    );
     // publish is called in parallel so we check the id of the first value to esure a throw with the first chunk
     mockSendMessageViaTopic.mockImplementation(async i => {
       if (JSON.parse(i.messages[0].value as any).id === "another-id_0") {
@@ -296,7 +345,7 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedMessage,
       trackerAdapter,
-      enrichAdapter,
+      messageEnricherWithTokenAdapater,
       mainAdapter,
       fallbackAdapter
     );
@@ -313,7 +362,8 @@ describe("publish", () => {
             JSON.stringify({
               ...document,
               content: aMessageContent,
-              kind: "IRetrievedMessageWithContent"
+              kind: "IRetrievedMessageWithContent",
+              token: aToken
             })
           ).toString("base64")
         )
@@ -325,6 +375,11 @@ describe("publish", () => {
 
   it("GIVEN a valid list of messages and a not working Kafka Producer Client, WHEN processing the list, THEN send it to the queue", async () => {
     // Given
+    const mockPdv = mockPersonalDataVaultEnricher();
+    const messageEnricherWithTokenAdapater = CAE.create(
+      enrichAdapter,
+      mockPdv.enricher
+    );
     mockSendMessageViaTopic.mockImplementation(async () => {
       throw anError;
     });
@@ -335,7 +390,7 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedMessage,
       trackerAdapter,
-      enrichAdapter,
+      messageEnricherWithTokenAdapater,
       mainAdapter,
       fallbackAdapter
     );
@@ -352,7 +407,8 @@ describe("publish", () => {
             JSON.stringify({
               ...document,
               content: aMessageContent,
-              kind: "IRetrievedMessageWithContent"
+              kind: "IRetrievedMessageWithContent",
+              token: aToken
             })
           ).toString("base64")
         )
@@ -364,6 +420,11 @@ describe("publish", () => {
 
   it("GIVEN a valid list of message status and both a not working Kafka Producer Client and a not working Queue Storage Client, WHEN processing the list, THEN throw an exception ", async () => {
     // Given
+    const mockPdv = mockPersonalDataVaultEnricher();
+    const messageEnricherWithTokenAdapater = CAE.create(
+      enrichAdapter,
+      mockPdv.enricher
+    );
     mockSendMessageViaTopic.mockImplementation(async () => {
       throw anError;
     });
@@ -377,7 +438,7 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedMessage,
       trackerAdapter,
-      enrichAdapter,
+      messageEnricherWithTokenAdapater,
       mainAdapter,
       fallbackAdapter
     );

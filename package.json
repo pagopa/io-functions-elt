@@ -22,6 +22,7 @@
     "predeploy": "npm-run-all generate build dist:*",
     "generate:definitions": "shx rm -rf ./generated/definitions && shx mkdir -p ./generated/definitions && gen-api-models --api-spec ./openapi/index.yaml --out-dir ./generated/definitions",
     "generate:avro": "shx rm -rf ./generated/avro && shx mkdir -p ./generated/avro && avro-to-typescript --compile ./avro ./generated/avro",
+    "generate:pdv": "shx rm -rf generated/pdv && shx mkdir -p generated/pdv && gen-api-models --api-spec ./openapi/consumed/pdv.yaml --no-strict --out-dir ./generated/pdv --request-types --response-decoders --client",
     "g:iotskafka": "shx rm -rf ./generated/kafka && mkdir -p ./generated/kafka && ts-to-io --follow-imports utils/kafka/KafkaTypes.ts > ./generated/kafka/IoKafkaTypes.ts",
     "generate": "npm-run-all generate:*",
     "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
@@ -30,7 +31,7 @@
   "devDependencies": {
     "@azure/functions": "^1.2.2",
     "@pagopa/eslint-config": "^1.3.1",
-    "@pagopa/openapi-codegen-ts": "^10.0.0",
+    "@pagopa/openapi-codegen-ts": "^13.0.1",
     "@types/express": "^4.17.12",
     "@types/jest": "^24.0.15",
     "@types/kafkajs": "^1.9.0",
