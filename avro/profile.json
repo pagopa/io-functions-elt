@@ -6,7 +6,8 @@
   "fields":[
     {
       "name": "id",
-      "type": "string"
+      "type": "string",
+      "default": "undefined"
     },
     {
       "name":"version",
@@ -15,7 +16,7 @@
     },
     {
       "name":"acceptedTosVersion",
-      "type": "int",
+      "type": "string",
       "default": "0"
     },
     {
@@ -42,8 +43,9 @@
       "type": "string"
     },
     {
-      "name":"fiscalCode",
-      "type": "string"
+      "name":"userPDVId",
+      "type": "string",
+      "default": "undefined"
     },
     {
       "name": "isEmailEnabled",
@@ -63,13 +65,13 @@
     },
     {
       "name": "isTestProfile",
-      "type": ["null","boolean"],
-      "default": null
+      "type": "boolean",
+      "default": false
     },
     {
       "name":"lastAppVersion",
-      "type": ["null","string"],
-      "default":null
+      "type": "string",
+      "default": "UNKNOWN"
     },
     {
       "name": "preferredLanguages",
@@ -100,7 +102,7 @@
           "ANONYMOUS"
         ]
       }],
-      "default":null
+      "default": "UNSET"
     },
     {
       "name": "reminderStatus",
