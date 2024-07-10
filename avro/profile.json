@@ -125,7 +125,7 @@
     },
     {
       "name":"servicePreferencesSettings",
-      "type": [{
+      "type": {
         "name":"ServicesPreferencesMode",
         "type": "record",
         "fields":[
@@ -134,36 +134,16 @@
             "type":{
               "type":"enum",
               "name":"ServicesPreferencesModeEnum",
-              "symbols":["AUTO","MANUAL"]
+              "symbols":["AUTO","MANUAL","LEGACY"]
             }
           },
           {
             "name":"version",
-            "doc": "This value can not be negative. Avro schema does not support unsigned integers",
             "type":"int",
             "default": 0
           }
         ]
-      },{
-        "name":"ServicesPreferencesModeLegacy",
-        "type": "record",
-        "fields":[
-          { 
-            "name":"mode",
-            "type":{
-              "type":"enum",
-              "name":"ServicesPreferencesModeEnumLegacy",
-              "symbols":["LEGACY"]
-            }
-          },
-          {
-            "name":"version",
-            "doc": "In this case the version type is fixed to be -1",
-            "type":"int",
-            "default": -1
-          }
-        ]
-      }]
+      }
     }
   ]
 }
