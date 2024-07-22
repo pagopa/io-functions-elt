@@ -106,8 +106,8 @@
           },
           {
             "name":"version",
-            "type":"int",
-            "default": 0
+            "doc": "A version of -1 refers to a LEGACY setting",
+            "type":"int"
           }
         ]
       }
