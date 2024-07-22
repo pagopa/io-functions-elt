@@ -73,7 +73,7 @@
     },
     {
       "name": "preferredLanguages",
-      "type":["null", {
+      "type": {
         "type": "array",
         "items": {
           "name": "PreferredLanguage",
@@ -86,8 +86,8 @@
             "fr_FR"
           ]
         }
-      }],
-      "default": null
+      },
+      "default":[]
     },
     {
       "name":"pushNotificationsContentType",
