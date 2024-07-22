@@ -63,7 +63,8 @@
     },
     {
       "name": "isWebhookEnabled",
-      "type": "boolean"
+      "type": "boolean",
+      "default": false
     },
     {
       "name":"lastAppVersion",
