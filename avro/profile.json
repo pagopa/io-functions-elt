@@ -22,7 +22,7 @@
     {
       "name":"acceptedTosVersion",
       "type": "string",
-      "default": "0"
+      "default": "UNSET"
     },
     {
       "name":"blockedInboxOrChannels",
@@ -76,7 +76,7 @@
       "type": {
         "type": "array",
         "items": {
-          "name": "PreferredLanguage",
+          "name": "PreferredLanguageEnum",
           "type":"enum",
           "symbols":[
             "it_IT",
@@ -106,7 +106,7 @@
       "name": "reminderStatus",
       "type": {
         "type":"enum",
-        "name":"ReminderStatus",
+        "name":"ReminderStatusEnum",
         "symbols":[
           "ENABLED",
           "DISABLED",
