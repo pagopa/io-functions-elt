@@ -58,7 +58,8 @@
     },
     {
       "name": "isInboxEnabled",
-      "type": "boolean"
+      "type": "boolean",
+      "default": false
     },
     {
       "name": "isWebhookEnabled",
