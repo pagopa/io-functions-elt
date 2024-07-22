@@ -6,8 +6,7 @@
   "fields":[
     {
       "name": "id",
-      "type": "string",
-      "default": "undefined"
+      "type": "string"
     },
     {
       "name":"version",
@@ -42,8 +41,7 @@
     },
     {
       "name":"userPDVId",
-      "type": "string",
-      "default": "undefined"
+      "type": "string"
     },
     {
       "name": "isEmailEnabled",
