@@ -21,12 +21,8 @@
       "default": 0
     },
     {
-      "name":"acceptedTosVersion",
-      "type": "string",
-      "default": "0"
-    },
-    {
       "name":"blockedInboxOrChannels",
+      "doc": "Contains blocked channels per each service. This info remains for backward compatibility only, it has been replaced with service-preferences data",
       "type":{
         "type": "map",
         "values":{
@@ -43,10 +39,6 @@
         }
       },
       "default" : {}
-    },
-    {
-      "name": "email",
-      "type": "string"
     },
     {
       "name":"userPDVId",
@@ -70,32 +62,9 @@
       "type": "boolean"
     },
     {
-      "name": "isTestProfile",
-      "type": "boolean",
-      "default": false
-    },
-    {
       "name":"lastAppVersion",
       "type": "string",
       "default": "UNKNOWN"
-    },
-    {
-      "name": "preferredLanguages",
-      "type":["null", {
-        "type": "array",
-        "items": {
-          "name": "PreferredLanguage",
-          "type":"enum",
-          "symbols":[
-            "it_IT",
-            "en_GB",
-            "es_ES",
-            "de_DE",
-            "fr_FR"
-          ]
-        }
-      }],
-      "default": null
     },
     {
       "name":"pushNotificationsContentType",
