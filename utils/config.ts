@@ -137,6 +137,7 @@ export const IDecodableConfig = t.interface({
   ERROR_STORAGE_TABLE: NonEmptyString,
   ERROR_STORAGE_TABLE_MESSAGES: NonEmptyString,
   ERROR_STORAGE_TABLE_MESSAGE_STATUS: NonEmptyString,
+  ERROR_STORAGE_SERVICE_PREFERENCES: NonEmptyString,
 
   // eslint-disable-next-line sort-keys
   COMMAND_STORAGE: NonEmptyString,
@@ -194,11 +195,20 @@ type MessageStatusKafkaTopicConfig = t.TypeOf<
   typeof MessageStatusKafkaTopicConfig
 >;
 
+const ServicePreferencesKafkaTopicConfig = t.type({
+  SERVICE_PREFERENCES_TOPIC_CONNECTION_STRING: NonEmptyString,
+  SERVICE_PREFERENCES_TOPIC_NAME: NonEmptyString
+});
+type ServicePreferencesKafkaTopicConfig = t.TypeOf<
+  typeof ServicePreferencesKafkaTopicConfig
+>;
+
 export interface IParsableConfig {
   readonly targetKafka: KafkaProducerCompactConfig;
 
   readonly MessagesKafkaTopicConfig: MessagesKafkaTopicConfig;
   readonly messageStatusKafkaTopicConfig: MessageStatusKafkaTopicConfig;
+  readonly servicePreferencesKafkaTopicConfig: ServicePreferencesKafkaTopicConfig;
 }
 
 export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
@@ -212,6 +222,9 @@ export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
     ),
     E.bind("messageStatusKafkaTopicConfig", () =>
       MessageStatusKafkaTopicConfig.decode(input)
+    ),
+    E.bind("servicePreferencesKafkaTopicConfig", () =>
+      ServicePreferencesKafkaTopicConfig.decode(input)
     )
   );
 
