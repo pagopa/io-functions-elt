@@ -137,7 +137,6 @@ export const IDecodableConfig = t.interface({
   ERROR_STORAGE_TABLE: NonEmptyString,
   ERROR_STORAGE_TABLE_MESSAGES: NonEmptyString,
   ERROR_STORAGE_TABLE_MESSAGE_STATUS: NonEmptyString,
-  ERROR_STORAGE_SERVICE_PREFERENCES: NonEmptyString,
 
   // eslint-disable-next-line sort-keys
   COMMAND_STORAGE: NonEmptyString,
@@ -160,6 +159,7 @@ export const IDecodableConfig = t.interface({
   SERVICES_FAILURE_QUEUE_NAME: NonEmptyString,
   MESSAGE_STATUS_FAILURE_QUEUE_NAME: NonEmptyString,
   MESSAGES_FAILURE_QUEUE_NAME: NonEmptyString,
+  SERVICE_PREFERENCES_FAILURE_QUEUE_NAME: NonEmptyString,
 
   ENRICH_MESSAGE_THROTTLING: withDefault(
     NonNegativeInteger,

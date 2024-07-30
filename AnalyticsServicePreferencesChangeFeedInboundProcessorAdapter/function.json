@@ -15,5 +15,5 @@
 
     }
   ],
-  "scriptFile": "../dist/CosmosApiServicePreferencesChangeFeed/index.js"
+  "scriptFile": "../dist/AnalyticsServicePreferencesChangeFeedInboundProcessorAdapter/index.js"
 }

@@ -14,8 +14,7 @@
     "ERROR_STORAGE_TABLE": "<Table Name>",
     "ERROR_STORAGE_TABLE_MESSAGES": "<Table Name>-messages",
     "ERROR_STORAGE_TABLE_MESSAGE_STATUS": "<Table Name>-message-status",
-    "ERROR_STORAGE_SERVICE_PREFERENCES": "<Table Name>-service-preferences",
-
+    
     "MESSAGES_TOPIC_NAME": "pdnd-io-cosmosdb-message",
     "MESSAGES_TOPIC_CONNECTION_STRING": "<Connection String>",
     "MESSAGES_LEASES_PREFIX": "messages-001",
@@ -27,6 +26,7 @@
     "SERVICE_PREFERENCES_TOPIC_NAME":"pdnd-io-cosmosdb-service-preferences",
     "SERVICE_PREFERENCES_TOPIC_CONNECTION_STRING":"<Conn String>",
     "SERVICE_PREFERENCES_LEASES_PREFIX": "service-preferences-001",
+    "SERVICE_PREFERENCES_FAILURE_QUEUE_NAME": "<Queue Name>-service-preferences",
 
     "SERVICEID_EXCLUSION_LIST": "ServiceId1,ServiceId2"
   }
