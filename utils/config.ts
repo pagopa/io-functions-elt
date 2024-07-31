@@ -165,6 +165,10 @@ export const IDecodableConfig = t.interface({
     NonNegativeInteger,
     500 as NonNegativeInteger
   ),
+  ENRICH_PDVID_THROTTLING: withDefault(
+    NonNegativeInteger,
+    500 as NonNegativeInteger
+  ),
 
   PN_SERVICE_ID: NonEmptyString,
 

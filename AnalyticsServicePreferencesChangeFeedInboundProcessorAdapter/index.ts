@@ -1,15 +1,17 @@
 import { QueueClient } from "@azure/storage-queue";
 import { Context } from "@azure/functions";
 
+import * as t from "io-ts";
+
 import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import * as QA from "../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
-import * as EEA from "../outbound/adapter/empty-outbound-enricher";
 import * as PF from "../outbound/adapter/predicate-outbound-filterer";
+import * as PDVA from "../outbound/adapter/pdv-id-outbound-enricher";
 
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 
@@ -19,6 +21,14 @@ import { servicePreferencesAvroFormatter } from "../utils/formatter/servicePrefe
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
+
+export type RetrievedServicePreferenceWithMaybePdvId = t.TypeOf<
+  typeof RetrievedServicePreferenceWithMaybePdvId
+>;
+const RetrievedServicePreferenceWithMaybePdvId = t.intersection([
+  RetrievedServicePreference,
+  t.partial({ pdvId: NonEmptyString })
+]);
 
 const config = getConfigOrThrow();
 
@@ -33,21 +43,24 @@ const servicePreferencesTopic = {
   messageFormatter: servicePreferencesAvroFormatter()
 };
 
-const servicePreferencesOnKafkaAdapter: OutboundPublisher<RetrievedServicePreference> = KA.create(
+const servicePreferencesOnKafkaAdapter: OutboundPublisher<RetrievedServicePreferenceWithMaybePdvId> = KA.create(
   KP.fromConfig(
     servicePreferencesConfig as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
     servicePreferencesTopic
   )
 );
 
-const servicePreferencesOnQueueAdapter: OutboundPublisher<RetrievedServicePreference> = QA.create(
+// TODO: avoid store pdvID in queue
+const servicePreferencesOnQueueAdapter: OutboundPublisher<RetrievedServicePreferenceWithMaybePdvId> = QA.create(
   new QueueClient(
     config.INTERNAL_STORAGE_CONNECTION_STRING,
     config.SERVICE_PREFERENCES_FAILURE_QUEUE_NAME
   )
 );
 
-const emptyEnricherAdapter: OutboundEnricher<RetrievedServicePreference> = EEA.create();
+const pdvIdEnricherAdapter: OutboundEnricher<RetrievedServicePreferenceWithMaybePdvId> = PDVA.create<
+  RetrievedServicePreferenceWithMaybePdvId
+>(config.ENRICH_PDVID_THROTTLING);
 
 const telemetryAdapter = TA.create(
   TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
@@ -68,7 +81,7 @@ const run = (
   getAnalyticsProcessorForDocuments(
     RetrievedServicePreference,
     telemetryAdapter,
-    emptyEnricherAdapter,
+    pdvIdEnricherAdapter,
     servicePreferencesOnKafkaAdapter,
     servicePreferencesOnQueueAdapter,
     servicePreferencesFilterer
