@@ -4,7 +4,7 @@ import * as TE from "fp-ts/TaskEither";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 // TODO: Remove as soon as PDV service is called
-const sha256 = (s: string): NonEmptyString =>
+export const sha256 = (s: string): NonEmptyString =>
   crypto
     .createHash("sha256")
     .update(s)

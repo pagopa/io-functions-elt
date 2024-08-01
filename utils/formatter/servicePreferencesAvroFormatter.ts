@@ -10,9 +10,9 @@ export const buildAvroServicePreferencesObject = (
 ): Omit<servicePreferences, "schema" | "subject"> => ({
   id: retrievedServicePreferencesWithPdvId.id.replace(
     retrievedServicePreferencesWithPdvId.fiscalCode,
-    retrievedServicePreferencesWithPdvId.pdvId ?? "UNDEFINED"
+    retrievedServicePreferencesWithPdvId.userPDVId ?? "UNDEFINED"
   ),
-  userPDVId: retrievedServicePreferencesWithPdvId.pdvId ?? "UNDEFINED",
+  userPDVId: retrievedServicePreferencesWithPdvId.userPDVId ?? "UNDEFINED",
   settingsVersion: retrievedServicePreferencesWithPdvId.settingsVersion,
   serviceId: retrievedServicePreferencesWithPdvId.serviceId,
   isInboxEnabled: retrievedServicePreferencesWithPdvId.isInboxEnabled,

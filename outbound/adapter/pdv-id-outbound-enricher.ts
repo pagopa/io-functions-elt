@@ -15,9 +15,9 @@ export const create = <M extends RetrievedServicePreferenceWithMaybePdvId>(
   const enrichASingleMessage = (message: M): TE.TaskEither<Error, M> =>
     pipe(
       getPdvId(message.fiscalCode),
-      TE.map(pdvId => ({
+      TE.map(userPDVId => ({
         ...message,
-        pdvId
+        userPDVId
       }))
     );
 

@@ -10,7 +10,7 @@
       "collectionName": "services-preferences",
       "leaseCollectionPrefix": "%SERVICE_PREFERENCES_LEASES_PREFIX%-",
       "leaseCollectionName": "pdnd-leases",
-      "createLeaseCollectionIfNotExists": true,
+      "createLeaseCollectionIfNotExists": false,
       "startFromBeginning": true
 
     }

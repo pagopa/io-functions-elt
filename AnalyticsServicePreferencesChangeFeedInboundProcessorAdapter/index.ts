@@ -8,7 +8,7 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
-import * as QA from "../outbound/adapter/queue-outbound-publisher";
+import * as QA from "../outbound/adapter/queue-outbound-mapper-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import * as PF from "../outbound/adapter/predicate-outbound-filterer";
 import * as PDVA from "../outbound/adapter/pdv-id-outbound-enricher";
@@ -27,7 +27,7 @@ export type RetrievedServicePreferenceWithMaybePdvId = t.TypeOf<
 >;
 const RetrievedServicePreferenceWithMaybePdvId = t.intersection([
   RetrievedServicePreference,
-  t.partial({ pdvId: NonEmptyString })
+  t.partial({ userPDVId: NonEmptyString })
 ]);
 
 const config = getConfigOrThrow();
@@ -52,6 +52,12 @@ const servicePreferencesOnKafkaAdapter: OutboundPublisher<RetrievedServicePrefer
 
 // TODO: avoid store pdvID in queue
 const servicePreferencesOnQueueAdapter: OutboundPublisher<RetrievedServicePreferenceWithMaybePdvId> = QA.create(
+  servicePreference => {
+    // void storing userPDVId it in queue
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { userPDVId, ...rest } = servicePreference;
+    return rest;
+  },
   new QueueClient(
     config.INTERNAL_STORAGE_CONNECTION_STRING,
     config.SERVICE_PREFERENCES_FAILURE_QUEUE_NAME
