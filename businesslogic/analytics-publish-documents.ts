@@ -4,6 +4,7 @@ import * as TT from "fp-ts/TaskThese";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as O from "fp-ts/Option";
 import * as S from "fp-ts/string";
+import * as B from "fp-ts/boolean";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { not } from "fp-ts/lib/Predicate";
 import * as t from "io-ts";
@@ -24,7 +25,8 @@ export const getAnalyticsProcessorForDocuments = <I>(
   contentEnricher: OutboundEnricher<I>,
   mainPublisher: OutboundPublisher<I>,
   fallbackPublisher: OutboundPublisher<I>,
-  dataFilterer: OutboundFilterer<I> = DOF.create()
+  dataFilterer: OutboundFilterer<I> = DOF.create(),
+  enablePublishTracking: boolean = false
   // eslint-disable-next-line max-params
 ): InboundDocumentsProcessor => ({
   process: flow(
@@ -56,7 +58,24 @@ export const getAnalyticsProcessorForDocuments = <I>(
             RA.map(success => success.document),
             mainPublisher.publishes,
             T.map(RA.concat(enrichResults)),
-            T.map(RA.filter(isFailure))
+            T.map(RA.filter(isFailure)),
+            T.map(
+              RA.map(failure =>
+                pipe(
+                  enablePublishTracking,
+                  B.fold(constVoid, () =>
+                    tracker.trackEvent({
+                      name: "elt.publishing.error",
+                      properties: {
+                        error: failure.error
+                      },
+                      tagOverrides: { samplingEnabled: "false" }
+                    })
+                  ),
+                  () => failure
+                )
+              )
+            )
           )
         ),
         // Publish documents in error with the fallback publisher: if the fallback fails, throw an error
