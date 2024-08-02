@@ -1,0 +1,19 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "cosmosDBTrigger",
+      "name": "cosmosApiServicePreferencesTrigger",
+      "direction": "in",
+      "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
+      "databaseName": "%COSMOSDB_NAME%",
+      "collectionName": "services-preferences",
+      "leaseCollectionPrefix": "%SERVICE_PREFERENCES_LEASES_PREFIX%-",
+      "leaseCollectionName": "pdnd-leases",
+      "createLeaseCollectionIfNotExists": false,
+      "startFromBeginning": true
+
+    }
+  ],
+  "scriptFile": "../dist/AnalyticsServicePreferencesChangeFeedInboundProcessorAdapter/index.js"
+}

@@ -159,8 +159,13 @@ export const IDecodableConfig = t.interface({
   SERVICES_FAILURE_QUEUE_NAME: NonEmptyString,
   MESSAGE_STATUS_FAILURE_QUEUE_NAME: NonEmptyString,
   MESSAGES_FAILURE_QUEUE_NAME: NonEmptyString,
+  SERVICE_PREFERENCES_FAILURE_QUEUE_NAME: NonEmptyString,
 
   ENRICH_MESSAGE_THROTTLING: withDefault(
+    NonNegativeInteger,
+    500 as NonNegativeInteger
+  ),
+  ENRICH_PDVID_THROTTLING: withDefault(
     NonNegativeInteger,
     500 as NonNegativeInteger
   ),
@@ -194,11 +199,20 @@ type MessageStatusKafkaTopicConfig = t.TypeOf<
   typeof MessageStatusKafkaTopicConfig
 >;
 
+const ServicePreferencesKafkaTopicConfig = t.type({
+  SERVICE_PREFERENCES_TOPIC_CONNECTION_STRING: NonEmptyString,
+  SERVICE_PREFERENCES_TOPIC_NAME: NonEmptyString
+});
+type ServicePreferencesKafkaTopicConfig = t.TypeOf<
+  typeof ServicePreferencesKafkaTopicConfig
+>;
+
 export interface IParsableConfig {
   readonly targetKafka: KafkaProducerCompactConfig;
 
   readonly MessagesKafkaTopicConfig: MessagesKafkaTopicConfig;
   readonly messageStatusKafkaTopicConfig: MessageStatusKafkaTopicConfig;
+  readonly servicePreferencesKafkaTopicConfig: ServicePreferencesKafkaTopicConfig;
 }
 
 export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
@@ -212,6 +226,9 @@ export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
     ),
     E.bind("messageStatusKafkaTopicConfig", () =>
       MessageStatusKafkaTopicConfig.decode(input)
+    ),
+    E.bind("servicePreferencesKafkaTopicConfig", () =>
+      ServicePreferencesKafkaTopicConfig.decode(input)
     )
   );
 
