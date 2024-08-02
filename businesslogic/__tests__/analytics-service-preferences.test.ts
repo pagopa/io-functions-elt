@@ -128,6 +128,7 @@ describe("publish", () => {
     // When
     await processorAdapter.process(documents)();
     // Then
+    expect(mockGetPdvId).toHaveBeenCalledTimes(2);
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockSendMessageViaTopic).toHaveBeenCalledWith({
       messages: documents.map(document => ({
@@ -159,6 +160,7 @@ describe("publish", () => {
     // When
     await processorAdapter.process(documents)();
     // Then
+    expect(mockGetPdvId).toHaveBeenCalledTimes(2);
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(2);
     pipe(
@@ -193,6 +195,7 @@ describe("publish", () => {
     // When
     await processorAdapter.process(documents)();
     // Then
+    expect(mockGetPdvId).toHaveBeenCalledTimes(2);
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(1);
     pipe(
