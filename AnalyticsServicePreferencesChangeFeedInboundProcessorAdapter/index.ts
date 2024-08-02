@@ -50,7 +50,6 @@ const servicePreferencesOnKafkaAdapter: OutboundPublisher<RetrievedServicePrefer
   )
 );
 
-// TODO: avoid store pdvID in queue
 const servicePreferencesOnQueueAdapter: OutboundPublisher<RetrievedServicePreferenceWithMaybePdvId> = QA.create(
   servicePreference => {
     // void storing userPDVId it in queue
