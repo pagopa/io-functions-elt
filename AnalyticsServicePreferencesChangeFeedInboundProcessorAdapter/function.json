@@ -8,9 +8,9 @@
       "connection": "COSMOS_API_CONNECTION_STRING",
       "databaseName": "%COSMOSDB_NAME%",
       "containerName": "services-preferences",
-      "leasecontainerPrefix": "%SERVICE_PREFERENCES_LEASES_PREFIX%-",
-      "leasecontainerName": "pdnd-leases",
-      "createLeasecontainerIfNotExists": false,
+      "leaseContainerPrefix": "%SERVICE_PREFERENCES_LEASES_PREFIX%-",
+      "leaseContainerName": "pdnd-leases",
+      "createLeaseContainerIfNotExists": false,
       "startFromBeginning": true
 
     }

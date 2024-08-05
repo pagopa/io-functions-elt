@@ -8,9 +8,9 @@
       "connection": "COSMOS_API_CONNECTION_STRING",
       "databaseName": "%COSMOSDB_NAME%",
       "containerName": "messages",
-      "leasecontainerPrefix": "%MESSAGES_LEASES_PREFIX%-",
-      "leasecontainerName": "pdnd-leases",
-      "createLeasecontainerIfNotExists": true,
+      "leaseContainerPrefix": "%MESSAGES_LEASES_PREFIX%-",
+      "leaseContainerName": "pdnd-leases",
+      "createLeaseContainerIfNotExists": true,
       "startFromBeginning": true
     }
   ],

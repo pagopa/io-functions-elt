@@ -8,8 +8,8 @@
       "connection": "COSMOS_API_CONNECTION_STRING",
       "databaseName": "%COSMOSDB_NAME%",
       "containerName": "services",
-      "leasecontainerName": "leases-services-2",
-      "createLeasecontainerIfNotExists": true,
+      "leaseContainerName": "leases-services-2",
+      "createLeaseContainerIfNotExists": true,
       "startFromBeginning": true
 
     }
