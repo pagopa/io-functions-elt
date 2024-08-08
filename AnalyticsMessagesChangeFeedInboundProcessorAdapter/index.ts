@@ -79,9 +79,12 @@ const telemetryAdapter = TA.create(
   TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
 );
 
+const testUsersRegexp = new RegExp(config.TEST_FISCAL_CODE_REGEX);
+
 const messageFilterer: OutboundFilterer<RetrievedMessage> = PF.create(
   retrievedMessage =>
-    !config.INTERNAL_TEST_FISCAL_CODES.includes(retrievedMessage.fiscalCode)
+    !config.INTERNAL_TEST_FISCAL_CODES.includes(retrievedMessage.fiscalCode) &&
+    !testUsersRegexp.test(retrievedMessage.fiscalCode)
 );
 
 const run = (

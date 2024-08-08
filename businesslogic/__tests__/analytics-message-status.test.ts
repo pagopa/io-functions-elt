@@ -1,6 +1,7 @@
 import { pipe } from "fp-ts/lib/function";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
 import { Producer, ProducerRecord } from "kafkajs";
 import { QueueClient } from "@azure/storage-queue";
@@ -91,11 +92,31 @@ const fallbackAdapter = QA.create(mockQueueClient) as OutboundPublisher<
 const trackerAdapter = TA.create(trackerMock);
 const emptyEnricher: OutboundEnricher<RetrievedMessageStatus> = EEA.create();
 
+const TEST_FISCAL_CODES = [aTestFiscalCode];
+const TEST_CF_REGEX = new RegExp(".*X$");
+
 const aMessageStatusPredicate = (
   retrievedMessageStatus: RetrievedMessageStatus
-) => aTestFiscalCode !== retrievedMessageStatus.fiscalCode;
+) =>
+  !TEST_FISCAL_CODES.includes(retrievedMessageStatus.fiscalCode as FiscalCode);
 const messageStatusFilterer: OutboundFilterer<RetrievedMessageStatus> = PF.create(
   aMessageStatusPredicate
+);
+
+const aMessageStatusPredicateWithRegex = (
+  retrievedMessageStatus: RetrievedMessageStatus
+) =>
+  !TEST_FISCAL_CODES.includes(
+    retrievedMessageStatus.fiscalCode as FiscalCode
+  ) &&
+  pipe(
+    retrievedMessageStatus.fiscalCode,
+    O.fromNullable,
+    O.map(cf => !TEST_CF_REGEX.test(cf)),
+    O.getOrElse(() => true)
+  );
+const messageStatusFiltererWithRegex: OutboundFilterer<RetrievedMessageStatus> = PF.create(
+  aMessageStatusPredicateWithRegex
 );
 
 describe("publish", () => {
@@ -155,6 +176,40 @@ describe("publish", () => {
       messages: documents.filter(aMessageStatusPredicate).map(document => ({
         value: JSON.stringify(document)
       })),
+      topic: aTopic
+    });
+    expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(0);
+    expect(mockTrackException).toHaveBeenCalledTimes(0);
+  });
+
+  it("GIVEN a valid list of message status, WHEN processing the list, THEN publish only elements NOT related to Test Fiscal Codes or regex to the topic", async () => {
+    // Given
+    const documents = [
+      aRetrievedMessageStatus,
+      {
+        ...aRetrievedMessageStatus,
+        fiscalCode: aTestFiscalCode,
+        version: 2
+      } as RetrievedMessageStatus
+    ];
+    const processAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessageStatus,
+      trackerAdapter,
+      emptyEnricher,
+      mainAdapter,
+      fallbackAdapter,
+      messageStatusFiltererWithRegex
+    );
+    // When
+    await processAdapter.process(documents)();
+    // Then
+    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
+    expect(mockSendMessageViaTopic).toHaveBeenCalledWith({
+      messages: documents
+        .filter(aMessageStatusPredicateWithRegex)
+        .map(document => ({
+          value: JSON.stringify(document)
+        })),
       topic: aTopic
     });
     expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(0);
