@@ -5,12 +5,12 @@
       "type": "cosmosDBTrigger",
       "name": "cosmosApiMessageStatusTrigger",
       "direction": "in",
-      "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
+      "connection": "COSMOS_API_CONNECTION_STRING",
       "databaseName": "%COSMOSDB_NAME%",
-      "collectionName": "message-status",
-      "leaseCollectionPrefix": "%MESSAGE_STATUS_LEASES_PREFIX%-",
-      "leaseCollectionName": "pdnd-leases",
-      "createLeaseCollectionIfNotExists": true,
+      "containerName": "message-status",
+      "leaseContainerPrefix": "%MESSAGE_STATUS_LEASES_PREFIX%-",
+      "leaseContainerName": "pdnd-leases",
+      "createLeaseContainerIfNotExists": true,
       "startFromBeginning": true
 
     }

@@ -5,11 +5,11 @@
       "type": "cosmosDBTrigger",
       "name": "cosmosApiProfilesTrigger",
       "direction": "in",
-      "connectionStringSetting": "COSMOS_API_CONNECTION_STRING",
+      "connection": "COSMOS_API_CONNECTION_STRING",
       "databaseName": "%COSMOSDB_NAME%",
-      "collectionName": "services",
-      "leaseCollectionName": "leases-services-2",
-      "createLeaseCollectionIfNotExists": true,
+      "containerName": "services",
+      "leaseContainerName": "leases-services-2",
+      "createLeaseContainerIfNotExists": true,
       "startFromBeginning": true
 
     }
