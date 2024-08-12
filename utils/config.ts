@@ -207,12 +207,19 @@ type ServicePreferencesKafkaTopicConfig = t.TypeOf<
   typeof ServicePreferencesKafkaTopicConfig
 >;
 
+const ProfilesKafkaTopicConfig = t.type({
+  PROFILES_TOPIC_CONNECTION_STRING: NonEmptyString,
+  PROFILES_TOPIC_NAME: NonEmptyString
+});
+type ProfilesKafkaTopicConfig = t.TypeOf<typeof ProfilesKafkaTopicConfig>;
+
 export interface IParsableConfig {
   readonly targetKafka: KafkaProducerCompactConfig;
 
   readonly MessagesKafkaTopicConfig: MessagesKafkaTopicConfig;
   readonly messageStatusKafkaTopicConfig: MessageStatusKafkaTopicConfig;
   readonly servicePreferencesKafkaTopicConfig: ServicePreferencesKafkaTopicConfig;
+  readonly profilesKafkaTopicConfig: ProfilesKafkaTopicConfig;
 }
 
 export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
@@ -229,6 +236,9 @@ export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
     ),
     E.bind("servicePreferencesKafkaTopicConfig", () =>
       ServicePreferencesKafkaTopicConfig.decode(input)
+    ),
+    E.bind("profilesKafkaTopicConfig", () =>
+      ProfilesKafkaTopicConfig.decode(input)
     )
   );
 
