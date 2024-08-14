@@ -58,7 +58,7 @@ const profilesOnQueueAdapter: OutboundPublisher<RetrievedProfileWithMaybePdvId> 
   },
   new QueueClient(
     config.INTERNAL_STORAGE_CONNECTION_STRING,
-    config.SERVICE_PREFERENCES_FAILURE_QUEUE_NAME
+    config.PROFILES_FAILURE_QUEUE_NAME
   )
 );
 

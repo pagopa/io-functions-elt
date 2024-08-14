@@ -160,6 +160,7 @@ export const IDecodableConfig = t.interface({
   MESSAGE_STATUS_FAILURE_QUEUE_NAME: NonEmptyString,
   MESSAGES_FAILURE_QUEUE_NAME: NonEmptyString,
   SERVICE_PREFERENCES_FAILURE_QUEUE_NAME: NonEmptyString,
+  PROFILES_FAILURE_QUEUE_NAME: NonEmptyString,
 
   ENRICH_MESSAGE_THROTTLING: withDefault(
     NonNegativeInteger,
