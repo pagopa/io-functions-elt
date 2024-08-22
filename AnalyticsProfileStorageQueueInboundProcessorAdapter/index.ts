@@ -34,7 +34,7 @@ const profilesTopic = {
   messageFormatter: profilesAvroFormatter()
 };
 
-const retrievedServicePreferencesOnKafkaAdapter: OutboundPublisher<RetrievedProfileWithMaybePdvId> = KA.create(
+const retrievedProfilesOnKafkaAdapter: OutboundPublisher<RetrievedProfileWithMaybePdvId> = KA.create(
   KP.fromConfig(
     profilesConfig as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
     profilesTopic
@@ -56,7 +56,7 @@ const run = (_context: Context, document: unknown): Promise<void> =>
     RetrievedProfile,
     telemetryAdapter,
     pdvIdEnricherAdapter,
-    retrievedServicePreferencesOnKafkaAdapter,
+    retrievedProfilesOnKafkaAdapter,
     throwAdapter
   ).process([document])();
 
