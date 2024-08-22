@@ -4,7 +4,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
-import { getConfigOrThrow } from "../utils/config";
+import { getConfigOrThrow, withTopic } from "../utils/config";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as EA from "../outbound/adapter/empty-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
@@ -24,6 +24,12 @@ const RetrievedServicePreferenceWithMaybePdvId = t.intersection([
 
 const config = getConfigOrThrow();
 
+const servicePreferencesConfig = withTopic(
+  config.servicePreferencesKafkaTopicConfig.SERVICE_PREFERENCES_TOPIC_NAME,
+  config.servicePreferencesKafkaTopicConfig
+    .SERVICE_PREFERENCES_TOPIC_CONNECTION_STRING
+)(config.targetKafka);
+
 const servicePreferencesTopic = {
   ...config.targetKafka,
   messageFormatter: servicePreferencesAvroFormatter()
@@ -31,7 +37,7 @@ const servicePreferencesTopic = {
 
 const retrievedServicePreferencesOnKafkaAdapter: OutboundPublisher<RetrievedServicePreferenceWithMaybePdvId> = KA.create(
   KP.fromConfig(
-    servicePreferencesTopic as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
+    servicePreferencesConfig as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
     servicePreferencesTopic
   )
 );
