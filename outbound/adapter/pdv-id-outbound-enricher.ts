@@ -7,7 +7,7 @@ import * as E from "fp-ts/Either";
 import { OutboundEnricher } from "../port/outbound-enricher";
 import { failure, success } from "../port/outbound-publisher";
 import { getPdvId } from "../../utils/pdv";
-import { RetrievedServicePreferenceWithMaybePdvId } from "../../AnalyticsServicePreferencesChangeFeedInboundProcessorAdapter";
+import { RetrievedServicePreferenceWithMaybePdvId } from "../../utils/types/decoratedTypes";
 
 export const create = <M extends RetrievedServicePreferenceWithMaybePdvId>(
   maxParallelThrottling: number

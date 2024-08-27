@@ -2,7 +2,7 @@
 import * as avro from "avsc";
 import { MessageFormatter } from "../kafka/KafkaTypes";
 import { servicePreferences } from "../../generated/avro/dto/servicePreferences";
-import { RetrievedServicePreferenceWithMaybePdvId } from "../../AnalyticsServicePreferencesChangeFeedInboundProcessorAdapter";
+import { RetrievedServicePreferenceWithMaybePdvId } from "../types/decoratedTypes";
 
 // remove me
 export const buildAvroServicePreferencesObject = (

@@ -1,7 +1,5 @@
 import { Context } from "@azure/functions";
 import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as t from "io-ts";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow, withTopic } from "../utils/config";
@@ -13,14 +11,7 @@ import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { servicePreferencesAvroFormatter } from "../utils/formatter/servicePreferencesAvroFormatter";
-
-export type RetrievedServicePreferenceWithMaybePdvId = t.TypeOf<
-  typeof RetrievedServicePreferenceWithMaybePdvId
->;
-const RetrievedServicePreferenceWithMaybePdvId = t.intersection([
-  RetrievedServicePreference,
-  t.partial({ userPDVId: NonEmptyString })
-]);
+import { RetrievedServicePreferenceWithMaybePdvId } from "../utils/types/decoratedTypes";
 
 const config = getConfigOrThrow();
 
@@ -31,7 +22,7 @@ const servicePreferencesConfig = withTopic(
 )(config.targetKafka);
 
 const servicePreferencesTopic = {
-  ...config.targetKafka,
+  ...servicePreferencesConfig,
   messageFormatter: servicePreferencesAvroFormatter()
 };
 

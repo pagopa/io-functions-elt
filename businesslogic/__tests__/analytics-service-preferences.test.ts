@@ -17,13 +17,13 @@ import * as QAF from "../../outbound/adapter/queue-outbound-mapper-publisher";
 import * as TA from "../../outbound/adapter/tracker-outbound-publisher";
 import * as PDVA from "../../outbound/adapter/pdv-id-outbound-enricher";
 
-import { RetrievedServicePreferenceWithMaybePdvId } from "../../AnalyticsServicePreferencesChangeFeedInboundProcessorAdapter";
 import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
 
 import { aFiscalCode } from "../../__mocks__/services.mock";
 import { OutboundPublisher } from "../../outbound/port/outbound-publisher";
 import { sha256 } from "../../utils/pdv";
 import * as pdv from "../../utils/pdv";
+import { RetrievedServicePreferenceWithMaybePdvId } from "../../utils/types/decoratedTypes";
 
 // Data
 

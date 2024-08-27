@@ -1,10 +1,8 @@
 import { QueueClient } from "@azure/storage-queue";
 import { Context } from "@azure/functions";
 
-import * as t from "io-ts";
-
 import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
@@ -21,14 +19,7 @@ import { servicePreferencesAvroFormatter } from "../utils/formatter/servicePrefe
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
-
-export type RetrievedServicePreferenceWithMaybePdvId = t.TypeOf<
-  typeof RetrievedServicePreferenceWithMaybePdvId
->;
-const RetrievedServicePreferenceWithMaybePdvId = t.intersection([
-  RetrievedServicePreference,
-  t.partial({ userPDVId: NonEmptyString })
-]);
+import { RetrievedServicePreferenceWithMaybePdvId } from "../utils/types/decoratedTypes";
 
 const config = getConfigOrThrow();
 
