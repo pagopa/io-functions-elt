@@ -6,34 +6,26 @@ import {
   RetrievedServicePreference
 } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 
-import { pipe } from "fp-ts/lib/function";
-import * as RA from "fp-ts/ReadonlyArray";
-
 import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
 
 import { aFiscalCode } from "../../__mocks__/services.mock";
-import { sha256 } from "../../utils/pdv";
 import {
   anError,
-  aTopic,
   getMainAdapter,
   mockGetPdvId,
-  mockSendMessageViaQueue,
   mockSendMessageViaTopic,
-  mockTrackException,
   getPdvIdEnricherAdapter,
   trackerAdapter,
-  getFallbackAdapterWithFilter
+  getFallbackAdapterWithFilter,
+  aCosmosMetadata
 } from "../__mocks__/processor.mock";
+import {
+  getEnricherFailureExpecter,
+  getKafkaProducerFailureExpects,
+  getSuccessValidListExpects
+} from "../__mocks__/test-case";
 
 // Data
-
-const aCosmosMetadata = {
-  _etag: "_etag",
-  _rid: "_rid",
-  _self: "xyz",
-  _ts: 1
-};
 
 const aRetrievedServicePreferences: RetrievedServicePreference = {
   ...aCosmosMetadata,
@@ -76,20 +68,7 @@ describe("publish", () => {
     // When
     await processorAdapter.process(documents)();
     // Then
-    expect(mockGetPdvId).toHaveBeenCalledTimes(2);
-    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
-    expect(mockSendMessageViaTopic).toHaveBeenCalledWith({
-      messages: documents.map(document => ({
-        value: JSON.stringify({
-          ...document,
-          // enriched values
-          userPDVId: sha256(document.fiscalCode)
-        })
-      })),
-      topic: aTopic
-    });
-    expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(0);
-    expect(mockTrackException).toHaveBeenCalledTimes(0);
+    getSuccessValidListExpects(documents);
   });
 
   it("GIVEN a valid list of service preferences and a not working Kafka Producer Client, WHEN processing the list, THEN send it to the queue", async () => {
@@ -108,25 +87,7 @@ describe("publish", () => {
     // When
     await processorAdapter.process(documents)();
     // Then
-    expect(mockGetPdvId).toHaveBeenCalledTimes(2);
-    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
-    expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(2);
-    pipe(
-      documents,
-      RA.mapWithIndex((i, document) =>
-        expect(mockSendMessageViaQueue).toHaveBeenNthCalledWith(
-          i + 1,
-          Buffer.from(
-            JSON.stringify({
-              ...document
-              // DO NOT store pdvId values
-              // userPDVId: sha256(document.fiscalCode)
-            })
-          ).toString("base64")
-        )
-      )
-    );
-    expect(mockTrackException).toHaveBeenCalledTimes(0);
+    getKafkaProducerFailureExpects(documents);
   });
 
   it("GIVEN a valid list of service preferences and a transient error on content enricher, WHEN processing the list, THEN send it to the queue", async () => {
@@ -143,24 +104,6 @@ describe("publish", () => {
     // When
     await processorAdapter.process(documents)();
     // Then
-    expect(mockGetPdvId).toHaveBeenCalledTimes(2);
-    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
-    expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(1);
-    pipe(
-      [documents[0]],
-      RA.mapWithIndex((i, document) =>
-        expect(mockSendMessageViaQueue).toHaveBeenNthCalledWith(
-          i + 1,
-          Buffer.from(
-            JSON.stringify({
-              ...document
-              // DO NOT store pdvId values
-              // userPDVId: sha256(document.fiscalCode)
-            })
-          ).toString("base64")
-        )
-      )
-    );
-    expect(mockTrackException).toHaveBeenCalledTimes(0);
+    getEnricherFailureExpecter(documents);
   });
 });

@@ -13,6 +13,13 @@ import * as pdv from "../../utils/pdv";
 export const aTopic = "a-topic";
 export const anError = new Error("An error");
 
+export const aCosmosMetadata = {
+  _etag: "_etag",
+  _rid: "_rid",
+  _self: "xyz",
+  _ts: 1
+};
+
 // Mocks
 export const mockTrackException = jest.fn(_ => void 0);
 export const trackerMock = ({
