@@ -1,10 +1,7 @@
 import { QueueClient } from "@azure/storage-queue";
 import { TelemetryClient } from "applicationinsights";
 import * as TE from "fp-ts/TaskEither";
-import {
-  INonNegativeIntegerTag,
-  NonNegativeInteger
-} from "@pagopa/ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Producer, ProducerRecord } from "kafkajs";
 
@@ -69,7 +66,7 @@ const aRetrievedProfileList = [
   {
     ...aRetrievedProfile,
     id: `${aFiscalCode}-0000000000000003` as NonEmptyString,
-    settingsVersion: 3 as number & INonNegativeIntegerTag,
+    settingsVersion: 3 as NonNegativeInteger,
     _ts: 1637077231001
   }
 ];
