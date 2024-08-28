@@ -67,7 +67,7 @@ const aRetrievedProfileList = [
   {
     ...aRetrievedProfile,
     id: `${aFiscalCode}-0000000000000003` as NonEmptyString,
-    settingsVersion: 3 as NonNegativeInteger,
+    version: 3 as NonNegativeInteger,
     _ts: 1637077231001
   }
 ];
