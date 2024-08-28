@@ -3,7 +3,7 @@
     {
       "authLevel": "function",
       "type": "cosmosDBTrigger",
-      "name": "cosmosApiServicePreferencesTrigger",
+      "name": "cosmosApiProfilesTrigger",
       "direction": "in",
       "connection": "COSMOS_API_CONNECTION_STRING",
       "databaseName": "%COSMOSDB_NAME%",
