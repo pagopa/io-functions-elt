@@ -1,9 +1,6 @@
-import { QueueClient } from "@azure/storage-queue";
-import { TelemetryClient } from "applicationinsights";
 import * as TE from "fp-ts/TaskEither";
 import { INonNegativeIntegerTag } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { Producer, ProducerRecord } from "kafkajs";
 import {
   AccessReadMessageStatusEnum,
   RetrievedServicePreference
@@ -12,23 +9,24 @@ import {
 import { pipe } from "fp-ts/lib/function";
 import * as RA from "fp-ts/ReadonlyArray";
 
-import * as KA from "../../outbound/adapter/kafka-outbound-publisher";
-import * as QAF from "../../outbound/adapter/queue-outbound-mapper-publisher";
-import * as TA from "../../outbound/adapter/tracker-outbound-publisher";
-import * as PDVA from "../../outbound/adapter/pdv-id-outbound-enricher";
-
 import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
 
 import { aFiscalCode } from "../../__mocks__/services.mock";
-import { OutboundPublisher } from "../../outbound/port/outbound-publisher";
 import { sha256 } from "../../utils/pdv";
-import * as pdv from "../../utils/pdv";
-import { RetrievedServicePreferenceWithMaybePdvId } from "../../utils/types/decoratedTypes";
+import {
+  anError,
+  aTopic,
+  getMainAdapter,
+  mockGetPdvId,
+  mockSendMessageViaQueue,
+  mockSendMessageViaTopic,
+  mockTrackException,
+  getPdvIdEnricherAdapter,
+  trackerAdapter,
+  getFallbackAdapterWithFilter
+} from "../__mocks__/processor.mock";
 
 // Data
-
-const aTopic = "a-topic";
-const anError = new Error("An error");
 
 const aCosmosMetadata = {
   _etag: "_etag",
@@ -60,56 +58,6 @@ const aRetrievedServicePreferencesList = [
   }
 ];
 
-// Mocks
-const mockTrackException = jest.fn(_ => void 0);
-const trackerMock = ({
-  trackException: mockTrackException
-} as unknown) as TelemetryClient;
-
-const mockSendMessageViaQueue = jest.fn(() => Promise.resolve());
-const mockQueueClient = ({
-  sendMessage: mockSendMessageViaQueue
-} as unknown) as QueueClient;
-
-const aKafkaResponse = {
-  errorCode: 0,
-  partition: 1,
-  topicName: aTopic
-};
-const mockSendMessageViaTopic = jest.fn(async (pr: ProducerRecord) =>
-  pipe(
-    pr.messages,
-    RA.map(() => aKafkaResponse)
-  )
-);
-const producerMock = () => ({
-  producer: ({
-    connect: jest.fn(async () => void 0),
-    disconnect: jest.fn(async () => void 0),
-    send: mockSendMessageViaTopic
-  } as unknown) as Producer,
-  topic: { topic: aTopic }
-});
-
-const mockGetPdvId = jest.spyOn(pdv, "getPdvId");
-
-const trackerAdapter = TA.create(trackerMock);
-
-const pdvIdEnricherAdapter = PDVA.create<
-  RetrievedServicePreferenceWithMaybePdvId
->(10);
-
-const mainAdapter = KA.create(producerMock) as OutboundPublisher<
-  RetrievedServicePreferenceWithMaybePdvId
->;
-
-const fallbackAdapterWithFilter = QAF.create(servicePreference => {
-  const { userPDVId, ...rest } = servicePreference;
-  return rest;
-}, mockQueueClient) as OutboundPublisher<
-  RetrievedServicePreferenceWithMaybePdvId
->;
-
 // Tests
 
 describe("publish", () => {
@@ -121,9 +69,9 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedServicePreference,
       trackerAdapter,
-      pdvIdEnricherAdapter,
-      mainAdapter,
-      fallbackAdapterWithFilter
+      getPdvIdEnricherAdapter(),
+      getMainAdapter(),
+      getFallbackAdapterWithFilter()
     );
     // When
     await processorAdapter.process(documents)();
@@ -153,9 +101,9 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedServicePreference,
       trackerAdapter,
-      pdvIdEnricherAdapter,
-      mainAdapter,
-      fallbackAdapterWithFilter
+      getPdvIdEnricherAdapter(),
+      getMainAdapter(),
+      getFallbackAdapterWithFilter()
     );
     // When
     await processorAdapter.process(documents)();
@@ -188,9 +136,9 @@ describe("publish", () => {
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedServicePreference,
       trackerAdapter,
-      pdvIdEnricherAdapter,
-      mainAdapter,
-      fallbackAdapterWithFilter
+      getPdvIdEnricherAdapter(),
+      getMainAdapter(),
+      getFallbackAdapterWithFilter()
     );
     // When
     await processorAdapter.process(documents)();

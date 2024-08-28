@@ -10,7 +10,7 @@ import { getPdvId } from "../../utils/pdv";
 import { RetrievedProfileWithMaybePdvId } from "../../AnalyticsProfilesChangeFeedInboundProcessorAdapter";
 import { RetrievedServicePreferenceWithMaybePdvId } from "../../utils/types/decoratedTypes";
 
-type MaybePdvDocumentsTypes =
+export type MaybePdvDocumentsTypes =
   | RetrievedServicePreferenceWithMaybePdvId
   | RetrievedProfileWithMaybePdvId;
 
