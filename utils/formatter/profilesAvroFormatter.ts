@@ -20,7 +20,7 @@ export const buildAvroProfileObject = (
   // eslint-disable-next-line no-underscore-dangle
   timestamp: retrievedProfilesWithPdvId._ts * 1000,
   acceptedTosVersion:
-    retrievedProfilesWithPdvId.acceptedTosVersion?.toString() ?? "UNDEFINED",
+    retrievedProfilesWithPdvId.acceptedTosVersion?.toString() ?? "UNSET",
   blockedInboxOrChannels:
     (retrievedProfilesWithPdvId.blockedInboxOrChannels as {
       // eslint-disable-next-line functional/prefer-readonly-type
@@ -30,7 +30,7 @@ export const buildAvroProfileObject = (
   isEmailValidated: retrievedProfilesWithPdvId.isEmailValidated ?? false,
   isInboxEnabled: retrievedProfilesWithPdvId.isEmailEnabled ?? false,
   isWebhookEnabled: retrievedProfilesWithPdvId.isWebhookEnabled ?? false,
-  lastAppVersion: retrievedProfilesWithPdvId.lastAppVersion ?? "UNSET",
+  lastAppVersion: retrievedProfilesWithPdvId.lastAppVersion ?? "UNKNOWN",
   preferredLanguages:
     // eslint-disable-next-line functional/prefer-readonly-type
     (retrievedProfilesWithPdvId.preferredLanguages as PreferredLanguageEnum[]) ??
