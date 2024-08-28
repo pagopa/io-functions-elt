@@ -27,6 +27,11 @@
     "SERVICE_PREFERENCES_TOPIC_CONNECTION_STRING":"<Conn String>",
     "SERVICE_PREFERENCES_LEASES_PREFIX": "service-preferences-001",
     "SERVICE_PREFERENCES_FAILURE_QUEUE_NAME": "<Queue Name>-service-preferences",
+    
+    "PROFILES_TOPIC_NAME" : "pdnd-io-cosmosdb-profiles",
+    "PROFILES_TOPIC_CONNECTION_STRING" : "<Conn String>",
+    "PROFILES_LEASES_PREFIX" : "profiles-001",
+    "PROFILES_FAILURE_QUEUE_NAME" : "<Queue Name>-profiles",
 
     "SERVICEID_EXCLUSION_LIST": "ServiceId1,ServiceId2"
   }
