@@ -30,7 +30,7 @@ const profilesConfig = withTopic(
 )(config.targetKafka);
 
 const profilesTopic = {
-  ...config.targetKafka,
+  ...profilesConfig,
   messageFormatter: profilesAvroFormatter()
 };
 
