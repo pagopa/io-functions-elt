@@ -28,7 +28,7 @@ export const buildAvroProfileObject = (
     }) ?? {},
   isEmailEnabled: retrievedProfilesWithPdvId.isEmailEnabled ?? false,
   isEmailValidated: retrievedProfilesWithPdvId.isEmailValidated ?? false,
-  isInboxEnabled: retrievedProfilesWithPdvId.isEmailEnabled ?? false,
+  isInboxEnabled: retrievedProfilesWithPdvId.isInboxEnabled ?? false,
   isWebhookEnabled: retrievedProfilesWithPdvId.isWebhookEnabled ?? false,
   lastAppVersion: retrievedProfilesWithPdvId.lastAppVersion ?? "UNKNOWN",
   preferredLanguages:
