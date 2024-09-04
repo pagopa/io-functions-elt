@@ -1,4 +1,4 @@
-import * as TE from "fp-ts/TaskEither";
+import * as RTE from "fp-ts/ReaderTaskEither";
 import { INonNegativeIntegerTag } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import {
@@ -92,7 +92,7 @@ describe("publish", () => {
 
   it("GIVEN a valid list of service preferences and a transient error on content enricher, WHEN processing the list, THEN send it to the queue", async () => {
     // Given
-    mockGetPdvId.mockImplementationOnce(() => TE.left(Error("an Error")));
+    mockGetPdvId.mockReturnValueOnce(RTE.left(Error("an Error")));
     const documents = aRetrievedServicePreferencesList;
     const processorAdapter = getAnalyticsProcessorForDocuments(
       RetrievedServicePreference,

@@ -20,6 +20,8 @@ import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 import { RetrievedServicePreferenceWithMaybePdvId } from "../utils/types/decoratedTypes";
+import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
+import { httpOrHttpsApiFetch } from "../utils/fetch";
 
 const config = getConfigOrThrow();
 
@@ -54,13 +56,21 @@ const servicePreferencesOnQueueAdapter: OutboundPublisher<RetrievedServicePrefer
   )
 );
 
+const pdvTokenizer = pdvTokenizerClient(
+  config.PDV_TOKENIZER_BASE_PATH,
+  config.PDV_TOKENIZER_API_KEY,
+  httpOrHttpsApiFetch
+);
+
+const telemetryClient = TA.initTelemetryClient(
+  config.APPINSIGHTS_INSTRUMENTATIONKEY
+);
+
 const pdvIdEnricherAdapter: OutboundEnricher<RetrievedServicePreferenceWithMaybePdvId> = PDVA.create<
   RetrievedServicePreferenceWithMaybePdvId
->(config.ENRICH_PDVID_THROTTLING);
+>(config.ENRICH_PDVID_THROTTLING, pdvTokenizer, telemetryClient);
 
-const telemetryAdapter = TA.create(
-  TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
-);
+const telemetryAdapter = TA.create(telemetryClient);
 
 const internalTestFiscalCodeSet = new Set(
   config.INTERNAL_TEST_FISCAL_CODES as ReadonlyArray<FiscalCode>

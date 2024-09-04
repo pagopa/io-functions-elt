@@ -1,6 +1,6 @@
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { sha256 } from "../../utils/pdv";
 import {
+  aMockPdvId,
   aTopic,
   mockGetPdvId,
   mockSendMessageViaQueue,
@@ -9,7 +9,6 @@ import {
 } from "./processor.mock";
 import { pipe } from "fp-ts/lib/function";
 import * as RA from "fp-ts/ReadonlyArray";
-
 export const getSuccessValidListExpects = <
   T extends { fiscalCode: FiscalCode }
 >(
@@ -22,7 +21,7 @@ export const getSuccessValidListExpects = <
       value: JSON.stringify({
         ...document,
         // enriched values
-        userPDVId: sha256(document.fiscalCode)
+        userPDVId: aMockPdvId
       })
     })),
     topic: aTopic
@@ -48,7 +47,7 @@ export const getKafkaProducerFailureExpects = <
           JSON.stringify({
             ...document
             // DO NOT store pdvId values
-            // userPDVId: sha256(document.fiscalCode)
+            // userPDVId
           })
         ).toString("base64")
       )
@@ -74,7 +73,7 @@ export const getEnricherFailureExpecter = <
           JSON.stringify({
             ...document
             // DO NOT store pdvId values
-            // userPDVId: sha256(document.fiscalCode)
+            // userPDVId
           })
         ).toString("base64")
       )

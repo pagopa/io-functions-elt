@@ -4,21 +4,26 @@ import { flow, pipe } from "fp-ts/lib/function";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as T from "fp-ts/Task";
 import * as E from "fp-ts/Either";
+import { TelemetryClient } from "applicationinsights";
 import { OutboundEnricher } from "../port/outbound-enricher";
 import { failure, success } from "../port/outbound-publisher";
 import { getPdvId } from "../../utils/pdv";
 import { RetrievedProfileWithMaybePdvId } from "../../AnalyticsProfilesChangeFeedInboundProcessorAdapter";
 import { RetrievedServicePreferenceWithMaybePdvId } from "../../utils/types/decoratedTypes";
+import { PdvTokenizerClient } from "../../utils/pdvTokenizerClient";
 
 export type MaybePdvDocumentsTypes =
   | RetrievedServicePreferenceWithMaybePdvId
   | RetrievedProfileWithMaybePdvId;
 
 export const create = <M extends MaybePdvDocumentsTypes>(
-  maxParallelThrottling: number
+  maxParallelThrottling: number,
+  pdvTokenizerClient: PdvTokenizerClient,
+  appInsightsTelemetryClient: TelemetryClient
 ): OutboundEnricher<M> => {
   const enrichASingleMessage = (message: M): TE.TaskEither<Error, M> =>
     pipe(
+      { appInsightsTelemetryClient, pdvTokenizerClient },
       getPdvId(message.fiscalCode),
       TE.map(userPDVId => ({
         ...message,
