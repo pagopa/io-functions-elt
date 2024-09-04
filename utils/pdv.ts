@@ -1,4 +1,3 @@
-import * as crypto from "crypto";
 import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
@@ -8,10 +7,11 @@ import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { TelemetryClient } from "applicationinsights";
 import { PdvTokenizerClient } from "./pdvTokenizerClient";
 
-export interface PdvDependencies {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type PdvDependencies = {
   readonly pdvTokenizerClient: PdvTokenizerClient;
   readonly appInsightsTelemetryClient: TelemetryClient;
-}
+};
 
 export const getPdvId: (
   fiscalCode: FiscalCode
