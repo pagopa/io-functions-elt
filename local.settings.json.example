@@ -28,6 +28,10 @@
     "SERVICE_PREFERENCES_LEASES_PREFIX": "service-preferences-001",
     "SERVICE_PREFERENCES_FAILURE_QUEUE_NAME": "<Queue Name>-service-preferences",
     
+    "PDV_TOKENIZER_API_KEY": "aKey",
+    "PDV_TOKENIZER_BASE_URL": "",
+    "PDV_TOKENIZER_BASE_PATH": "",
+
     "PROFILES_TOPIC_NAME" : "pdnd-io-cosmosdb-profiles",
     "PROFILES_TOPIC_CONNECTION_STRING" : "<Conn String>",
     "PROFILES_LEASES_PREFIX" : "profiles-001",

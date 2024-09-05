@@ -46,9 +46,10 @@ const retrievedProfilesOnKafkaAdapter: OutboundPublisher<RetrievedProfileWithMay
 const throwAdapter: OutboundPublisher<RetrievedProfileWithMaybePdvId> = EA.create();
 
 const pdvTokenizer = pdvTokenizerClient(
-  config.PDV_TOKENIZER_BASE_PATH,
+  config.PDV_TOKENIZER_BASE_URL,
   config.PDV_TOKENIZER_API_KEY,
-  httpOrHttpsApiFetch
+  httpOrHttpsApiFetch,
+  config.PDV_TOKENIZER_BASE_PATH
 );
 
 const telemetryClient = TA.initTelemetryClient(
