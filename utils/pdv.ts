@@ -6,6 +6,7 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { TelemetryClient } from "applicationinsights";
 import { PdvTokenizerClient } from "./pdvTokenizerClient";
+import { sha256 } from "./crypto";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PdvDependencies = {
@@ -20,7 +21,7 @@ export const getPdvId: (
   Error,
   NonEmptyString
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-> = fiscalCode => ({ pdvTokenizerClient }) =>
+> = fiscalCode => ({ pdvTokenizerClient, appInsightsTelemetryClient }) =>
   pipe(
     TE.tryCatch(
       () => pdvTokenizerClient.saveUsingPUT({ body: { pii: fiscalCode } }),
@@ -42,7 +43,24 @@ export const getPdvId: (
       flow(
         NonEmptyString.decode,
         TE.fromEither,
-        TE.mapLeft(errors => Error(readableReportSimplified(errors)))
+        TE.mapLeft(errors =>
+          Error(
+            `Unexpected empty token from tokenizer: ${readableReportSimplified(
+              errors
+            )}`
+          )
+        )
       )
-    )
+    ),
+    TE.mapLeft(error => {
+      // unexpected response that needs tracking
+      appInsightsTelemetryClient.trackEvent({
+        name: error.message,
+        properties: {
+          fiscal_code: sha256(fiscalCode)
+        },
+        tagOverrides: { samplingEnabled: "false" }
+      });
+      return error;
+    })
   );
