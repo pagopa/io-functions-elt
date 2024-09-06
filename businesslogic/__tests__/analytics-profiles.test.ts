@@ -1,18 +1,7 @@
 import * as RTE from "fp-ts/ReaderTaskEither";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-
 import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
-
-import { aFiscalCode } from "../../__mocks__/services.mock";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
-import { PreferredLanguageEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/PreferredLanguage";
-import { ReminderStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ReminderStatus";
-import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
-import { PushNotificationsContentTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/PushNotificationsContentType";
 import {
-  aCosmosMetadata,
-  anError,
   mockGetPdvId,
   mockSendMessageViaTopic,
   trackerAdapter
@@ -27,41 +16,7 @@ import {
   getKafkaProducerFailureExpects,
   getSuccessValidListExpects
 } from "../__mocks__/test-case";
-
-// Data
-
-const aRetrievedProfile: RetrievedProfile = {
-  ...aCosmosMetadata,
-  kind: "IRetrievedProfile",
-  id: `${aFiscalCode}-0000000000000002` as NonEmptyString,
-  fiscalCode: aFiscalCode,
-  isEmailEnabled: true,
-  isEmailValidated: true,
-  email: "an-email@email.com" as EmailString,
-  acceptedTosVersion: 22,
-  isInboxEnabled: true,
-  isWebhookEnabled: true,
-  preferredLanguages: [PreferredLanguageEnum.it_IT],
-  pushNotificationsContentType: PushNotificationsContentTypeEnum.FULL,
-  reminderStatus: ReminderStatusEnum.ENABLED,
-  servicePreferencesSettings: {
-    mode: ServicesPreferencesModeEnum.AUTO,
-    version: 1 as NonNegativeInteger
-  },
-  version: 2 as NonNegativeInteger,
-  isTestProfile: false,
-  lastAppVersion: "10.1.1" as RetrievedProfile["lastAppVersion"],
-  _ts: 1637077231000
-};
-const aRetrievedProfileList = [
-  aRetrievedProfile,
-  {
-    ...aRetrievedProfile,
-    id: `${aFiscalCode}-0000000000000003` as NonEmptyString,
-    version: 3 as NonNegativeInteger,
-    _ts: 1637077231001
-  }
-];
+import { anError, aRetrievedProfileList } from "../__mocks__/data.mock";
 
 // Tests
 

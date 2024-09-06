@@ -11,17 +11,7 @@ import * as PDVA from "../../outbound/adapter/pdv-id-outbound-enricher";
 import { OutboundPublisher } from "../../outbound/port/outbound-publisher";
 import * as pdv from "../../utils/pdv";
 import { Client } from "../../generated/pdv-tokenizer-api/client";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-
-export const aTopic = "a-topic";
-export const anError = new Error("An error");
-
-export const aCosmosMetadata = {
-  _etag: "_etag",
-  _rid: "_rid",
-  _self: "xyz",
-  _ts: 1
-};
+import { aKafkaResponse, aMockPdvId, aTopic } from "./data.mock";
 
 // Mocks
 export const mockTrackException = jest.fn(_ => void 0);
@@ -34,11 +24,6 @@ export const mockQueueClient = ({
   sendMessage: mockSendMessageViaQueue
 } as unknown) as QueueClient;
 
-export const aKafkaResponse = {
-  errorCode: 0,
-  partition: 1,
-  topicName: aTopic
-};
 export const mockSendMessageViaTopic = jest.fn(async (pr: ProducerRecord) =>
   pipe(
     pr.messages,
@@ -53,8 +38,6 @@ export const producerMock = () => ({
   } as unknown) as Producer,
   topic: { topic: aTopic }
 });
-
-export const aMockPdvId = "7f95058c-0cf4-400b-9b77-2cd18eaba0b0" as NonEmptyString;
 
 export const mockGetPdvId = jest
   .spyOn(pdv, "getPdvId")

@@ -1,9 +1,7 @@
-import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   buildAvroProfileObject,
   profilesAvroFormatter
 } from "../formatter/profilesAvroFormatter";
-import { aCosmosMetadata } from "../../businesslogic/__mocks__/processor.mock";
 import { aFiscalCode } from "../../__mocks__/services.mock";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
@@ -13,6 +11,7 @@ import { profile } from "../../generated/avro/dto/profile";
 import { RetrievedProfileWithMaybePdvId } from "../../AnalyticsProfilesChangeFeedInboundProcessorAdapter";
 import { PushNotificationsContentTypeEnum } from "../../generated/avro/dto/PushNotificationsContentTypeEnumEnum";
 import { ReminderStatusEnum } from "../../generated/avro/dto/ReminderStatusEnumEnum";
+import { aCosmosMetadata } from "../../businesslogic/__mocks__/data.mock";
 const aUserPDVId = "7f97bf94-6f41-4e8c-97a3-d496125374c0" as NonEmptyString;
 const aRetrievedProfile: RetrievedProfileWithMaybePdvId = {
   ...aCosmosMetadata,

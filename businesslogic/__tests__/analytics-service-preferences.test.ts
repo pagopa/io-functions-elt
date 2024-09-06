@@ -1,54 +1,23 @@
 import * as RTE from "fp-ts/ReaderTaskEither";
-import { INonNegativeIntegerTag } from "@pagopa/ts-commons/lib/numbers";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import {
-  AccessReadMessageStatusEnum,
-  RetrievedServicePreference
-} from "@pagopa/io-functions-commons/dist/src/models/service_preference";
-
+import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { getAnalyticsProcessorForDocuments } from "../analytics-publish-documents";
-
-import { aFiscalCode } from "../../__mocks__/services.mock";
 import {
-  anError,
   getMainAdapter,
   mockGetPdvId,
   mockSendMessageViaTopic,
   getPdvIdEnricherAdapter,
   trackerAdapter,
-  getFallbackAdapterWithFilter,
-  aCosmosMetadata
+  getFallbackAdapterWithFilter
 } from "../__mocks__/processor.mock";
 import {
   getEnricherFailureExpecter,
   getKafkaProducerFailureExpects,
   getSuccessValidListExpects
 } from "../__mocks__/test-case";
-
-// Data
-
-const aRetrievedServicePreferences: RetrievedServicePreference = {
-  ...aCosmosMetadata,
-  kind: "IRetrievedServicePreference",
-  id: `${aFiscalCode}-anEnabledServiceId-0000000000000001` as NonEmptyString,
-  fiscalCode: aFiscalCode,
-  serviceId: "anEnabledServiceId" as NonEmptyString,
-  isInboxEnabled: true,
-  isEmailEnabled: true,
-  isWebhookEnabled: true,
-  accessReadMessageStatus: AccessReadMessageStatusEnum.DENY,
-  settingsVersion: 1 as number & INonNegativeIntegerTag,
-  _ts: 1637077231000
-};
-const aRetrievedServicePreferencesList = [
-  aRetrievedServicePreferences,
-  {
-    ...aRetrievedServicePreferences,
-    id: `${aFiscalCode}-anEnabledServiceId-0000000000000002` as NonEmptyString,
-    settingsVersion: 2 as number & INonNegativeIntegerTag,
-    _ts: 1637077231001
-  }
-];
+import {
+  anError,
+  aRetrievedServicePreferencesList
+} from "../__mocks__/data.mock";
 
 // Tests
 

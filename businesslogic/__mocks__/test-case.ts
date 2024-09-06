@@ -1,7 +1,5 @@
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import {
-  aMockPdvId,
-  aTopic,
   mockGetPdvId,
   mockSendMessageViaQueue,
   mockSendMessageViaTopic,
@@ -9,6 +7,7 @@ import {
 } from "./processor.mock";
 import { pipe } from "fp-ts/lib/function";
 import * as RA from "fp-ts/ReadonlyArray";
+import { aMockPdvId, aTopic } from "./data.mock";
 export const getSuccessValidListExpects = <
   T extends { fiscalCode: FiscalCode }
 >(
