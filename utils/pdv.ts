@@ -55,7 +55,7 @@ export const getPdvId: (
     TE.mapLeft(error => {
       // unexpected response that needs tracking
       appInsightsTelemetryClient.trackEvent({
-        name: "fn-elt.error.unexpected",
+        name: "fn-elt.getPdvId.error",
         properties: {
           error_message: error.message,
           fiscal_code: sha256(fiscalCode)

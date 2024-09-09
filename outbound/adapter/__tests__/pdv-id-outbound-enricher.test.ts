@@ -48,7 +48,10 @@ describe.each`
       | E.Either<Error, MaybePdvDocumentsTypes>
   ) => {
     if (isList) {
-      expect(result).toMatchObject([{ success: true }, { success: true }]);
+      expect(result).toMatchObject([
+        { success: true, document: { ...value[0], userPDVId: aMockPdvId } },
+        { success: true, document: { ...value[1], userPDVId: aMockPdvId } }
+      ]);
     } else {
       expect(result).toStrictEqual(
         E.right({
