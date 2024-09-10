@@ -171,6 +171,11 @@ export const IDecodableConfig = t.interface({
     500 as NonNegativeInteger
   ),
 
+  // PDV Tokenizer configuration
+  PDV_TOKENIZER_API_KEY: NonEmptyString,
+  PDV_TOKENIZER_BASE_URL: NonEmptyString,
+  PDV_TOKENIZER_BASE_PATH: NonEmptyString,
+
   PN_SERVICE_ID: NonEmptyString,
 
   // eslint-disable-next-line sort-keys

@@ -12,6 +12,8 @@ import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-pu
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { servicePreferencesAvroFormatter } from "../utils/formatter/servicePreferencesAvroFormatter";
 import { RetrievedServicePreferenceWithMaybePdvId } from "../utils/types/decoratedTypes";
+import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
+import { httpOrHttpsApiFetch } from "../utils/fetch";
 
 const config = getConfigOrThrow();
 
@@ -35,13 +37,22 @@ const retrievedServicePreferencesOnKafkaAdapter: OutboundPublisher<RetrievedServ
 
 const throwAdapter: OutboundPublisher<RetrievedServicePreferenceWithMaybePdvId> = EA.create();
 
-const telemetryAdapter = TA.create(
-  TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
+const pdvTokenizer = pdvTokenizerClient(
+  config.PDV_TOKENIZER_BASE_URL,
+  config.PDV_TOKENIZER_API_KEY,
+  httpOrHttpsApiFetch,
+  config.PDV_TOKENIZER_BASE_PATH
 );
+
+const telemetryClient = TA.initTelemetryClient(
+  config.APPINSIGHTS_INSTRUMENTATIONKEY
+);
+
+const telemetryAdapter = TA.create(telemetryClient);
 
 const pdvIdEnricherAdapter: OutboundEnricher<RetrievedServicePreferenceWithMaybePdvId> = PDVA.create<
   RetrievedServicePreferenceWithMaybePdvId
->(config.ENRICH_PDVID_THROTTLING);
+>(config.ENRICH_PDVID_THROTTLING, pdvTokenizer, telemetryClient);
 
 const run = (_context: Context, document: unknown): Promise<void> =>
   getAnalyticsProcessorForDocuments(

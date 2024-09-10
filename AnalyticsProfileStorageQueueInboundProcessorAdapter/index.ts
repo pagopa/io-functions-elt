@@ -13,6 +13,8 @@ import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { profilesAvroFormatter } from "../utils/formatter/profilesAvroFormatter";
+import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
+import { httpOrHttpsApiFetch } from "../utils/fetch";
 
 export type RetrievedProfileWithMaybePdvId = t.TypeOf<
   typeof RetrievedProfileWithMaybePdvId
@@ -43,13 +45,22 @@ const retrievedProfilesOnKafkaAdapter: OutboundPublisher<RetrievedProfileWithMay
 
 const throwAdapter: OutboundPublisher<RetrievedProfileWithMaybePdvId> = EA.create();
 
-const telemetryAdapter = TA.create(
-  TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
+const pdvTokenizer = pdvTokenizerClient(
+  config.PDV_TOKENIZER_BASE_URL,
+  config.PDV_TOKENIZER_API_KEY,
+  httpOrHttpsApiFetch,
+  config.PDV_TOKENIZER_BASE_PATH
 );
+
+const telemetryClient = TA.initTelemetryClient(
+  config.APPINSIGHTS_INSTRUMENTATIONKEY
+);
+
+const telemetryAdapter = TA.create(telemetryClient);
 
 const pdvIdEnricherAdapter: OutboundEnricher<RetrievedProfileWithMaybePdvId> = PDVA.create<
   RetrievedProfileWithMaybePdvId
->(config.ENRICH_PDVID_THROTTLING);
+>(config.ENRICH_PDVID_THROTTLING, pdvTokenizer, telemetryClient);
 
 const run = (_context: Context, document: unknown): Promise<void> =>
   getAnalyticsProcessorForDocuments(
