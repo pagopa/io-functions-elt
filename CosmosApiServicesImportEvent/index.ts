@@ -51,7 +51,7 @@ const messageContentBlobService = createBlobService(
   config.MessageContentStorageConnection
 );
 
-const csvFilesBlobService = createBlobService(config.COMMAND_STORAGE);
+const csvFilesBlobService = createBlobService(config.BLOB_COMMAND_STORAGE);
 
 const errorStorage = new TableClient(
   `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,

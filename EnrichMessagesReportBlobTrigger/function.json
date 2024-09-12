@@ -5,7 +5,7 @@
       "type": "blobTrigger",
       "direction": "in",
       "path": "%MESSAGE_EXPORT_STEP_1_CONTAINER%/{name}",
-      "connection": "COMMAND_STORAGE"
+      "connection": "BLOB_COMMAND_STORAGE"
     },
     {
       "name": "visibleServicesExtended",
