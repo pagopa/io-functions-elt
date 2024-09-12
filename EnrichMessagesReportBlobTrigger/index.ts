@@ -8,7 +8,7 @@ import { handler } from "./handler";
 
 const config = getConfigOrThrow();
 
-const csvFilesBlobService = createBlobService(config.COMMAND_STORAGE);
+const csvFilesBlobService = createBlobService(config.BLOB_COMMAND_STORAGE);
 
 const blobTrigger: AzureFunction = handler(
   exportTextToBlob(

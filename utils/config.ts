@@ -139,6 +139,7 @@ export const IDecodableConfig = t.interface({
   ERROR_STORAGE_TABLE_MESSAGE_STATUS: NonEmptyString,
 
   // eslint-disable-next-line sort-keys
+  BLOB_COMMAND_STORAGE: NonEmptyString,
   COMMAND_STORAGE: NonEmptyString,
   MESSAGE_EXPORT_STEP_1_CONTAINER: NonEmptyString,
   MESSAGE_EXPORT_STEP_FINAL_CONTAINER: NonEmptyString,
