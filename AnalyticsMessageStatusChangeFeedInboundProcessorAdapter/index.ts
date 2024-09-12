@@ -1,6 +1,8 @@
 import { Context } from "@azure/functions";
 import { QueueClient } from "@azure/storage-queue";
 import { RetrievedMessageStatus } from "@pagopa/io-functions-commons/dist/src/models/message_status";
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow, withTopic } from "../utils/config";
@@ -43,10 +45,18 @@ const telemetryAdapter = TA.create(
   TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
 );
 
+const testUsersRegexp = new RegExp(config.TEST_FISCAL_CODE_REGEX);
+
 const messageStatusFilterer: OutboundFilterer<RetrievedMessageStatus> = PF.create(
   retrievedMessageStatus =>
     !config.INTERNAL_TEST_FISCAL_CODES.includes(
       retrievedMessageStatus.fiscalCode
+    ) &&
+    pipe(
+      retrievedMessageStatus.fiscalCode,
+      O.fromNullable,
+      O.map(fiscalCode => !testUsersRegexp.test(fiscalCode)),
+      O.getOrElse(() => true)
     )
 );
 const emptyEnricherAdapter: OutboundEnricher<RetrievedMessageStatus> = EEA.create();

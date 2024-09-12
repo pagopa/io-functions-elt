@@ -119,10 +119,20 @@ const enrichAdapter = EA.create(
   500
 );
 
+const TEST_FISCAL_CODES = [aTestFiscalCode];
+const TEST_CF_REGEX = new RegExp(".*X$");
+
 const aMessagePredicate = (retrievedMessage: RetrievedMessage) =>
-  aTestFiscalCode !== retrievedMessage.fiscalCode;
+  !TEST_FISCAL_CODES.includes(retrievedMessage.fiscalCode);
 const messageFilterer: OutboundFilterer<RetrievedMessage> = PF.create(
   aMessagePredicate
+);
+
+const aMessagePredicateWithRegex = (retrievedMessage: RetrievedMessage) =>
+  !TEST_FISCAL_CODES.includes(retrievedMessage.fiscalCode) &&
+  !TEST_CF_REGEX.test(retrievedMessage.fiscalCode);
+const messageFiltererWithRegex: OutboundFilterer<RetrievedMessage> = PF.create(
+  aMessagePredicateWithRegex
 );
 
 describe("publish", () => {
@@ -232,6 +242,42 @@ describe("publish", () => {
     expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
     expect(mockSendMessageViaTopic).toHaveBeenCalledWith({
       messages: documents.filter(aMessagePredicate).map(document => ({
+        value: JSON.stringify({
+          ...document,
+          content: aMessageContent,
+          kind: "IRetrievedMessageWithContent"
+        })
+      })),
+      topic: aTopic
+    });
+    expect(mockSendMessageViaQueue).toHaveBeenCalledTimes(0);
+    expect(mockTrackException).toHaveBeenCalledTimes(0);
+  });
+
+  it("GIVEN a valid list of messages, WHEN processing the list, THEN publish only elements NOT related to Test Fiscal Codes list and regex to the topic", async () => {
+    // Given
+    const documents = [
+      aRetrievedMessageWithoutContent,
+      {
+        ...aRetrievedMessageWithoutContent,
+        id: "another-id" as NonEmptyString
+      },
+      { ...aRetrievedMessageWithoutContent, fiscalCode: aTestFiscalCode }
+    ];
+    const processorAdapter = getAnalyticsProcessorForDocuments(
+      RetrievedMessage,
+      trackerAdapter,
+      enrichAdapter,
+      mainAdapter,
+      fallbackAdapter,
+      messageFiltererWithRegex
+    );
+    // When
+    await processorAdapter.process(documents)();
+    // Then
+    expect(mockSendMessageViaTopic).toHaveBeenCalledTimes(1);
+    expect(mockSendMessageViaTopic).toHaveBeenCalledWith({
+      messages: documents.filter(aMessagePredicateWithRegex).map(document => ({
         value: JSON.stringify({
           ...document,
           content: aMessageContent,
