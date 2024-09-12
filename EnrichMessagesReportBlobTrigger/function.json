@@ -4,7 +4,7 @@
       "name": "messageReportBlob",
       "type": "blobTrigger",
       "direction": "in",
-      "path": "%MESSAGE_EXPORT_STEP_1_CONTAINER%/{name}",
+      "path": "%MESSAGE_EXPORT_STEP_1_CONTAINER%/step1_{name}",
       "connection": "BLOB_COMMAND_STORAGE"
     },
     {
