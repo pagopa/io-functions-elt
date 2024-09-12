@@ -265,7 +265,9 @@ export const processMessages = (
     TE.chain(content => {
       const dateStringMin = new Date(rangeMin * 1000).toJSON();
       const dateStringMax = new Date(rangeMax * 1000).toJSON();
-      return exportToBlob(`${dateStringMin} - ${dateStringMax}.json`)(content);
+      return exportToBlob(`step1_${dateStringMin} - ${dateStringMax}.json`)(
+        content
+      );
     }),
     T.map(_ => {
       context.log(`[${rangeMin}] Result success:  ${E.isRight(_)}`);
