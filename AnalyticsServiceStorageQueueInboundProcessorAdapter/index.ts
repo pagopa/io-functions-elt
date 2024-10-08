@@ -11,6 +11,7 @@ import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
+import * as DOF from "../outbound/adapter/allow-all-outbound-filterer";
 
 const config = getConfigOrThrow();
 
@@ -39,7 +40,9 @@ const run = (_context: Context, document: unknown): Promise<void> =>
     telemetryAdapter,
     emptyEnricherAdapter,
     retrievedServiceOnKafkaAdapter,
-    throwAdapter
+    throwAdapter,
+    DOF.create(),
+    true
   ).process([document])();
 
 export default run;

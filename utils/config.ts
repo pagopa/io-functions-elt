@@ -8,6 +8,7 @@
 import * as t from "io-ts";
 
 import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
 import * as R from "fp-ts/Record";
 import * as S from "fp-ts/string";
@@ -189,6 +190,8 @@ export const IDecodableConfig = t.interface({
 
   SERVICES_LEASES_PREFIX: NonEmptyString,
 
+  ENABLE_PUBLISH_ERROR_TRACK: t.boolean,
+
   isProduction: t.boolean
 });
 
@@ -265,7 +268,13 @@ export const IConfig = new t.Type<IConfig>(
 
 export const envConfig = {
   ...process.env,
-  isProduction: process.env.NODE_ENV === "production"
+  isProduction: process.env.NODE_ENV === "production",
+  ENABLE_PUBLISH_ERROR_TRACK: pipe(
+    process.env.ENABLE_PUBLISH_ERROR_TRACK,
+    O.fromNullable,
+    O.map(value => value === "true"),
+    O.getOrElse(() => false)
+  )
 };
 
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode(envConfig);
