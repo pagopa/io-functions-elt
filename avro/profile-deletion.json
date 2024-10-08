@@ -1,0 +1,18 @@
+{
+  "name": "profileDeletion",
+  "type": "record",
+  "namespace": "dto",
+  "doc": "Kafka JS schema profile deletion event",
+  "fields":[
+    {
+      "name": "userPDVId",
+      "type": "string"
+    },
+    {
+      "name": "deletedAt",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "default": 0
+    }
+  ]
+}
