@@ -8,7 +8,11 @@ import { TelemetryClient } from "applicationinsights";
 import { RedisClientType } from "redis";
 import { PdvTokenizerClient } from "./pdvTokenizerClient";
 import { sha256 } from "./crypto";
-import { PDVIdPrefix } from "./redis";
+import {
+  falsyResponseToErrorAsync,
+  PDVIdPrefix,
+  singleStringReply
+} from "./redis";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PdvDependencies = {
@@ -65,7 +69,9 @@ const obtainTokenFromPDV: (
         TE.tryCatch(
           () => redisClient.set(`${PDVIdPrefix}${fiscalCode}`, pdvId),
           E.toError
-        )
+        ),
+        singleStringReply,
+        falsyResponseToErrorAsync(Error("Error saving the key"))
       )
     )
   );

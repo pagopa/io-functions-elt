@@ -40,6 +40,13 @@ const mockRedisClient = ({
 
 //
 
+const enricher = create(
+  2,
+  mockTokenizerClient,
+  TE.right(mockRedisClient),
+  mockTelemetryClient
+);
+
 describe.each`
   title                        | value                               | isList   | length
   ${"profile"}                 | ${aRetrievedProfile}                | ${false} | ${1}
@@ -50,13 +57,6 @@ describe.each`
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  const enricher = create(
-    2,
-    mockTokenizerClient,
-    TE.right(mockRedisClient),
-    mockTelemetryClient
-  );
 
   const call = isList ? enricher.enrichs(value) : enricher.enrich(value);
 
@@ -156,5 +156,84 @@ describe.each`
         )}`
       )
     );
+  });
+});
+
+describe("Redis cache introduction", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const call = enricher.enrich(aRetrievedProfile);
+
+  it("GIVEN a valid document WHEN the cache already has the token THEN PDV Tokenizer should not be called", async () => {
+    mockGet.mockResolvedValueOnce(aMockPdvId);
+
+    const result = await call();
+    expect(result).toStrictEqual(
+      E.right({
+        ...aRetrievedProfile,
+        userPDVId: aMockPdvId
+      })
+    );
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockSave).not.toHaveBeenCalled();
+    expect(mockSet).not.toHaveBeenCalled();
+    expect(mockTrackEvent).not.toHaveBeenCalled();
+  });
+
+  it("GIVEN a valid document WHEN the cache doesn't hold the token THEN PDV Tokenizer should be called along with the cache", async () => {
+    mockGet.mockResolvedValueOnce(undefined);
+
+    const result = await call();
+    expect(result).toStrictEqual(
+      E.right({
+        ...aRetrievedProfile,
+        userPDVId: aMockPdvId
+      })
+    );
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockSave).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledTimes(1);
+    expect(mockTrackEvent).not.toHaveBeenCalled();
+  });
+
+  it("GIVEN a valid document WHEN the cache can't be reached THEN an error should be returned", async () => {
+    const faultyEnricher = create(
+      2,
+      mockTokenizerClient,
+      TE.left(Error("error")),
+      mockTelemetryClient
+    );
+    const result = await faultyEnricher.enrich(aRetrievedProfile)();
+    expect(result).toStrictEqual(E.left(Error("error")));
+    expect(mockGet).not.toHaveBeenCalled();
+    expect(mockSave).not.toHaveBeenCalled();
+    expect(mockSet).not.toHaveBeenCalled();
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("GIVEN a valid document WHEN the cache can't reach redis to save the token THEN an error should be returned", async () => {
+    mockSet.mockRejectedValueOnce(Error("error"));
+
+    const result = await call();
+
+    expect(result).toStrictEqual(E.left(Error("error")));
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockSave).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledTimes(1);
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("GIVEN a valid document WHEN the cache can't save the token THEN an error should be returned", async () => {
+    mockSet.mockResolvedValueOnce("KO");
+
+    const result = await call();
+
+    expect(result).toStrictEqual(E.left(Error("Error saving the key")));
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockSave).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledTimes(1);
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
   });
 });
