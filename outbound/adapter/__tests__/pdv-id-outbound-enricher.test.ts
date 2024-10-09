@@ -13,6 +13,8 @@ import {
   aRetrievedServicePreferences,
   aRetrievedServicePreferencesList
 } from "../../../businesslogic/__mocks__/data.mock";
+import { RedisClientType } from "redis";
+import * as TE from "fp-ts/lib/TaskEither";
 
 const mockSave = jest
   .fn()
@@ -27,7 +29,16 @@ const mockTokenizerClient = ({
   saveUsingPUT: mockSave
 } as unknown) as Client;
 
-const enricher = create(2, mockTokenizerClient, mockTelemetryClient);
+// Redis mock
+const mockSet = jest.fn().mockResolvedValue("OK");
+// DEFAULT BEHAVIOUR: redis doesn't contain the value in the cache
+const mockGet = jest.fn().mockResolvedValue(undefined);
+const mockRedisClient = ({
+  set: mockSet,
+  get: mockGet
+} as unknown) as RedisClientType;
+
+//
 
 describe.each`
   title                        | value                               | isList   | length
@@ -39,6 +50,13 @@ describe.each`
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  const enricher = create(
+    2,
+    mockTokenizerClient,
+    TE.right(mockRedisClient),
+    mockTelemetryClient
+  );
 
   const call = isList ? enricher.enrichs(value) : enricher.enrich(value);
 

@@ -114,83 +114,102 @@ export const KafkaProducerCompactConfigFromEnv = new t.Type<
   t.identity
 );
 
+// Redis cache config
+const RedisConfig = t.intersection([
+  t.type({
+    REDIS_PASSWORD: NonEmptyString,
+    REDIS_TLS_ENABLED: withDefault(t.boolean, true),
+    REDIS_URL: NonEmptyString
+  }),
+  t.partial({
+    REDIS_PORT: NonEmptyString
+  })
+]);
+export type RedisConfig = t.TypeOf<typeof RedisConfig>;
+
 // global app configuration
 export type IDecodableConfig = t.TypeOf<typeof IDecodableConfig>;
-export const IDecodableConfig = t.interface({
-  APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
+export const IDecodableConfig = t.intersection([
+  t.interface({
+    APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
 
-  COSMOSDB_KEY: NonEmptyString,
-  COSMOSDB_NAME: NonEmptyString,
-  COSMOSDB_URI: NonEmptyString,
+    COSMOSDB_KEY: NonEmptyString,
+    COSMOSDB_NAME: NonEmptyString,
+    COSMOSDB_URI: NonEmptyString,
 
-  // eslint-disable-next-line sort-keys
-  COSMOSDB_REPLICA_KEY: NonEmptyString,
-  COSMOSDB_REPLICA_LOCATION: withDefault(
-    NonEmptyString,
-    "North Europe" as NonEmptyString
-  ),
-  COSMOSDB_REPLICA_NAME: NonEmptyString,
-  COSMOSDB_REPLICA_URI: NonEmptyString,
+    // eslint-disable-next-line sort-keys
+    COSMOSDB_REPLICA_KEY: NonEmptyString,
+    COSMOSDB_REPLICA_LOCATION: withDefault(
+      NonEmptyString,
+      "North Europe" as NonEmptyString
+    ),
+    COSMOSDB_REPLICA_NAME: NonEmptyString,
+    COSMOSDB_REPLICA_URI: NonEmptyString,
 
-  ERROR_STORAGE_ACCOUNT: NonEmptyString,
-  ERROR_STORAGE_KEY: NonEmptyString,
-  ERROR_STORAGE_TABLE: NonEmptyString,
-  ERROR_STORAGE_TABLE_MESSAGES: NonEmptyString,
-  ERROR_STORAGE_TABLE_MESSAGE_STATUS: NonEmptyString,
+    ERROR_STORAGE_ACCOUNT: NonEmptyString,
+    ERROR_STORAGE_KEY: NonEmptyString,
+    ERROR_STORAGE_TABLE: NonEmptyString,
+    ERROR_STORAGE_TABLE_MESSAGES: NonEmptyString,
+    ERROR_STORAGE_TABLE_MESSAGE_STATUS: NonEmptyString,
 
-  // eslint-disable-next-line sort-keys
-  BLOB_COMMAND_STORAGE: NonEmptyString,
-  COMMAND_STORAGE: NonEmptyString,
-  MESSAGE_EXPORT_STEP_1_CONTAINER: NonEmptyString,
-  MESSAGE_EXPORT_STEP_FINAL_CONTAINER: NonEmptyString,
+    // eslint-disable-next-line sort-keys
+    BLOB_COMMAND_STORAGE: NonEmptyString,
+    COMMAND_STORAGE: NonEmptyString,
+    MESSAGE_EXPORT_STEP_1_CONTAINER: NonEmptyString,
+    MESSAGE_EXPORT_STEP_FINAL_CONTAINER: NonEmptyString,
 
-  // eslint-disable-next-line sort-keys
-  COSMOS_CHUNK_SIZE: IntegerFromString,
-  COSMOS_DEGREE_OF_PARALLELISM: IntegerFromString,
+    // eslint-disable-next-line sort-keys
+    COSMOS_CHUNK_SIZE: IntegerFromString,
+    COSMOS_DEGREE_OF_PARALLELISM: IntegerFromString,
 
-  MESSAGE_CONTENT_CHUNK_SIZE: IntegerFromString,
-  MESSAGE_EXPORTS_COMMAND_TABLE: NonEmptyString,
-  MessageContentStorageConnection: NonEmptyString,
-  ServiceInfoBlobStorageConnection: NonEmptyString,
+    MESSAGE_CONTENT_CHUNK_SIZE: IntegerFromString,
+    MESSAGE_EXPORTS_COMMAND_TABLE: NonEmptyString,
+    MessageContentStorageConnection: NonEmptyString,
+    ServiceInfoBlobStorageConnection: NonEmptyString,
 
-  // eslint-disable-next-line sort-keys
-  MessageContentPrimaryStorageConnection: NonEmptyString,
+    // eslint-disable-next-line sort-keys
+    MessageContentPrimaryStorageConnection: NonEmptyString,
 
-  INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
-  SERVICES_FAILURE_QUEUE_NAME: NonEmptyString,
-  MESSAGE_STATUS_FAILURE_QUEUE_NAME: NonEmptyString,
-  MESSAGES_FAILURE_QUEUE_NAME: NonEmptyString,
-  SERVICE_PREFERENCES_FAILURE_QUEUE_NAME: NonEmptyString,
-  PROFILES_FAILURE_QUEUE_NAME: NonEmptyString,
+    INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
+    SERVICES_FAILURE_QUEUE_NAME: NonEmptyString,
+    MESSAGE_STATUS_FAILURE_QUEUE_NAME: NonEmptyString,
+    MESSAGES_FAILURE_QUEUE_NAME: NonEmptyString,
+    SERVICE_PREFERENCES_FAILURE_QUEUE_NAME: NonEmptyString,
+    PROFILES_FAILURE_QUEUE_NAME: NonEmptyString,
 
-  ENRICH_MESSAGE_THROTTLING: withDefault(
-    NonNegativeInteger,
-    500 as NonNegativeInteger
-  ),
-  ENRICH_PDVID_THROTTLING: withDefault(
-    NonNegativeInteger,
-    500 as NonNegativeInteger
-  ),
+    ENRICH_MESSAGE_THROTTLING: withDefault(
+      NonNegativeInteger,
+      500 as NonNegativeInteger
+    ),
+    ENRICH_PDVID_THROTTLING: withDefault(
+      NonNegativeInteger,
+      500 as NonNegativeInteger
+    ),
 
-  // PDV Tokenizer configuration
-  PDV_TOKENIZER_API_KEY: NonEmptyString,
-  PDV_TOKENIZER_BASE_URL: NonEmptyString,
-  PDV_TOKENIZER_BASE_PATH: NonEmptyString,
+    // PDV Tokenizer configuration
+    PDV_TOKENIZER_API_KEY: NonEmptyString,
+    PDV_TOKENIZER_BASE_URL: NonEmptyString,
+    PDV_TOKENIZER_BASE_PATH: NonEmptyString,
 
-  PN_SERVICE_ID: NonEmptyString,
+    PN_SERVICE_ID: NonEmptyString,
 
-  // eslint-disable-next-line sort-keys
-  SERVICEID_EXCLUSION_LIST: withDefault(
-    CommaSeparatedListOf(NonEmptyString),
-    []
-  ),
+    // eslint-disable-next-line sort-keys
+    SERVICEID_EXCLUSION_LIST: withDefault(
+      CommaSeparatedListOf(NonEmptyString),
+      []
+    ),
 
-  INTERNAL_TEST_FISCAL_CODES: withDefault(CommaSeparatedListOf(FiscalCode), []),
+    INTERNAL_TEST_FISCAL_CODES: withDefault(
+      CommaSeparatedListOf(FiscalCode),
+      []
+    ),
 
-  SERVICES_LEASES_PREFIX: NonEmptyString,
+    SERVICES_LEASES_PREFIX: NonEmptyString,
 
-  isProduction: t.boolean
-});
+    isProduction: t.boolean
+  }),
+  RedisConfig
+]);
 
 const MessagesKafkaTopicConfig = t.type({
   MESSAGES_TOPIC_CONNECTION_STRING: NonEmptyString,

@@ -5,6 +5,7 @@ import * as RA from "fp-ts/ReadonlyArray";
 import * as T from "fp-ts/Task";
 import * as E from "fp-ts/Either";
 import { TelemetryClient } from "applicationinsights";
+import { RedisClientType } from "redis";
 import { OutboundEnricher } from "../port/outbound-enricher";
 import { failure, success } from "../port/outbound-publisher";
 import { getPdvId } from "../../utils/pdv";
@@ -19,11 +20,12 @@ export type MaybePdvDocumentsTypes =
 export const create = <M extends MaybePdvDocumentsTypes>(
   maxParallelThrottling: number,
   pdvTokenizerClient: PdvTokenizerClient,
+  redisClientTask: TE.TaskEither<Error, RedisClientType>,
   appInsightsTelemetryClient: TelemetryClient
 ): OutboundEnricher<M> => {
   const enrichASingleMessage = (message: M): TE.TaskEither<Error, M> =>
     pipe(
-      { appInsightsTelemetryClient, pdvTokenizerClient },
+      { appInsightsTelemetryClient, pdvTokenizerClient, redisClientTask },
       getPdvId(message.fiscalCode),
       TE.map(userPDVId => ({
         ...message,

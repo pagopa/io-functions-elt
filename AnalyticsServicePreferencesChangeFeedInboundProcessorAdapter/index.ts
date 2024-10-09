@@ -22,6 +22,7 @@ import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 import { RetrievedServicePreferenceWithMaybePdvId } from "../utils/types/decoratedTypes";
 import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
 import { httpOrHttpsApiFetch } from "../utils/fetch";
+import { createRedisClientSingleton } from "../utils/redis";
 
 const config = getConfigOrThrow();
 
@@ -63,13 +64,20 @@ const pdvTokenizer = pdvTokenizerClient(
   config.PDV_TOKENIZER_BASE_PATH
 );
 
+const redisClientTask = createRedisClientSingleton(config);
+
 const telemetryClient = TA.initTelemetryClient(
   config.APPINSIGHTS_INSTRUMENTATIONKEY
 );
 
 const pdvIdEnricherAdapter: OutboundEnricher<RetrievedServicePreferenceWithMaybePdvId> = PDVA.create<
   RetrievedServicePreferenceWithMaybePdvId
->(config.ENRICH_PDVID_THROTTLING, pdvTokenizer, telemetryClient);
+>(
+  config.ENRICH_PDVID_THROTTLING,
+  pdvTokenizer,
+  redisClientTask,
+  telemetryClient
+);
 
 const telemetryAdapter = TA.create(telemetryClient);
 
