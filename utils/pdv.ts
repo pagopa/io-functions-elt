@@ -5,26 +5,41 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { flow, pipe } from "fp-ts/lib/function";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { TelemetryClient } from "applicationinsights";
+import { RedisClientType } from "redis";
+import { Second } from "@pagopa/ts-commons/lib/units";
 import { PdvTokenizerClient } from "./pdvTokenizerClient";
 import { sha256 } from "./crypto";
+import {
+  falsyResponseToErrorAsync,
+  PDVIdPrefix,
+  singleStringReply
+} from "./redis";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PdvDependencies = {
   readonly pdvTokenizerClient: PdvTokenizerClient;
+  readonly redisClientTask: TE.TaskEither<Error, RedisClientType>;
+  readonly PDVIdKeyTTLinSeconds: Second;
   readonly appInsightsTelemetryClient: TelemetryClient;
 };
 
-export const getPdvId: (
-  fiscalCode: FiscalCode
-) => RTE.ReaderTaskEither<
-  PdvDependencies,
-  Error,
-  NonEmptyString
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-> = fiscalCode => ({ pdvTokenizerClient, appInsightsTelemetryClient }) =>
+const obtainTokenFromPDV: (
+  fiscalCode: FiscalCode,
+  redisClient: RedisClientType,
+  keyTTLinSeconds: Second,
+  pdvTokenizerClient: PdvTokenizerClient
+) => TE.TaskEither<Error, NonEmptyString> = (
+  fiscalCode,
+  redisClient,
+  keyTTLinSeconds,
+  pdvTokenizerClient
+) =>
   pipe(
     TE.tryCatch(
-      () => pdvTokenizerClient.saveUsingPUT({ body: { pii: fiscalCode } }),
+      () =>
+        pdvTokenizerClient.saveUsingPUT({
+          body: { pii: fiscalCode }
+        }),
       E.toError
     ),
     TE.chainEitherKW(
@@ -52,8 +67,65 @@ export const getPdvId: (
         )
       )
     ),
+    // Save obtained token for further usage
+    TE.chainFirst(pdvId =>
+      pipe(
+        TE.tryCatch(
+          () =>
+            redisClient.setEx(
+              `${PDVIdPrefix}${fiscalCode}`,
+              keyTTLinSeconds,
+              pdvId
+            ),
+          E.toError
+        ),
+        singleStringReply,
+        falsyResponseToErrorAsync(Error("Error saving the key"))
+      )
+    )
+  );
+
+export const getPdvId: (
+  fiscalCode: FiscalCode
+) => RTE.ReaderTaskEither<
+  PdvDependencies,
+  Error,
+  NonEmptyString
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+> = fiscalCode => ({
+  pdvTokenizerClient,
+  appInsightsTelemetryClient,
+  redisClientTask,
+  PDVIdKeyTTLinSeconds
+}) =>
+  pipe(
+    redisClientTask,
+    TE.chain(redisClient =>
+      pipe(
+        // check if redis cache already holds the info
+        TE.tryCatch(
+          () => redisClient.get(`${PDVIdPrefix}${fiscalCode}`),
+          E.toError
+        ),
+        TE.chain(
+          flow(
+            NonEmptyString.decode,
+            TE.fromEither,
+            // Calling PDV to obtain a token if nothing was found in the cache
+            TE.orElse(() =>
+              obtainTokenFromPDV(
+                fiscalCode,
+                redisClient,
+                PDVIdKeyTTLinSeconds,
+                pdvTokenizerClient
+              )
+            )
+          )
+        )
+      )
+    ),
     TE.mapLeft(error => {
-      // unexpected response that needs tracking
+      // unexpected behaviour that needs tracking
       appInsightsTelemetryClient.trackEvent({
         name: "fn-elt.getPdvId.error",
         properties: {

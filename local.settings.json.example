@@ -37,6 +37,11 @@
     "PROFILES_LEASES_PREFIX" : "profiles-001",
     "PROFILES_FAILURE_QUEUE_NAME" : "<Queue Name>-profiles",
 
-    "SERVICEID_EXCLUSION_LIST": "ServiceId1,ServiceId2"
+    "SERVICEID_EXCLUSION_LIST": "ServiceId1,ServiceId2",
+
+    "REDIS_URL": "localhost",
+    "REDIS_PORT": 6379,
+    "REDIS_PASSWORD": "foo",
+    "REDIS_TLS_ENABLED": false
   }
 }

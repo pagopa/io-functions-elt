@@ -4,6 +4,7 @@ import { Context } from "@azure/functions";
 import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
+import { Second } from "@pagopa/ts-commons/lib/units";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import * as QA from "../outbound/adapter/queue-outbound-mapper-publisher";
@@ -22,6 +23,7 @@ import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 import { RetrievedServicePreferenceWithMaybePdvId } from "../utils/types/decoratedTypes";
 import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
 import { httpOrHttpsApiFetch } from "../utils/fetch";
+import { createRedisClientSingleton } from "../utils/redis";
 
 const config = getConfigOrThrow();
 
@@ -63,13 +65,21 @@ const pdvTokenizer = pdvTokenizerClient(
   config.PDV_TOKENIZER_BASE_PATH
 );
 
+const redisClientTask = createRedisClientSingleton(config);
+
 const telemetryClient = TA.initTelemetryClient(
   config.APPINSIGHTS_INSTRUMENTATIONKEY
 );
 
 const pdvIdEnricherAdapter: OutboundEnricher<RetrievedServicePreferenceWithMaybePdvId> = PDVA.create<
   RetrievedServicePreferenceWithMaybePdvId
->(config.ENRICH_PDVID_THROTTLING, pdvTokenizer, telemetryClient);
+>(
+  config.ENRICH_PDVID_THROTTLING,
+  pdvTokenizer,
+  redisClientTask,
+  config.PDV_IDS_TTL as Second,
+  telemetryClient
+);
 
 const telemetryAdapter = TA.create(telemetryClient);
 
