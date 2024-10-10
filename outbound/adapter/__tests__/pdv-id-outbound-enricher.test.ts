@@ -15,6 +15,8 @@ import {
 } from "../../../businesslogic/__mocks__/data.mock";
 import { RedisClientType } from "redis";
 import * as TE from "fp-ts/lib/TaskEither";
+import { Second } from "@pagopa/ts-commons/lib/units";
+import { PDVIdPrefix } from "../../../utils/redis";
 
 const mockSave = jest
   .fn()
@@ -35,15 +37,18 @@ const mockSet = jest.fn().mockResolvedValue("OK");
 const mockGet = jest.fn().mockResolvedValue(undefined);
 const mockRedisClient = ({
   set: mockSet,
+  setEx: mockSet,
   get: mockGet
 } as unknown) as RedisClientType;
 
+const mockPDVIdsTTL = 30 as Second;
 //
 
 const enricher = create(
   2,
   mockTokenizerClient,
   TE.right(mockRedisClient),
+  mockPDVIdsTTL,
   mockTelemetryClient
 );
 
@@ -195,6 +200,11 @@ describe("Redis cache introduction", () => {
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(mockSave).toHaveBeenCalledTimes(1);
     expect(mockSet).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledWith(
+      `${PDVIdPrefix}${aRetrievedProfile.fiscalCode}`,
+      mockPDVIdsTTL,
+      aMockPdvId
+    );
     expect(mockTrackEvent).not.toHaveBeenCalled();
   });
 
@@ -203,6 +213,7 @@ describe("Redis cache introduction", () => {
       2,
       mockTokenizerClient,
       TE.left(Error("error")),
+      mockPDVIdsTTL,
       mockTelemetryClient
     );
     const result = await faultyEnricher.enrich(aRetrievedProfile)();
@@ -222,6 +233,11 @@ describe("Redis cache introduction", () => {
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(mockSave).toHaveBeenCalledTimes(1);
     expect(mockSet).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledWith(
+      `${PDVIdPrefix}${aRetrievedProfile.fiscalCode}`,
+      mockPDVIdsTTL,
+      aMockPdvId
+    );
     expect(mockTrackEvent).toHaveBeenCalledTimes(1);
   });
 
@@ -234,6 +250,12 @@ describe("Redis cache introduction", () => {
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(mockSave).toHaveBeenCalledTimes(1);
     expect(mockSet).toHaveBeenCalledTimes(1);
+
+    expect(mockSet).toHaveBeenCalledWith(
+      `${PDVIdPrefix}${aRetrievedProfile.fiscalCode}`,
+      mockPDVIdsTTL,
+      aMockPdvId
+    );
     expect(mockTrackEvent).toHaveBeenCalledTimes(1);
   });
 });

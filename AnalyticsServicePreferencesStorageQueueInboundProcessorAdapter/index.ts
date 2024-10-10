@@ -1,5 +1,6 @@
 import { Context } from "@azure/functions";
 import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
+import { Second } from "@pagopa/ts-commons/lib/units";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow, withTopic } from "../utils/config";
@@ -59,6 +60,7 @@ const pdvIdEnricherAdapter: OutboundEnricher<RetrievedServicePreferenceWithMaybe
   config.ENRICH_PDVID_THROTTLING,
   pdvTokenizer,
   redisClientTask,
+  config.PDV_IDS_TTL as Second,
   telemetryClient
 );
 

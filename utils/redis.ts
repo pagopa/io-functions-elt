@@ -52,7 +52,7 @@ const createRedisClientTask: (
           config.REDIS_PORT,
           config.REDIS_TLS_ENABLED
         ),
-      () => new Error("Error Connecting to redis")
+      err => new Error(`Error Connecting to redis: ${err}`)
     ),
     TE.chain(redisClient => {
       redisClient.on("connect", () => {

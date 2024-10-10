@@ -6,6 +6,7 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { TelemetryClient } from "applicationinsights";
 import { RedisClientType } from "redis";
+import { Second } from "@pagopa/ts-commons/lib/units";
 import { PdvTokenizerClient } from "./pdvTokenizerClient";
 import { sha256 } from "./crypto";
 import {
@@ -18,16 +19,19 @@ import {
 export type PdvDependencies = {
   readonly pdvTokenizerClient: PdvTokenizerClient;
   readonly redisClientTask: TE.TaskEither<Error, RedisClientType>;
+  readonly PDVIdKeyTTLinSeconds: Second;
   readonly appInsightsTelemetryClient: TelemetryClient;
 };
 
 const obtainTokenFromPDV: (
   fiscalCode: FiscalCode,
   redisClient: RedisClientType,
+  keyTTLinSeconds: Second,
   pdvTokenizerClient: PdvTokenizerClient
 ) => TE.TaskEither<Error, NonEmptyString> = (
   fiscalCode,
   redisClient,
+  keyTTLinSeconds,
   pdvTokenizerClient
 ) =>
   pipe(
@@ -67,7 +71,12 @@ const obtainTokenFromPDV: (
     TE.chainFirst(pdvId =>
       pipe(
         TE.tryCatch(
-          () => redisClient.set(`${PDVIdPrefix}${fiscalCode}`, pdvId),
+          () =>
+            redisClient.setEx(
+              `${PDVIdPrefix}${fiscalCode}`,
+              keyTTLinSeconds,
+              pdvId
+            ),
           E.toError
         ),
         singleStringReply,
@@ -86,7 +95,8 @@ export const getPdvId: (
 > = fiscalCode => ({
   pdvTokenizerClient,
   appInsightsTelemetryClient,
-  redisClientTask
+  redisClientTask,
+  PDVIdKeyTTLinSeconds
 }) =>
   pipe(
     redisClientTask,
@@ -103,7 +113,12 @@ export const getPdvId: (
             TE.fromEither,
             // Calling PDV to obtain a token if nothing was found in the cache
             TE.orElse(() =>
-              obtainTokenFromPDV(fiscalCode, redisClient, pdvTokenizerClient)
+              obtainTokenFromPDV(
+                fiscalCode,
+                redisClient,
+                PDVIdKeyTTLinSeconds,
+                pdvTokenizerClient
+              )
             )
           )
         )

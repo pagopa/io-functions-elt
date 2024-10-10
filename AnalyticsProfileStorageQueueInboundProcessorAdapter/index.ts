@@ -2,6 +2,7 @@ import { Context } from "@azure/functions";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import { Second } from "@pagopa/ts-commons/lib/units";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow, withTopic } from "../utils/config";
@@ -67,6 +68,7 @@ const pdvIdEnricherAdapter: OutboundEnricher<RetrievedProfileWithMaybePdvId> = P
   config.ENRICH_PDVID_THROTTLING,
   pdvTokenizer,
   redisClientTask,
+  config.PDV_IDS_TTL as Second,
   telemetryClient
 );
 

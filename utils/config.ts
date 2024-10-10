@@ -191,6 +191,9 @@ export const IDecodableConfig = t.intersection([
     PDV_TOKENIZER_BASE_URL: NonEmptyString,
     PDV_TOKENIZER_BASE_PATH: NonEmptyString,
 
+    // TTL in seconds for PDV ID key retention (defaults to 30 days)
+    PDV_IDS_TTL: withDefault(t.number, 3600 * 24 * 30),
+
     PN_SERVICE_ID: NonEmptyString,
 
     // eslint-disable-next-line sort-keys
@@ -284,6 +287,9 @@ export const IConfig = new t.Type<IConfig>(
 
 export const envConfig = {
   ...process.env,
+  REDIS_TLS_ENABLED:
+    process.env.REDIS_TLS_ENABLED &&
+    process.env.REDIS_TLS_ENABLED.toLowerCase() === "true",
   isProduction: process.env.NODE_ENV === "production"
 };
 

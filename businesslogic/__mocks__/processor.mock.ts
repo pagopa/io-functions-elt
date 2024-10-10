@@ -14,6 +14,7 @@ import { Client } from "../../generated/pdv-tokenizer-api/client";
 import { aKafkaResponse, aMockPdvId, aTopic } from "./data.mock";
 import { RedisClientType } from "redis";
 import * as TE from "fp-ts/lib/TaskEither";
+import { Second } from "@pagopa/ts-commons/lib/units";
 
 // Mocks
 export const mockTrackException = jest.fn(_ => void 0);
@@ -47,9 +48,11 @@ const mockSet = jest.fn().mockResolvedValue("OK");
 const mockGet = jest.fn().mockResolvedValue(undefined);
 const mockRedisClient = ({
   set: mockSet,
+  setEx: mockSet,
   get: mockGet
 } as unknown) as RedisClientType;
 
+const mockPDVIdsTTL = 30 as Second;
 //
 
 export const mockGetPdvId = jest
@@ -65,6 +68,7 @@ export const getPdvIdEnricherAdapter = <
     10,
     ({} as unknown) as Client /* functionality mocked by mockGetPdvId */,
     TE.right(mockRedisClient),
+    mockPDVIdsTTL,
     trackerMock
   );
 
