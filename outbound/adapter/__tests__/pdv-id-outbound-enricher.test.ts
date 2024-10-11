@@ -224,12 +224,17 @@ describe("Redis cache introduction", () => {
     expect(mockTrackEvent).toHaveBeenCalledTimes(1);
   });
 
-  it("GIVEN a valid document WHEN the cache can't reach redis to save the token THEN an error should be returned", async () => {
+  it("GIVEN a valid document WHEN the cache can't reach redis to save the token THEN we go ahead with the enrich", async () => {
     mockSet.mockRejectedValueOnce(Error("error"));
 
     const result = await call();
 
-    expect(result).toStrictEqual(E.left(Error("error")));
+    expect(result).toStrictEqual(
+      E.right({
+        ...aRetrievedProfile,
+        userPDVId: aMockPdvId
+      })
+    );
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(mockSave).toHaveBeenCalledTimes(1);
     expect(mockSet).toHaveBeenCalledTimes(1);
@@ -238,24 +243,6 @@ describe("Redis cache introduction", () => {
       mockPDVIdsTTL,
       aMockPdvId
     );
-    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
-  });
-
-  it("GIVEN a valid document WHEN the cache can't save the token THEN an error should be returned", async () => {
-    mockSet.mockResolvedValueOnce("KO");
-
-    const result = await call();
-
-    expect(result).toStrictEqual(E.left(Error("Error saving the key")));
-    expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockSave).toHaveBeenCalledTimes(1);
-    expect(mockSet).toHaveBeenCalledTimes(1);
-
-    expect(mockSet).toHaveBeenCalledWith(
-      `${PDVIdPrefix}${aRetrievedProfile.fiscalCode}`,
-      mockPDVIdsTTL,
-      aMockPdvId
-    );
-    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
+    expect(mockTrackEvent).not.toHaveBeenCalled();
   });
 });

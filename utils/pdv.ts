@@ -67,20 +67,13 @@ const obtainTokenFromPDV: (
         )
       )
     ),
-    // Save obtained token for further usage
-    TE.chainFirst(pdvId =>
+    // Save obtained token for further usage (fire and forget)
+    TE.chainFirstW(pdvId =>
       pipe(
-        TE.tryCatch(
-          () =>
-            redisClient.setEx(
-              `${PDVIdPrefix}${fiscalCode}`,
-              keyTTLinSeconds,
-              pdvId
-            ),
-          E.toError
-        ),
-        singleStringReply,
-        falsyResponseToErrorAsync(Error("Error saving the key"))
+        redisClient
+          .setEx(`${PDVIdPrefix}${fiscalCode}`, keyTTLinSeconds, pdvId)
+          .catch(() => void 0 as never),
+        () => TE.right(void 0)
       )
     )
   );
