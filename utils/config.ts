@@ -192,7 +192,7 @@ export const IDecodableConfig = t.intersection([
     PDV_TOKENIZER_BASE_PATH: NonEmptyString,
 
     // TTL in seconds for PDV ID key retention (defaults to 30 days)
-    PDV_IDS_TTL: withDefault(t.number, 3600 * 24 * 30),
+    PDV_IDS_TTL: withDefault(IntegerFromString, 3600 * 24 * 30),
 
     PN_SERVICE_ID: NonEmptyString,
 
