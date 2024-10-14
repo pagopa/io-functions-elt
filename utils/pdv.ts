@@ -9,7 +9,7 @@ import { RedisClientType } from "redis";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { PdvTokenizerClient } from "./pdvTokenizerClient";
 import { sha256 } from "./crypto";
-import { PDVIdPrefix } from "./redis";
+import { PDVIdPrefix, sendSampledRedisError } from "./redis";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PdvDependencies = {
@@ -64,6 +64,7 @@ const obtainTokenFromPDV: (
     TE.chainFirstW(pdvId =>
       pipe(
         deps.redisClientTask,
+        sendSampledRedisError(deps.appInsightsTelemetryClient),
         TE.chainW(redisClient =>
           pipe(
             redisClient

@@ -1,6 +1,7 @@
 import * as redis from "redis";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/function";
+import { TelemetryClient } from "applicationinsights";
 import { RedisConfig } from "./config";
 
 export const PDVIdPrefix = "PDVID-";
@@ -128,4 +129,23 @@ export const falsyResponseToErrorAsync = (error: Error) => (
   pipe(
     response,
     TE.chain(value => (value ? TE.right(value) : TE.left(error)))
+  );
+
+export const sendSampledRedisError = (
+  appInsightsTelemetryClient: TelemetryClient
+) => (
+  redisTask: TE.TaskEither<Error, redis.RedisClientType>
+): TE.TaskEither<Error, redis.RedisClientType> =>
+  pipe(
+    redisTask,
+    TE.mapLeft(err => {
+      // sampled event
+      appInsightsTelemetryClient.trackEvent({
+        name: "fn-elt.getPdvId.redis.error",
+        properties: {
+          error_message: err.message
+        }
+      });
+      return err;
+    })
   );

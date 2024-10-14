@@ -226,7 +226,7 @@ describe("Redis cache introduction", () => {
     expect(mockGet).not.toHaveBeenCalled();
     expect(mockSave).toHaveBeenCalledTimes(1);
     expect(mockSet).not.toHaveBeenCalled();
-    expect(mockTrackEvent).not.toHaveBeenCalled();
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
   });
 
   it("GIVEN a valid document WHEN the cache can't be reached to save the token THEN we go ahead", async () => {
