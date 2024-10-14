@@ -13,10 +13,12 @@ import { getPdvId } from "../../utils/pdv";
 import { RetrievedProfileWithMaybePdvId } from "../../AnalyticsProfilesChangeFeedInboundProcessorAdapter";
 import { RetrievedServicePreferenceWithMaybePdvId } from "../../utils/types/decoratedTypes";
 import { PdvTokenizerClient } from "../../utils/pdvTokenizerClient";
+import { RetrievedUserDataProcessingWithMaybePdvId } from "../../AnalyticsDeletesChangeFeedInboundProcessorAdapter";
 
 export type MaybePdvDocumentsTypes =
   | RetrievedServicePreferenceWithMaybePdvId
-  | RetrievedProfileWithMaybePdvId;
+  | RetrievedProfileWithMaybePdvId
+  | RetrievedUserDataProcessingWithMaybePdvId;
 
 export const create = <M extends MaybePdvDocumentsTypes>(
   maxParallelThrottling: number,

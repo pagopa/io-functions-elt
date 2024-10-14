@@ -176,6 +176,7 @@ export const IDecodableConfig = t.intersection([
     MESSAGES_FAILURE_QUEUE_NAME: NonEmptyString,
     SERVICE_PREFERENCES_FAILURE_QUEUE_NAME: NonEmptyString,
     PROFILES_FAILURE_QUEUE_NAME: NonEmptyString,
+    DELETES_FAILURE_QUEUE_NAME: NonEmptyString,
 
     ENRICH_MESSAGE_THROTTLING: withDefault(
       NonNegativeInteger,
@@ -208,6 +209,11 @@ export const IDecodableConfig = t.intersection([
     ),
 
     SERVICES_LEASES_PREFIX: NonEmptyString,
+    MESSAGES_LEASES_PREFIX: NonEmptyString,
+    MESSAGE_STATUS_LEASES_PREFIX: NonEmptyString,
+    PROFILES_LEASES_PREFIX: NonEmptyString,
+    SERVICE_PREFERENCES_LEASES_PREFIX: NonEmptyString,
+    DELETES_LEASES_PREFIX: NonEmptyString,
 
     isProduction: t.boolean
   }),
@@ -242,6 +248,12 @@ const ProfilesKafkaTopicConfig = t.type({
 });
 type ProfilesKafkaTopicConfig = t.TypeOf<typeof ProfilesKafkaTopicConfig>;
 
+const DeletesKafkaTopicConfig = t.type({
+  DELETES_TOPIC_CONNECTION_STRING: NonEmptyString,
+  DELETES_TOPIC_NAME: NonEmptyString
+});
+type DeletesKafkaTopicConfig = t.TypeOf<typeof DeletesKafkaTopicConfig>;
+
 export interface IParsableConfig {
   readonly targetKafka: KafkaProducerCompactConfig;
 
@@ -249,6 +261,7 @@ export interface IParsableConfig {
   readonly messageStatusKafkaTopicConfig: MessageStatusKafkaTopicConfig;
   readonly servicePreferencesKafkaTopicConfig: ServicePreferencesKafkaTopicConfig;
   readonly profilesKafkaTopicConfig: ProfilesKafkaTopicConfig;
+  readonly deletesKafkaTopicConfig: DeletesKafkaTopicConfig;
 }
 
 export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
@@ -268,6 +281,9 @@ export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
     ),
     E.bind("profilesKafkaTopicConfig", () =>
       ProfilesKafkaTopicConfig.decode(input)
+    ),
+    E.bind("deletesKafkaTopicConfig", () =>
+      DeletesKafkaTopicConfig.decode(input)
     )
   );
 
