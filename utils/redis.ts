@@ -131,7 +131,7 @@ export const falsyResponseToErrorAsync = (error: Error) => (
     TE.chain(value => (value ? TE.right(value) : TE.left(error)))
   );
 
-export const sendSampledRedisError = (
+export const sendSampledRedisNetworkError = (
   appInsightsTelemetryClient: TelemetryClient
 ) => (
   redisTask: TE.TaskEither<Error, redis.RedisClientType>
@@ -147,5 +147,23 @@ export const sendSampledRedisError = (
         }
       });
       return err;
+    })
+  );
+
+export const sendSampledRedisCommandError = (
+  appInsightsTelemetryClient: TelemetryClient
+) => (
+  command: TE.TaskEither<Error, string | null>
+): TE.TaskEither<Error, string | null> =>
+  pipe(
+    command,
+    TE.mapLeft(error => {
+      appInsightsTelemetryClient.trackEvent({
+        name: "fn-elt.getPdvId.redis.command.error",
+        properties: {
+          error_message: error.message
+        }
+      });
+      return error;
     })
   );

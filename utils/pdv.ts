@@ -9,7 +9,11 @@ import { RedisClientType } from "redis";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { PdvTokenizerClient } from "./pdvTokenizerClient";
 import { sha256 } from "./crypto";
-import { PDVIdPrefix, sendSampledRedisError } from "./redis";
+import {
+  PDVIdPrefix,
+  sendSampledRedisCommandError,
+  sendSampledRedisNetworkError
+} from "./redis";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PdvDependencies = {
@@ -64,7 +68,7 @@ const obtainTokenFromPDV: (
     TE.chainFirstW(pdvId =>
       pipe(
         deps.redisClientTask,
-        sendSampledRedisError(deps.appInsightsTelemetryClient),
+        sendSampledRedisNetworkError(deps.appInsightsTelemetryClient),
         TE.chain(redisClient =>
           pipe(
             TE.tryCatch(
@@ -76,15 +80,7 @@ const obtainTokenFromPDV: (
                 ),
               E.toError
             ),
-            TE.mapLeft(error => {
-              deps.appInsightsTelemetryClient.trackEvent({
-                name: "fn-elt.getPdvId.redis.command.error",
-                properties: {
-                  error_message: error.message
-                }
-              });
-              return error;
-            })
+            sendSampledRedisCommandError(deps.appInsightsTelemetryClient)
           )
         ),
         TE.map(_ => void 0),
@@ -110,15 +106,7 @@ export const getPdvId: (
           () => redisClient.get(`${PDVIdPrefix}${fiscalCode}`),
           E.toError
         ),
-        TE.mapLeft(error => {
-          deps.appInsightsTelemetryClient.trackEvent({
-            name: "fn-elt.getPdvId.redis.command.error",
-            properties: {
-              error_message: error.message
-            }
-          });
-          return error;
-        }),
+        sendSampledRedisCommandError(deps.appInsightsTelemetryClient),
         TE.chainEitherKW(NonEmptyString.decode)
       )
     ),
