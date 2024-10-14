@@ -208,7 +208,7 @@ describe("Redis cache introduction", () => {
     expect(mockTrackEvent).not.toHaveBeenCalled();
   });
 
-  it("GIVEN a valid document WHEN the cache can't be reached THEN an error should be returned", async () => {
+  it("GIVEN a valid document WHEN the cache can't be reached THEN PDV Tokenizer should be called", async () => {
     const faultyEnricher = create(
       2,
       mockTokenizerClient,
@@ -217,14 +217,19 @@ describe("Redis cache introduction", () => {
       mockTelemetryClient
     );
     const result = await faultyEnricher.enrich(aRetrievedProfile)();
-    expect(result).toStrictEqual(E.left(Error("error")));
+    expect(result).toStrictEqual(
+      E.right({
+        ...aRetrievedProfile,
+        userPDVId: aMockPdvId
+      })
+    );
     expect(mockGet).not.toHaveBeenCalled();
-    expect(mockSave).not.toHaveBeenCalled();
+    expect(mockSave).toHaveBeenCalledTimes(1);
     expect(mockSet).not.toHaveBeenCalled();
-    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
+    expect(mockTrackEvent).not.toHaveBeenCalled();
   });
 
-  it("GIVEN a valid document WHEN the cache can't reach redis to save the token THEN we go ahead with the enrich", async () => {
+  it("GIVEN a valid document WHEN the cache can't be reached to save the token THEN we go ahead", async () => {
     mockSet.mockRejectedValueOnce(Error("error"));
 
     const result = await call();
