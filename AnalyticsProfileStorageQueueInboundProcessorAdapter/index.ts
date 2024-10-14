@@ -2,6 +2,7 @@ import { Context } from "@azure/functions";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import { Second } from "@pagopa/ts-commons/lib/units";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow, withTopic } from "../utils/config";
@@ -15,6 +16,7 @@ import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { profilesAvroFormatter } from "../utils/formatter/profilesAvroFormatter";
 import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
 import { httpOrHttpsApiFetch } from "../utils/fetch";
+import { createRedisClientSingleton } from "../utils/redis";
 
 export type RetrievedProfileWithMaybePdvId = t.TypeOf<
   typeof RetrievedProfileWithMaybePdvId
@@ -52,6 +54,8 @@ const pdvTokenizer = pdvTokenizerClient(
   config.PDV_TOKENIZER_BASE_PATH
 );
 
+const redisClientTask = createRedisClientSingleton(config);
+
 const telemetryClient = TA.initTelemetryClient(
   config.APPINSIGHTS_INSTRUMENTATIONKEY
 );
@@ -60,7 +64,13 @@ const telemetryAdapter = TA.create(telemetryClient);
 
 const pdvIdEnricherAdapter: OutboundEnricher<RetrievedProfileWithMaybePdvId> = PDVA.create<
   RetrievedProfileWithMaybePdvId
->(config.ENRICH_PDVID_THROTTLING, pdvTokenizer, telemetryClient);
+>(
+  config.ENRICH_PDVID_THROTTLING,
+  pdvTokenizer,
+  redisClientTask,
+  config.PDV_IDS_TTL as Second,
+  telemetryClient
+);
 
 const run = (_context: Context, document: unknown): Promise<void> =>
   getAnalyticsProcessorForDocuments(

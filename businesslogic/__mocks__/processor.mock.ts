@@ -12,6 +12,9 @@ import { OutboundPublisher } from "../../outbound/port/outbound-publisher";
 import * as pdv from "../../utils/pdv";
 import { Client } from "../../generated/pdv-tokenizer-api/client";
 import { aKafkaResponse, aMockPdvId, aTopic } from "./data.mock";
+import { RedisClientType } from "redis";
+import * as TE from "fp-ts/lib/TaskEither";
+import { Second } from "@pagopa/ts-commons/lib/units";
 
 // Mocks
 export const mockTrackException = jest.fn(_ => void 0);
@@ -39,6 +42,19 @@ export const producerMock = () => ({
   topic: { topic: aTopic }
 });
 
+// Redis mock
+const mockSet = jest.fn().mockResolvedValue("OK");
+// DEFAULT BEHAVIOUR: redis doesn't contain the value in the cache
+const mockGet = jest.fn().mockResolvedValue(undefined);
+const mockRedisClient = ({
+  set: mockSet,
+  setEx: mockSet,
+  get: mockGet
+} as unknown) as RedisClientType;
+
+const mockPDVIdsTTL = 30 as Second;
+//
+
 export const mockGetPdvId = jest
   .spyOn(pdv, "getPdvId")
   .mockReturnValue(RTE.right(aMockPdvId));
@@ -51,6 +67,8 @@ export const getPdvIdEnricherAdapter = <
   PDVA.create<T>(
     10,
     ({} as unknown) as Client /* functionality mocked by mockGetPdvId */,
+    TE.right(mockRedisClient),
+    mockPDVIdsTTL,
     trackerMock
   );
 

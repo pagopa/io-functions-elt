@@ -13,6 +13,10 @@ import {
   aRetrievedServicePreferences,
   aRetrievedServicePreferencesList
 } from "../../../businesslogic/__mocks__/data.mock";
+import { RedisClientType } from "redis";
+import * as TE from "fp-ts/lib/TaskEither";
+import { Second } from "@pagopa/ts-commons/lib/units";
+import { PDVIdPrefix } from "../../../utils/redis";
 
 const mockSave = jest
   .fn()
@@ -27,7 +31,26 @@ const mockTokenizerClient = ({
   saveUsingPUT: mockSave
 } as unknown) as Client;
 
-const enricher = create(2, mockTokenizerClient, mockTelemetryClient);
+// Redis mock
+const mockSet = jest.fn().mockResolvedValue("OK");
+// DEFAULT BEHAVIOUR: redis doesn't contain the value in the cache
+const mockGet = jest.fn().mockResolvedValue(undefined);
+const mockRedisClient = ({
+  set: mockSet,
+  setEx: mockSet,
+  get: mockGet
+} as unknown) as RedisClientType;
+
+const mockPDVIdsTTL = 30 as Second;
+//
+
+const enricher = create(
+  2,
+  mockTokenizerClient,
+  TE.right(mockRedisClient),
+  mockPDVIdsTTL,
+  mockTelemetryClient
+);
 
 describe.each`
   title                        | value                               | isList   | length
@@ -138,5 +161,114 @@ describe.each`
         )}`
       )
     );
+  });
+});
+
+describe("Redis cache introduction", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const call = enricher.enrich(aRetrievedProfile);
+
+  it("GIVEN a valid document WHEN the cache already has the token THEN PDV Tokenizer should not be called", async () => {
+    mockGet.mockResolvedValueOnce(aMockPdvId);
+
+    const result = await call();
+    expect(result).toStrictEqual(
+      E.right({
+        ...aRetrievedProfile,
+        userPDVId: aMockPdvId
+      })
+    );
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockSave).not.toHaveBeenCalled();
+    expect(mockSet).not.toHaveBeenCalled();
+    expect(mockTrackEvent).not.toHaveBeenCalled();
+  });
+
+  it("GIVEN a valid document WHEN the cache doesn't hold the token THEN PDV Tokenizer should be called along with the cache", async () => {
+    mockGet.mockResolvedValueOnce(undefined);
+
+    const result = await call();
+    expect(result).toStrictEqual(
+      E.right({
+        ...aRetrievedProfile,
+        userPDVId: aMockPdvId
+      })
+    );
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockSave).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledWith(
+      `${PDVIdPrefix}${aRetrievedProfile.fiscalCode}`,
+      mockPDVIdsTTL,
+      aMockPdvId
+    );
+    expect(mockTrackEvent).not.toHaveBeenCalled();
+  });
+
+  it("GIVEN a valid document WHEN the cache get goes wrong THEN PDV Tokenizer should be called along with the cache", async () => {
+    mockGet.mockRejectedValueOnce(Error("error"));
+
+    const result = await call();
+    expect(result).toStrictEqual(
+      E.right({
+        ...aRetrievedProfile,
+        userPDVId: aMockPdvId
+      })
+    );
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockSave).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledWith(
+      `${PDVIdPrefix}${aRetrievedProfile.fiscalCode}`,
+      mockPDVIdsTTL,
+      aMockPdvId
+    );
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("GIVEN a valid document WHEN the cache can't be reached THEN PDV Tokenizer should be called", async () => {
+    const faultyEnricher = create(
+      2,
+      mockTokenizerClient,
+      TE.left(Error("error")),
+      mockPDVIdsTTL,
+      mockTelemetryClient
+    );
+    const result = await faultyEnricher.enrich(aRetrievedProfile)();
+    expect(result).toStrictEqual(
+      E.right({
+        ...aRetrievedProfile,
+        userPDVId: aMockPdvId
+      })
+    );
+    expect(mockGet).not.toHaveBeenCalled();
+    expect(mockSave).toHaveBeenCalledTimes(1);
+    expect(mockSet).not.toHaveBeenCalled();
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("GIVEN a valid document WHEN the cache can't be reached to save the token THEN we go ahead", async () => {
+    mockSet.mockRejectedValueOnce(Error("error"));
+
+    const result = await call();
+
+    expect(result).toStrictEqual(
+      E.right({
+        ...aRetrievedProfile,
+        userPDVId: aMockPdvId
+      })
+    );
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockSave).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledWith(
+      `${PDVIdPrefix}${aRetrievedProfile.fiscalCode}`,
+      mockPDVIdsTTL,
+      aMockPdvId
+    );
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
   });
 });
