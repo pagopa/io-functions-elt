@@ -2,7 +2,7 @@ import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { flow, identity, pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { TelemetryClient } from "applicationinsights";
 import { RedisClientType } from "redis";
@@ -66,14 +66,25 @@ const obtainTokenFromPDV: (
         deps.redisClientTask,
         sendSampledRedisError(deps.appInsightsTelemetryClient),
         TE.chain(redisClient =>
-          TE.tryCatch(
-            () =>
-              redisClient.setEx(
-                `${PDVIdPrefix}${fiscalCode}`,
-                deps.PDVIdKeyTTLinSeconds,
-                pdvId
-              ),
-            identity
+          pipe(
+            TE.tryCatch(
+              () =>
+                redisClient.setEx(
+                  `${PDVIdPrefix}${fiscalCode}`,
+                  deps.PDVIdKeyTTLinSeconds,
+                  pdvId
+                ),
+              E.toError
+            ),
+            TE.mapLeft(error => {
+              deps.appInsightsTelemetryClient.trackEvent({
+                name: "fn-elt.getPdvId.redis.command.error",
+                properties: {
+                  error_message: error.message
+                }
+              });
+              return error;
+            })
           )
         ),
         TE.map(_ => void 0),
@@ -99,6 +110,15 @@ export const getPdvId: (
           () => redisClient.get(`${PDVIdPrefix}${fiscalCode}`),
           E.toError
         ),
+        TE.mapLeft(error => {
+          deps.appInsightsTelemetryClient.trackEvent({
+            name: "fn-elt.getPdvId.redis.command.error",
+            properties: {
+              error_message: error.message
+            }
+          });
+          return error;
+        }),
         TE.chainEitherKW(NonEmptyString.decode)
       )
     ),

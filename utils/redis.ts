@@ -141,7 +141,7 @@ export const sendSampledRedisError = (
     TE.mapLeft(err => {
       // sampled event
       appInsightsTelemetryClient.trackEvent({
-        name: "fn-elt.getPdvId.redis.error",
+        name: "fn-elt.getPdvId.redis.network.error",
         properties: {
           error_message: err.message
         }

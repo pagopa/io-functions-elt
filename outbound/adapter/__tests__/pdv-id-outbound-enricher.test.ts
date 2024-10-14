@@ -208,6 +208,27 @@ describe("Redis cache introduction", () => {
     expect(mockTrackEvent).not.toHaveBeenCalled();
   });
 
+  it("GIVEN a valid document WHEN the cache get goes wrong THEN PDV Tokenizer should be called along with the cache", async () => {
+    mockGet.mockRejectedValueOnce(Error("error"));
+
+    const result = await call();
+    expect(result).toStrictEqual(
+      E.right({
+        ...aRetrievedProfile,
+        userPDVId: aMockPdvId
+      })
+    );
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockSave).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledWith(
+      `${PDVIdPrefix}${aRetrievedProfile.fiscalCode}`,
+      mockPDVIdsTTL,
+      aMockPdvId
+    );
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
+  });
+
   it("GIVEN a valid document WHEN the cache can't be reached THEN PDV Tokenizer should be called", async () => {
     const faultyEnricher = create(
       2,
@@ -248,6 +269,6 @@ describe("Redis cache introduction", () => {
       mockPDVIdsTTL,
       aMockPdvId
     );
-    expect(mockTrackEvent).not.toHaveBeenCalled();
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
   });
 });
