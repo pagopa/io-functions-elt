@@ -2,7 +2,7 @@ import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { flow, pipe } from "fp-ts/lib/function";
+import { flow, identity, pipe } from "fp-ts/lib/function";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { TelemetryClient } from "applicationinsights";
 import { RedisClientType } from "redis";
@@ -65,21 +65,19 @@ const obtainTokenFromPDV: (
       pipe(
         deps.redisClientTask,
         sendSampledRedisError(deps.appInsightsTelemetryClient),
-        TE.chainW(redisClient =>
-          pipe(
-            redisClient
-              .setEx(
+        TE.chain(redisClient =>
+          TE.tryCatch(
+            () =>
+              redisClient.setEx(
                 `${PDVIdPrefix}${fiscalCode}`,
                 deps.PDVIdKeyTTLinSeconds,
                 pdvId
-              )
-              .catch(() => void 0 as never),
-            () => TE.right(void 0)
+              ),
+            identity
           )
         ),
-        // discard the value, regardless of the result
-        TE.toUnion,
-        TE.fromTask
+        TE.map(_ => void 0),
+        TE.orElse(() => TE.of(void 0))
       )
     )
   );
