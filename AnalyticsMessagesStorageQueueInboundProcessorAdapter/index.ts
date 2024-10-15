@@ -8,6 +8,8 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { createBlobService } from "azure-storage";
+import * as winston from "winston";
+import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow } from "../utils/config";
@@ -74,15 +76,21 @@ const telemetryAdapter = TA.create(
 );
 
 const run = (
-  _context: Context,
+  context: Context,
   documents: ReadonlyArray<unknown>
-): Promise<void> =>
-  getAnalyticsProcessorForDocuments(
+): Promise<void> => {
+  const contextTransport = new AzureContextTransport(() => context.log, {
+    level: "debug"
+  });
+  winston.add(contextTransport);
+
+  return getAnalyticsProcessorForDocuments(
     RetrievedMessage,
     telemetryAdapter,
     messageEnricherAdapter,
     retrievedMessagesOnKafkaAdapter,
     throwAdapter
   ).process([documents])();
+};
 
 export default run;
