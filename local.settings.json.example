@@ -43,5 +43,11 @@
     "REDIS_PORT": 6379,
     "REDIS_PASSWORD": "foo",
     "REDIS_TLS_ENABLED": false
+
+    "DELETESS_TOPIC_NAME" : "pdnd-io-cosmosdb-deletes",
+    "DELETES_TOPIC_CONNECTION_STRING" : "<Conn String>",
+    "DELETES_LEASES_PREFIX" : "deletes-001",
+
+    "SERVICEID_EXCLUSION_LIST": "ServiceId1,ServiceId2"
   }
 }

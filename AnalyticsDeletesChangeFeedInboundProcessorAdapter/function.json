@@ -1,0 +1,19 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "cosmosDBTrigger",
+      "name": "cosmosApiDeletesTrigger",
+      "direction": "in",
+      "connection": "COSMOS_API_CONNECTION_STRING",
+      "databaseName": "%COSMOSDB_NAME%",
+      "containerName": "user-data-processing",
+      "leaseContainerPrefix": "%DELETES_LEASES_PREFIX%-",
+      "leaseContainerName": "pdnd-leases",
+      "createLeaseContainerIfNotExists": false,
+      "startFromBeginning": false
+
+    }
+  ],
+  "scriptFile": "../dist/AnalyticsDeletesChangeFeedInboundProcessorAdapter/index.js"
+}
