@@ -15,5 +15,5 @@
 
     }
   ],
-  "scriptFile": "../dist/AnalyticsDeletesChangeFeedInboundProcessorAdapter/index.js"
+  "scriptFile": "../dist/AnalyticsUserDataProcessingChangeFeedInboundProcessorAdapter/index.js"
 }

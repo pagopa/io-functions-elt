@@ -13,7 +13,7 @@ import { getPdvId } from "../../utils/pdv";
 import { RetrievedProfileWithMaybePdvId } from "../../AnalyticsProfilesChangeFeedInboundProcessorAdapter";
 import { RetrievedServicePreferenceWithMaybePdvId } from "../../utils/types/decoratedTypes";
 import { PdvTokenizerClient } from "../../utils/pdvTokenizerClient";
-import { RetrievedUserDataProcessingWithMaybePdvId } from "../../AnalyticsDeletesChangeFeedInboundProcessorAdapter";
+import { RetrievedUserDataProcessingWithMaybePdvId } from "../../AnalyticsUserDataProcessingChangeFeedInboundProcessorAdapter";
 
 export type MaybePdvDocumentsTypes =
   | RetrievedServicePreferenceWithMaybePdvId
