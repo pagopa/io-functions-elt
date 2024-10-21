@@ -2,7 +2,7 @@
 import * as avro from "avsc";
 import { MessageFormatter } from "../kafka/KafkaTypes";
 import { profileDeletion } from "../../generated/avro/dto/profileDeletion";
-import { RetrievedUserDataProcessingWithMaybePdvId } from "../../AnalyticsDeletesChangeFeedInboundProcessorAdapter";
+import { RetrievedUserDataProcessingWithMaybePdvId } from "../../AnalyticsUserDataProcessingChangeFeedInboundProcessorAdapter";
 
 // remove me
 export const buildAvroDeleteObject = (
