@@ -1,6 +1,6 @@
 import {
   nestifyPrefixedType,
-  KafkaProducerCompactConfigFromEnv
+  getKafkaProducerCompactConfigFromEnv
 } from "../config";
 import * as E from "fp-ts/Either";
 
@@ -55,7 +55,7 @@ describe("config", () => {
   });
 
   it("GIVEN a not valid kafka producer configuration WHEN the decode is called THEN a left either is returned", () => {
-    const aaa = KafkaProducerCompactConfigFromEnv.decode({
+    const aaa = getKafkaProducerCompactConfigFromEnv("TARGETKAFKA").decode({
       ...dummyEnv,
       TARGETKAFKA_clientId: 1
     });
@@ -63,7 +63,9 @@ describe("config", () => {
   });
 
   it("GIVEN a valid kafka producer configuration WHEN the decode is called THEN a right either is returned", () => {
-    const aaa = KafkaProducerCompactConfigFromEnv.decode(dummyEnv);
+    const aaa = getKafkaProducerCompactConfigFromEnv("TARGETKAFKA").decode(
+      dummyEnv
+    );
     expect(E.isRight(aaa)).toBeTruthy();
     if (E.isRight(aaa)) {
       expect(E.getOrElseW(() => "")(aaa)).toStrictEqual(dummyTargetKafkaConfig);

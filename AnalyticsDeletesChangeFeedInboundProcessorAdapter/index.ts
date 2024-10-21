@@ -7,6 +7,7 @@ import { RetrievedUserDataProcessing } from "@pagopa/io-functions-commons/dist/s
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { UserDataProcessingStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
+import { Second } from "@pagopa/ts-commons/lib/units";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import * as QA from "../outbound/adapter/queue-outbound-mapper-publisher";
@@ -24,6 +25,7 @@ import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 import { httpOrHttpsApiFetch } from "../utils/fetch";
 import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
 import { profileDeletionAvroFormatter } from "../utils/formatter/deletesAvroFormatter";
+import { createRedisClientSingleton } from "../utils/redis";
 
 export type RetrievedUserDataProcessingWithMaybePdvId = t.TypeOf<
   typeof RetrievedUserDataProcessingWithMaybePdvId
@@ -38,7 +40,7 @@ const config = getConfigOrThrow();
 const profileDeletionConfig = withTopic(
   config.deletesKafkaTopicConfig.DELETES_TOPIC_NAME,
   config.deletesKafkaTopicConfig.DELETES_TOPIC_CONNECTION_STRING
-)(config.targetKafka);
+)(config.targetKafkaAuth);
 
 const profileDeletionTopic = {
   ...profileDeletionConfig,
@@ -76,9 +78,17 @@ const telemetryClient = TA.initTelemetryClient(
   config.APPINSIGHTS_INSTRUMENTATIONKEY
 );
 
+const redisClientTask = createRedisClientSingleton(config);
+
 const pdvIdEnricherAdapter: OutboundEnricher<RetrievedUserDataProcessingWithMaybePdvId> = PDVA.create<
   RetrievedUserDataProcessingWithMaybePdvId
->(config.ENRICH_PDVID_THROTTLING, pdvTokenizer, telemetryClient);
+>(
+  config.ENRICH_PDVID_THROTTLING,
+  pdvTokenizer,
+  redisClientTask,
+  config.PDV_IDS_TTL as Second,
+  telemetryClient
+);
 
 const telemetryAdapter = TA.create(telemetryClient);
 
