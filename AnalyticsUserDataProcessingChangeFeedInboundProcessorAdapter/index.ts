@@ -8,6 +8,7 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { UserDataProcessingStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import { Second } from "@pagopa/ts-commons/lib/units";
+import { UserDataProcessingChoiceEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import * as QA from "../outbound/adapter/queue-outbound-mapper-publisher";
@@ -98,6 +99,8 @@ const internalTestFiscalCodeSet = new Set(
 const userDataProcessingFilterer: OutboundFilterer<RetrievedUserDataProcessing> = PF.create(
   retrievedUserDataProcessing =>
     !internalTestFiscalCodeSet.has(retrievedUserDataProcessing.fiscalCode) &&
+    retrievedUserDataProcessing.choice ===
+      UserDataProcessingChoiceEnum.DELETE &&
     retrievedUserDataProcessing.status === UserDataProcessingStatusEnum.WIP
 );
 
