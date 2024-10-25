@@ -1,5 +1,7 @@
 import { Context } from "@azure/functions";
 import { RetrievedMessageStatus } from "@pagopa/io-functions-commons/dist/src/models/message_status";
+import * as winston from "winston";
+import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow, withTopic } from "../utils/config";
@@ -37,13 +39,18 @@ const telemetryAdapter = TA.create(
 
 const emptyEnricherAdapter: OutboundEnricher<RetrievedMessageStatus> = EEA.create();
 
-const run = (_context: Context, document: unknown): Promise<void> =>
-  getAnalyticsProcessorForDocuments(
+const run = (context: Context, document: unknown): Promise<void> => {
+  const contextTransport = new AzureContextTransport(() => context.log, {
+    level: "debug"
+  });
+  winston.add(contextTransport);
+  return getAnalyticsProcessorForDocuments(
     RetrievedMessageStatus,
     telemetryAdapter,
     emptyEnricherAdapter,
     messageStatusOnKafkaAdapter,
     throwAdapter
   ).process([document])();
+};
 
 export default run;

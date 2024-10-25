@@ -1,6 +1,8 @@
 import { Context } from "@azure/functions";
 import { QueueClient } from "@azure/storage-queue";
 import { RetrievedMessageStatus } from "@pagopa/io-functions-commons/dist/src/models/message_status";
+import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
+import * as winston from "winston";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { getConfigOrThrow, withTopic } from "../utils/config";
@@ -52,10 +54,14 @@ const messageStatusFilterer: OutboundFilterer<RetrievedMessageStatus> = PF.creat
 const emptyEnricherAdapter: OutboundEnricher<RetrievedMessageStatus> = EEA.create();
 
 const run = (
-  _context: Context,
+  context: Context,
   documents: ReadonlyArray<unknown>
-): Promise<void> =>
-  getAnalyticsProcessorForDocuments(
+): Promise<void> => {
+  const contextTransport = new AzureContextTransport(() => context.log, {
+    level: "debug"
+  });
+  winston.add(contextTransport);
+  return getAnalyticsProcessorForDocuments(
     RetrievedMessageStatus,
     telemetryAdapter,
     emptyEnricherAdapter,
@@ -63,5 +69,6 @@ const run = (
     messageStatusOnQueueAdapter,
     messageStatusFilterer
   ).process(documents)();
+};
 
 export default run;
