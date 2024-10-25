@@ -1,6 +1,4 @@
 import { Context } from "@azure/functions";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as t from "io-ts";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
@@ -17,21 +15,14 @@ import { profilesAvroFormatter } from "../utils/formatter/profilesAvroFormatter"
 import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
 import { httpOrHttpsApiFetch } from "../utils/fetch";
 import { createRedisClientSingleton } from "../utils/redis";
-
-export type RetrievedProfileWithMaybePdvId = t.TypeOf<
-  typeof RetrievedProfileWithMaybePdvId
->;
-const RetrievedProfileWithMaybePdvId = t.intersection([
-  RetrievedProfile,
-  t.partial({ userPDVId: NonEmptyString })
-]);
+import { RetrievedProfileWithMaybePdvId } from "../utils/types/decoratedTypes";
 
 const config = getConfigOrThrow();
 
 const profilesConfig = withTopic(
   config.profilesKafkaTopicConfig.PROFILES_TOPIC_NAME,
   config.profilesKafkaTopicConfig.PROFILES_TOPIC_CONNECTION_STRING
-)(config.targetKafka);
+)(config.targetKafkaAuth);
 
 const profilesTopic = {
   ...profilesConfig,

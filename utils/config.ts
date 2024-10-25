@@ -74,13 +74,18 @@ export const nestifyPrefixedType = (
  * @param password
  * @returns
  */
-export const withTopic = (topicName: string, password: string) => (
-  kafkaConfig: KafkaProducerCompactConfig
-): KafkaProducerCompactConfig =>
+export const withTopic = (
+  topicName: string,
+  password: string,
+  username: string = "$ConnectionString",
+  mechanism: string = "plain"
+) => (kafkaConfig: KafkaProducerCompactConfig): KafkaProducerCompactConfig =>
   ({
     ...kafkaConfig,
     sasl: {
       ...kafkaConfig.sasl,
+      mechanism,
+      username,
       password
     },
     topic: topicName
@@ -89,30 +94,29 @@ export const withTopic = (topicName: string, password: string) => (
 export type KafkaProducerCompactConfig = t.TypeOf<
   typeof KafkaProducerCompactConfig
 >;
-export const KafkaProducerCompactConfigFromEnv = new t.Type<
-  KafkaProducerCompactConfig,
-  KafkaProducerCompactConfig,
-  unknown
->(
-  "KafkaProducerCompactConfigFromEnv",
-  (u: unknown): u is KafkaProducerCompactConfig =>
-    KafkaProducerCompactConfig.is(u),
-  (input, context) =>
-    pipe(
-      input,
-      E.fromPredicate(
-        isRecordOfString,
-        createNotRecordOfStringErrorL(input, context)
-      ),
-      E.chainW(inputRecord =>
-        KafkaProducerCompactConfig.validate(
-          nestifyPrefixedType(inputRecord, "TARGETKAFKA"),
-          context
+export const getKafkaProducerCompactConfigFromEnv = (
+  envPrefix: string
+): t.Type<KafkaProducerCompactConfig, KafkaProducerCompactConfig, unknown> =>
+  new t.Type<KafkaProducerCompactConfig, KafkaProducerCompactConfig, unknown>(
+    "KafkaProducerCompactConfigFromEnv",
+    (u: unknown): u is KafkaProducerCompactConfig =>
+      KafkaProducerCompactConfig.is(u),
+    (input, context) =>
+      pipe(
+        input,
+        E.fromPredicate(
+          isRecordOfString,
+          createNotRecordOfStringErrorL(input, context)
+        ),
+        E.chainW(inputRecord =>
+          KafkaProducerCompactConfig.validate(
+            nestifyPrefixedType(inputRecord, envPrefix),
+            context
+          )
         )
-      )
-    ),
-  t.identity
-);
+      ),
+    t.identity
+  );
 
 // Redis cache config
 const RedisConfig = t.intersection([
@@ -176,6 +180,7 @@ export const IDecodableConfig = t.intersection([
     MESSAGES_FAILURE_QUEUE_NAME: NonEmptyString,
     SERVICE_PREFERENCES_FAILURE_QUEUE_NAME: NonEmptyString,
     PROFILES_FAILURE_QUEUE_NAME: NonEmptyString,
+    DELETES_FAILURE_QUEUE_NAME: NonEmptyString,
 
     ENRICH_MESSAGE_THROTTLING: withDefault(
       NonNegativeInteger,
@@ -208,6 +213,11 @@ export const IDecodableConfig = t.intersection([
     ),
 
     SERVICES_LEASES_PREFIX: NonEmptyString,
+    MESSAGES_LEASES_PREFIX: NonEmptyString,
+    MESSAGE_STATUS_LEASES_PREFIX: NonEmptyString,
+    PROFILES_LEASES_PREFIX: NonEmptyString,
+    SERVICE_PREFERENCES_LEASES_PREFIX: NonEmptyString,
+    DELETES_LEASES_PREFIX: NonEmptyString,
 
     isProduction: t.boolean
   }),
@@ -242,20 +252,31 @@ const ProfilesKafkaTopicConfig = t.type({
 });
 type ProfilesKafkaTopicConfig = t.TypeOf<typeof ProfilesKafkaTopicConfig>;
 
+const DeletesKafkaTopicConfig = t.type({
+  DELETES_TOPIC_CONNECTION_STRING: NonEmptyString,
+  DELETES_TOPIC_NAME: NonEmptyString
+});
+type DeletesKafkaTopicConfig = t.TypeOf<typeof DeletesKafkaTopicConfig>;
+
 export interface IParsableConfig {
   readonly targetKafka: KafkaProducerCompactConfig;
+  readonly targetKafkaAuth: KafkaProducerCompactConfig;
 
   readonly MessagesKafkaTopicConfig: MessagesKafkaTopicConfig;
   readonly messageStatusKafkaTopicConfig: MessageStatusKafkaTopicConfig;
   readonly servicePreferencesKafkaTopicConfig: ServicePreferencesKafkaTopicConfig;
   readonly profilesKafkaTopicConfig: ProfilesKafkaTopicConfig;
+  readonly deletesKafkaTopicConfig: DeletesKafkaTopicConfig;
 }
 
 export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
   pipe(
     E.Do,
     E.bind("targetKafka", () =>
-      KafkaProducerCompactConfigFromEnv.decode(input)
+      getKafkaProducerCompactConfigFromEnv("TARGETKAFKA").decode(input)
+    ),
+    E.bind("targetKafkaAuth", () =>
+      getKafkaProducerCompactConfigFromEnv("TARGETKAFKAAUTH").decode(input)
     ),
     E.bind("MessagesKafkaTopicConfig", () =>
       MessagesKafkaTopicConfig.decode(input)
@@ -268,6 +289,9 @@ export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
     ),
     E.bind("profilesKafkaTopicConfig", () =>
       ProfilesKafkaTopicConfig.decode(input)
+    ),
+    E.bind("deletesKafkaTopicConfig", () =>
+      DeletesKafkaTopicConfig.decode(input)
     )
   );
 

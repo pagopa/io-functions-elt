@@ -10,13 +10,17 @@ import { Second } from "@pagopa/ts-commons/lib/units";
 import { OutboundEnricher } from "../port/outbound-enricher";
 import { failure, success } from "../port/outbound-publisher";
 import { getPdvId } from "../../utils/pdv";
-import { RetrievedProfileWithMaybePdvId } from "../../AnalyticsProfilesChangeFeedInboundProcessorAdapter";
-import { RetrievedServicePreferenceWithMaybePdvId } from "../../utils/types/decoratedTypes";
+import {
+  RetrievedProfileWithMaybePdvId,
+  RetrievedServicePreferenceWithMaybePdvId,
+  RetrievedUserDataProcessingWithMaybePdvId
+} from "../../utils/types/decoratedTypes";
 import { PdvTokenizerClient } from "../../utils/pdvTokenizerClient";
 
 export type MaybePdvDocumentsTypes =
   | RetrievedServicePreferenceWithMaybePdvId
-  | RetrievedProfileWithMaybePdvId;
+  | RetrievedProfileWithMaybePdvId
+  | RetrievedUserDataProcessingWithMaybePdvId;
 
 export const create = <M extends MaybePdvDocumentsTypes>(
   maxParallelThrottling: number,

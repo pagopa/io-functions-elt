@@ -1,10 +1,12 @@
 import { QueueClient } from "@azure/storage-queue";
 import { Context } from "@azure/functions";
 
-import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import { RetrievedUserDataProcessing } from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
+import { UserDataProcessingStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import { Second } from "@pagopa/ts-commons/lib/units";
+import { UserDataProcessingChoiceEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import * as QA from "../outbound/adapter/queue-outbound-mapper-publisher";
@@ -19,41 +21,41 @@ import { getConfigOrThrow, withTopic } from "../utils/config";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
-import { profilesAvroFormatter } from "../utils/formatter/profilesAvroFormatter";
 import { httpOrHttpsApiFetch } from "../utils/fetch";
 import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
+import { profileDeletionAvroFormatter } from "../utils/formatter/deletesAvroFormatter";
 import { createRedisClientSingleton } from "../utils/redis";
-import { RetrievedProfileWithMaybePdvId } from "../utils/types/decoratedTypes";
+import { RetrievedUserDataProcessingWithMaybePdvId } from "../utils/types/decoratedTypes";
 
 const config = getConfigOrThrow();
 
-const profilesConfig = withTopic(
-  config.profilesKafkaTopicConfig.PROFILES_TOPIC_NAME,
-  config.profilesKafkaTopicConfig.PROFILES_TOPIC_CONNECTION_STRING
+const profileDeletionConfig = withTopic(
+  config.deletesKafkaTopicConfig.DELETES_TOPIC_NAME,
+  config.deletesKafkaTopicConfig.DELETES_TOPIC_CONNECTION_STRING
 )(config.targetKafkaAuth);
 
-const profilesTopic = {
-  ...profilesConfig,
-  messageFormatter: profilesAvroFormatter()
+const profileDeletionTopic = {
+  ...profileDeletionConfig,
+  messageFormatter: profileDeletionAvroFormatter()
 };
 
-const profilesOnKafkaAdapter: OutboundPublisher<RetrievedProfileWithMaybePdvId> = KA.create(
+const profileDeletionsOnKafkaAdapter: OutboundPublisher<RetrievedUserDataProcessingWithMaybePdvId> = KA.create(
   KP.fromConfig(
-    profilesConfig as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
-    profilesTopic
+    profileDeletionConfig as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
+    profileDeletionTopic
   )
 );
 
-const profilesOnQueueAdapter: OutboundPublisher<RetrievedProfileWithMaybePdvId> = QA.create(
-  profile => {
+const profileDeletionsOnQueueAdapter: OutboundPublisher<RetrievedUserDataProcessingWithMaybePdvId> = QA.create(
+  profileDeletion => {
     // void storing userPDVId it in queue
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { userPDVId, ...rest } = profile;
+    const { userPDVId, ...rest } = profileDeletion;
     return rest;
   },
   new QueueClient(
     config.INTERNAL_STORAGE_CONNECTION_STRING,
-    config.PROFILES_FAILURE_QUEUE_NAME
+    config.DELETES_FAILURE_QUEUE_NAME
   )
 );
 
@@ -64,14 +66,14 @@ const pdvTokenizer = pdvTokenizerClient(
   config.PDV_TOKENIZER_BASE_PATH
 );
 
-const redisClientTask = createRedisClientSingleton(config);
-
 const telemetryClient = TA.initTelemetryClient(
   config.APPINSIGHTS_INSTRUMENTATIONKEY
 );
 
-const pdvIdEnricherAdapter: OutboundEnricher<RetrievedProfileWithMaybePdvId> = PDVA.create<
-  RetrievedProfileWithMaybePdvId
+const redisClientTask = createRedisClientSingleton(config);
+
+const pdvIdEnricherAdapter: OutboundEnricher<RetrievedUserDataProcessingWithMaybePdvId> = PDVA.create<
+  RetrievedUserDataProcessingWithMaybePdvId
 >(
   config.ENRICH_PDVID_THROTTLING,
   pdvTokenizer,
@@ -85,9 +87,12 @@ const telemetryAdapter = TA.create(telemetryClient);
 const internalTestFiscalCodeSet = new Set(
   config.INTERNAL_TEST_FISCAL_CODES as ReadonlyArray<FiscalCode>
 );
-const profilesFilterer: OutboundFilterer<RetrievedProfile> = PF.create(
-  retrievedProfile =>
-    !internalTestFiscalCodeSet.has(retrievedProfile.fiscalCode)
+const userDataProcessingFilterer: OutboundFilterer<RetrievedUserDataProcessing> = PF.create(
+  retrievedUserDataProcessing =>
+    !internalTestFiscalCodeSet.has(retrievedUserDataProcessing.fiscalCode) &&
+    retrievedUserDataProcessing.choice ===
+      UserDataProcessingChoiceEnum.DELETE &&
+    retrievedUserDataProcessing.status === UserDataProcessingStatusEnum.WIP
 );
 
 const run = (
@@ -95,12 +100,12 @@ const run = (
   documents: ReadonlyArray<unknown>
 ): Promise<void> =>
   getAnalyticsProcessorForDocuments(
-    RetrievedProfile,
+    RetrievedUserDataProcessing,
     telemetryAdapter,
     pdvIdEnricherAdapter,
-    profilesOnKafkaAdapter,
-    profilesOnQueueAdapter,
-    profilesFilterer
+    profileDeletionsOnKafkaAdapter,
+    profileDeletionsOnQueueAdapter,
+    userDataProcessingFilterer
   ).process(documents)();
 
 export default run;
