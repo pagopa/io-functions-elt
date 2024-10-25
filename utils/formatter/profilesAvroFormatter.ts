@@ -3,10 +3,10 @@ import * as avro from "avsc";
 import { PreferredLanguageEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/PreferredLanguage";
 import { MessageFormatter } from "../kafka/KafkaTypes";
 import { profile } from "../../generated/avro/dto/profile";
-import { RetrievedProfileWithMaybePdvId } from "../../AnalyticsProfilesChangeFeedInboundProcessorAdapter";
 import { PushNotificationsContentTypeEnum } from "../../generated/avro/dto/PushNotificationsContentTypeEnumEnum";
 import { ReminderStatusEnum } from "../../generated/avro/dto/ReminderStatusEnumEnum";
 import { BlockedInboxOrChannelEnum } from "../../generated/avro/dto/BlockedInboxOrChannelEnumEnum";
+import { RetrievedProfileWithMaybePdvId } from "../types/decoratedTypes";
 
 // remove me
 export const buildAvroProfileObject = (

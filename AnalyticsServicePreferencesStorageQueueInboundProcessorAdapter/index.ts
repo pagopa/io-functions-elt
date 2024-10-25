@@ -23,7 +23,7 @@ const servicePreferencesConfig = withTopic(
   config.servicePreferencesKafkaTopicConfig.SERVICE_PREFERENCES_TOPIC_NAME,
   config.servicePreferencesKafkaTopicConfig
     .SERVICE_PREFERENCES_TOPIC_CONNECTION_STRING
-)(config.targetKafka);
+)(config.targetKafkaAuth);
 
 const servicePreferencesTopic = {
   ...servicePreferencesConfig,

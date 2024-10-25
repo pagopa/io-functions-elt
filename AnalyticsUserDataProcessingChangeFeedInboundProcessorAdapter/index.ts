@@ -1,10 +1,8 @@
 import { QueueClient } from "@azure/storage-queue";
 import { Context } from "@azure/functions";
 
-import * as t from "io-ts";
-
 import { RetrievedUserDataProcessing } from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { UserDataProcessingStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import { Second } from "@pagopa/ts-commons/lib/units";
@@ -27,14 +25,7 @@ import { httpOrHttpsApiFetch } from "../utils/fetch";
 import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
 import { profileDeletionAvroFormatter } from "../utils/formatter/deletesAvroFormatter";
 import { createRedisClientSingleton } from "../utils/redis";
-
-export type RetrievedUserDataProcessingWithMaybePdvId = t.TypeOf<
-  typeof RetrievedUserDataProcessingWithMaybePdvId
->;
-const RetrievedUserDataProcessingWithMaybePdvId = t.intersection([
-  RetrievedUserDataProcessing,
-  t.partial({ userPDVId: NonEmptyString })
-]);
+import { RetrievedUserDataProcessingWithMaybePdvId } from "../utils/types/decoratedTypes";
 
 const config = getConfigOrThrow();
 
