@@ -1,11 +1,12 @@
-import * as TE from "fp-ts/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
-import * as RA from "fp-ts/ReadonlyArray";
 import * as O from "fp-ts/Option";
+import * as RA from "fp-ts/ReadonlyArray";
+import * as TE from "fp-ts/TaskEither";
 import { Task } from "fp-ts/lib/Task";
-import { OutboundPublisher, Result } from "../port/outbound-publisher";
+import { flow, pipe } from "fp-ts/lib/function";
+
 import { KafkaProducerCompact } from "../../utils/kafka/KafkaProducerCompact";
 import * as KP from "../../utils/kafka/KafkaProducerCompact";
+import { OutboundPublisher, Result } from "../port/outbound-publisher";
 
 export const create = <T>(
   producer: KafkaProducerCompact<T>
@@ -35,11 +36,11 @@ export const create = <T>(
       TE.map(() =>
         pipe(
           documents,
-          RA.map(document => ({ document, success: true }))
+          RA.map((document) => ({ document, success: true }))
         )
       ),
       TE.mapLeft(
-        RA.map(e => ({
+        RA.map((e) => ({
           document: e.body,
           error: new Error(e.message),
           success: false

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import { Task } from "fp-ts/lib/Task";
 import * as TE from "fp-ts/TaskEither";
+import { Task } from "fp-ts/lib/Task";
 
 export type Success<T> = { readonly success: boolean; readonly document: T };
 export const success = <T>(document: T): Success<T> => ({

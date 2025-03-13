@@ -1,9 +1,8 @@
-import { createBlobService } from "azure-storage";
 import { AzureFunction } from "@azure/functions";
+import { createBlobService } from "azure-storage";
 
-import { getConfigOrThrow } from "../utils/config";
 import { exportTextToBlob } from "../utils/azure-storage";
-
+import { getConfigOrThrow } from "../utils/config";
 import { handler } from "./handler";
 
 const config = getConfigOrThrow();

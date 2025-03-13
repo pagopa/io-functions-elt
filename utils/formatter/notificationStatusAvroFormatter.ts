@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+import { NotificationChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannel";
+import { NotificationChannelStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannelStatusValue";
+import { RetrievedNotificationStatus } from "@pagopa/io-functions-commons/dist/src/models/notification_status";
 import * as avro from "avsc";
 
-import { RetrievedNotificationStatus } from "@pagopa/io-functions-commons/dist/src/models/notification_status";
-import { NotificationChannelStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannelStatusValue";
-import { NotificationChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannel";
-
-import { MessageFormatter } from "../kafka/KafkaTypes";
-import { notificationStatus } from "../../generated/avro/dto/notificationStatus";
-import { MessageNotificationStatus } from "../../generated/avro/dto/MessageNotificationStatusEnum";
 import { ChannelType } from "../../generated/avro/dto/ChannelTypeEnum";
+import { MessageNotificationStatus } from "../../generated/avro/dto/MessageNotificationStatusEnum";
 import { NotificationStatusCrudOperation } from "../../generated/avro/dto/NotificationStatusCrudOperationEnum";
+import { notificationStatus } from "../../generated/avro/dto/notificationStatus";
+import { MessageFormatter } from "../kafka/KafkaTypes";
 
 const toAvroNotificationStatus = (
   status: NotificationChannelStatusValueEnum
@@ -40,16 +39,18 @@ export const buildAvroNotificationStatusObject = (
     /* eslint-enable sort-keys */
   });
 
-export const avroNotificationStatusFormatter = (): // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-MessageFormatter<RetrievedNotificationStatus> => message => ({
-  // notificatioId as Partition Key
-  key: message.notificationId,
-  value: avro.Type.forSchema(
-    notificationStatus.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
-  ).toBuffer(
-    Object.assign(
-      new notificationStatus(),
-      buildAvroNotificationStatusObject(message)
+export const avroNotificationStatusFormatter =
+  (): // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  MessageFormatter<RetrievedNotificationStatus> =>
+  (message) => ({
+    // notificatioId as Partition Key
+    key: message.notificationId,
+    value: avro.Type.forSchema(
+      notificationStatus.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
+    ).toBuffer(
+      Object.assign(
+        new notificationStatus(),
+        buildAvroNotificationStatusObject(message)
+      )
     )
-  )
-});
+  });

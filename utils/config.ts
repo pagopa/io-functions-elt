@@ -1,4 +1,16 @@
 /* eslint-disable sort-keys */
+import { CommaSeparatedListOf } from "@pagopa/ts-commons/lib/comma-separated-list";
+import {
+  IntegerFromString,
+  NonNegativeInteger
+} from "@pagopa/ts-commons/lib/numbers";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
+import * as E from "fp-ts/Either";
+import * as R from "fp-ts/Record";
+import { pipe } from "fp-ts/lib/function";
+import * as S from "fp-ts/string";
 /**
  * Config module
  *
@@ -6,39 +18,23 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 import * as t from "io-ts";
-
-import * as E from "fp-ts/Either";
-import { pipe } from "fp-ts/lib/function";
-import * as R from "fp-ts/Record";
-import * as S from "fp-ts/string";
 import { set } from "lodash";
-
-import { CommaSeparatedListOf } from "@pagopa/ts-commons/lib/comma-separated-list";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import {
-  IntegerFromString,
-  NonNegativeInteger
-} from "@pagopa/ts-commons/lib/numbers";
-import { withDefault } from "@pagopa/ts-commons/lib/types";
 
 import { KafkaProducerCompactConfig } from "./IoKafkaTypes";
 
 const isRecordOfString = (i: unknown): i is Record<string, unknown> =>
   typeof i === "object" &&
   i !== null &&
-  !Object.keys(i).some(property => typeof property !== "string");
+  !Object.keys(i).some((property) => typeof property !== "string");
 
-const createNotRecordOfStringErrorL = (
-  input: unknown,
-  context: t.Context
-) => (): t.Errors => [
-  {
-    context,
-    message: "input is not a valid record of string",
-    value: input
-  }
-];
+const createNotRecordOfStringErrorL =
+  (input: unknown, context: t.Context) => (): t.Errors => [
+    {
+      context,
+      message: "input is not a valid record of string",
+      value: input
+    }
+  ];
 
 /**
  * This functions create an object containig only the properties starting with 'prefix'. The env properties name will be splited using '_' to create nested object.
@@ -54,17 +50,9 @@ export const nestifyPrefixedType = (
 ): Record<string, unknown> =>
   pipe(
     env,
-    R.filterWithIndex(fieldName => fieldName.split("_")[0] === prefix),
+    R.filterWithIndex((fieldName) => fieldName.split("_")[0] === prefix),
     R.reduceWithIndex(S.Ord)({}, (k, b, a) =>
-      set(
-        b,
-        // eslint-disable-next-line functional/immutable-data
-        k
-          .split("_")
-          .splice(1)
-          .join("."),
-        a
-      )
+      set(b, k.split("_").splice(1).join("."), a)
     )
   );
 
@@ -74,22 +62,24 @@ export const nestifyPrefixedType = (
  * @param password
  * @returns
  */
-export const withTopic = (
-  topicName: string,
-  password: string,
-  username: string = "$ConnectionString",
-  mechanism: string = "plain"
-) => (kafkaConfig: KafkaProducerCompactConfig): KafkaProducerCompactConfig =>
-  ({
-    ...kafkaConfig,
-    sasl: {
-      ...kafkaConfig.sasl,
-      mechanism,
-      username,
-      password
-    },
-    topic: topicName
-  } as KafkaProducerCompactConfig);
+export const withTopic =
+  (
+    topicName: string,
+    password: string,
+    username: string = "$ConnectionString",
+    mechanism: string = "plain"
+  ) =>
+  (kafkaConfig: KafkaProducerCompactConfig): KafkaProducerCompactConfig =>
+    ({
+      ...kafkaConfig,
+      sasl: {
+        ...kafkaConfig.sasl,
+        mechanism,
+        username,
+        password
+      },
+      topic: topicName
+    }) as KafkaProducerCompactConfig;
 
 export type KafkaProducerCompactConfig = t.TypeOf<
   typeof KafkaProducerCompactConfig
@@ -108,7 +98,7 @@ export const getKafkaProducerCompactConfigFromEnv = (
           isRecordOfString,
           createNotRecordOfStringErrorL(input, context)
         ),
-        E.chainW(inputRecord =>
+        E.chainW((inputRecord) =>
           KafkaProducerCompactConfig.validate(
             nestifyPrefixedType(inputRecord, envPrefix),
             context

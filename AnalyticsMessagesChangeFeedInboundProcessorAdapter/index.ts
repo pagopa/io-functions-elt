@@ -1,31 +1,32 @@
 import { Context } from "@azure/functions";
 import { QueueClient } from "@azure/storage-queue";
-import { pipe } from "fp-ts/lib/function";
-import * as E from "fp-ts/Either";
 import {
-  MessageModel,
   MESSAGE_COLLECTION_NAME,
+  MessageModel,
   RetrievedMessage
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { createBlobService } from "azure-storage";
-import * as KP from "../utils/kafka/KafkaProducerCompact";
-import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
-import { getConfigOrThrow } from "../utils/config";
+import * as E from "fp-ts/Either";
+import { pipe } from "fp-ts/lib/function";
+
+import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
+import { MessageContentType } from "../generated/avro/dto/MessageContentTypeEnum";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
-import * as QA from "../outbound/adapter/queue-outbound-publisher";
-import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import * as MA from "../outbound/adapter/messages-outbound-enricher";
 import * as PF from "../outbound/adapter/predicate-outbound-filterer";
-import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
-import { OutboundPublisher } from "../outbound/port/outbound-publisher";
-import {
-  avroMessageFormatter,
-  ThirdPartyDataWithCategoryFetcher
-} from "../utils/formatter/messagesAvroFormatter";
-import { MessageContentType } from "../generated/avro/dto/MessageContentTypeEnum";
-import { cosmosdbInstance } from "../utils/cosmosdb";
+import * as QA from "../outbound/adapter/queue-outbound-publisher";
+import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
+import { OutboundPublisher } from "../outbound/port/outbound-publisher";
+import { getConfigOrThrow } from "../utils/config";
+import { cosmosdbInstance } from "../utils/cosmosdb";
+import {
+  ThirdPartyDataWithCategoryFetcher,
+  avroMessageFormatter
+} from "../utils/formatter/messagesAvroFormatter";
+import * as KP from "../utils/kafka/KafkaProducerCompact";
+import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 
 const config = getConfigOrThrow();
 
@@ -37,12 +38,14 @@ const messagesConfig = {
   },
   topic: config.MessagesKafkaTopicConfig.MESSAGES_TOPIC_NAME
 };
-const thirdPartyDataWithCategoryFetcher: ThirdPartyDataWithCategoryFetcher = serviceId =>
+const thirdPartyDataWithCategoryFetcher: ThirdPartyDataWithCategoryFetcher = (
+  serviceId
+) =>
   pipe(
     serviceId,
     E.fromPredicate(
-      id => id === config.PN_SERVICE_ID,
-      id => Error(`Missing third-party service configuration for ${id}`)
+      (id) => id === config.PN_SERVICE_ID,
+      (id) => Error(`Missing third-party service configuration for ${id}`)
     ),
     E.map(() => MessageContentType.PN),
     E.mapLeft(() => MessageContentType.GENERIC),
@@ -52,12 +55,13 @@ const messagesTopic = {
   ...messagesConfig,
   messageFormatter: avroMessageFormatter(thirdPartyDataWithCategoryFetcher)
 };
-const retrievedMessagesOnKafkaAdapter: OutboundPublisher<RetrievedMessage> = KA.create(
-  KP.fromConfig(
-    messagesTopic as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
-    messagesTopic
-  )
-);
+const retrievedMessagesOnKafkaAdapter: OutboundPublisher<RetrievedMessage> =
+  KA.create(
+    KP.fromConfig(
+      messagesTopic as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
+      messagesTopic
+    )
+  );
 
 const messageEnricherAdapter = MA.create(
   new MessageModel(
@@ -68,19 +72,20 @@ const messageEnricherAdapter = MA.create(
   config.ENRICH_MESSAGE_THROTTLING
 );
 
-const retrievedMessageOnQueueAdapter: OutboundPublisher<RetrievedMessage> = QA.create(
-  new QueueClient(
-    config.INTERNAL_STORAGE_CONNECTION_STRING,
-    config.MESSAGES_FAILURE_QUEUE_NAME
-  )
-);
+const retrievedMessageOnQueueAdapter: OutboundPublisher<RetrievedMessage> =
+  QA.create(
+    new QueueClient(
+      config.INTERNAL_STORAGE_CONNECTION_STRING,
+      config.MESSAGES_FAILURE_QUEUE_NAME
+    )
+  );
 
 const telemetryAdapter = TA.create(
   TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
 );
 
 const messageFilterer: OutboundFilterer<RetrievedMessage> = PF.create(
-  retrievedMessage =>
+  (retrievedMessage) =>
     !config.INTERNAL_TEST_FISCAL_CODES.includes(retrievedMessage.fiscalCode)
 );
 

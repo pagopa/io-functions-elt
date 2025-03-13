@@ -1,32 +1,29 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable sort-keys */
-/* eslint-disable @typescript-eslint/naming-convention */
-import * as avro from "avsc";
-
-import * as t from "io-ts";
-
-import * as RA from "fp-ts/ReadonlyArray";
-import * as O from "fp-ts/Option";
-import * as E from "fp-ts/Either";
-import { pipe } from "fp-ts/lib/function";
-
+import { EUCovidCert } from "@pagopa/io-functions-commons/dist/generated/definitions/EUCovidCert";
+import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
+import { LegalData } from "@pagopa/io-functions-commons/dist/generated/definitions/LegalData";
+import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
+import { PaymentData } from "@pagopa/io-functions-commons/dist/generated/definitions/PaymentData";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { ThirdPartyData } from "@pagopa/io-functions-commons/dist/generated/definitions/ThirdPartyData";
 import {
   RetrievedMessage,
   RetrievedMessageWithContent
 } from "@pagopa/io-functions-commons/dist/src/models/message";
-import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
-import { EUCovidCert } from "@pagopa/io-functions-commons/dist/generated/definitions/EUCovidCert";
-import { PaymentData } from "@pagopa/io-functions-commons/dist/generated/definitions/PaymentData";
-import { LegalData } from "@pagopa/io-functions-commons/dist/generated/definitions/LegalData";
-import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
-import { ThirdPartyData } from "@pagopa/io-functions-commons/dist/generated/definitions/ThirdPartyData";
+/* eslint-disable @typescript-eslint/naming-convention */
+import * as avro from "avsc";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
+import * as RA from "fp-ts/ReadonlyArray";
+import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 
-import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
-import { MessageFormatter } from "../kafka/KafkaTypes";
-import { message as avroMessage } from "../../generated/avro/dto/message";
-import { MessageCrudOperation } from "../../generated/avro/dto/MessageCrudOperationEnum";
 import { MessageContentType } from "../../generated/avro/dto/MessageContentTypeEnum";
+import { MessageCrudOperation } from "../../generated/avro/dto/MessageCrudOperationEnum";
 import { MessageFeatureLevelType } from "../../generated/avro/dto/MessageFeatureLevelTypeEnum";
+import { message as avroMessage } from "../../generated/avro/dto/message";
+import { MessageFormatter } from "../kafka/KafkaTypes";
 
 export type ThirdPartyDataWithCategoryFetcher = (
   serviceId: ServiceId
@@ -73,7 +70,7 @@ const getCategory = (
 ): MessageContentType =>
   pipe(
     messageCategoryMappings,
-    RA.map(mapping =>
+    RA.map((mapping) =>
       pipe(
         message.content,
         mapping.pattern.decode,
@@ -84,7 +81,7 @@ const getCategory = (
       )
     ),
     RA.filter(O.isSome),
-    RA.map(v => v.value),
+    RA.map((v) => v.value),
     RA.head,
     O.getOrElseW(() => MessageContentType.GENERIC)
   );
@@ -139,17 +136,19 @@ export const buildAvroMessagesObject = (
     };
   };
 
-export const avroMessageFormatter = (
-  categoryFetcher: ThirdPartyDataWithCategoryFetcher
-): // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-MessageFormatter<RetrievedMessage> => message => ({
-  key: message.id,
-  value: avro.Type.forSchema(
-    avroMessage.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
-  ).toBuffer(
-    Object.assign(
-      new avroMessage(),
-      buildAvroMessagesObject(message, categoryFetcher)
+export const avroMessageFormatter =
+  (
+    categoryFetcher: ThirdPartyDataWithCategoryFetcher
+  ): // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  MessageFormatter<RetrievedMessage> =>
+  (message) => ({
+    key: message.id,
+    value: avro.Type.forSchema(
+      avroMessage.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
+    ).toBuffer(
+      Object.assign(
+        new avroMessage(),
+        buildAvroMessagesObject(message, categoryFetcher)
+      )
     )
-  )
-});
+  });

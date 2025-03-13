@@ -3,11 +3,11 @@
 /** Partially generated with ts-to-io lib */
 /** TODO: improve ts-to-io to use type-from-string decoder from ts-commons */
 
+import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
+import { CommaSeparatedListOf } from "@pagopa/ts-commons/lib/comma-separated-list";
+import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import * as t from "io-ts";
 import { CompressionTypes } from "kafkajs";
-import { CommaSeparatedListOf } from "@pagopa/ts-commons/lib/comma-separated-list";
-import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
-import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 
 export const ValidableKafkaProducerConfig = t.intersection([
   t.intersection([

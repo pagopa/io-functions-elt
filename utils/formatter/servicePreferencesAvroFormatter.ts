@@ -1,7 +1,8 @@
 /* eslint-disable sort-keys */
 import * as avro from "avsc";
-import { MessageFormatter } from "../kafka/KafkaTypes";
+
 import { servicePreferences } from "../../generated/avro/dto/servicePreferences";
+import { MessageFormatter } from "../kafka/KafkaTypes";
 import { RetrievedServicePreferenceWithMaybePdvId } from "../types/decoratedTypes";
 
 // remove me
@@ -25,16 +26,18 @@ export const buildAvroServicePreferencesObject = (
 });
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const servicePreferencesAvroFormatter = (): MessageFormatter<RetrievedServicePreferenceWithMaybePdvId> => servicePreferenceWithPdvId => {
-  const avroObject = buildAvroServicePreferencesObject(
-    servicePreferenceWithPdvId
-  );
+export const servicePreferencesAvroFormatter =
+  (): MessageFormatter<RetrievedServicePreferenceWithMaybePdvId> =>
+  (servicePreferenceWithPdvId) => {
+    const avroObject = buildAvroServicePreferencesObject(
+      servicePreferenceWithPdvId
+    );
 
-  return {
-    // pdvId as Partition Key
-    key: avroObject.userPDVId,
-    value: avro.Type.forSchema(
-      servicePreferences.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
-    ).toBuffer(Object.assign(new servicePreferences(), avroObject))
+    return {
+      // pdvId as Partition Key
+      key: avroObject.userPDVId,
+      value: avro.Type.forSchema(
+        servicePreferences.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
+      ).toBuffer(Object.assign(new servicePreferences(), avroObject))
+    };
   };
-};
