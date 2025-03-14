@@ -135,7 +135,7 @@ export type RedisConfig = t.TypeOf<typeof RedisConfig>;
 export type IDecodableConfig = t.TypeOf<typeof IDecodableConfig>;
 export const IDecodableConfig = t.intersection([
   t.interface({
-    APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
+    APPLICATIONINSIGHTS_CONNECTION_STRING: NonEmptyString,
 
     COSMOSDB_KEY: NonEmptyString,
     COSMOSDB_NAME: NonEmptyString,

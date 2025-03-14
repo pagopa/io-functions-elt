@@ -70,7 +70,7 @@ const messageEnricherAdapter = MA.create(
 const throwAdapter: OutboundPublisher<RetrievedMessage> = EA.create();
 
 const telemetryAdapter = TA.create(
-  TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
+  TA.initTelemetryClient(config.APPLICATIONINSIGHTS_CONNECTION_STRING)
 );
 
 const run = (

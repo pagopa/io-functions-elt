@@ -67,7 +67,7 @@ const pdvTokenizer = pdvTokenizerClient(
 const redisClientTask = createRedisClientSingleton(config);
 
 const telemetryClient = TA.initTelemetryClient(
-  config.APPINSIGHTS_INSTRUMENTATIONKEY
+  config.APPLICATIONINSIGHTS_CONNECTION_STRING
 );
 
 const pdvIdEnricherAdapter: OutboundEnricher<RetrievedProfileWithMaybePdvId> = PDVA.create<

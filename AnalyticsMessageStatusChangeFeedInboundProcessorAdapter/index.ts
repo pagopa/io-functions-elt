@@ -40,7 +40,7 @@ const messageStatusOnQueueAdapter: OutboundPublisher<RetrievedMessageStatus> = Q
 );
 
 const telemetryAdapter = TA.create(
-  TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
+  TA.initTelemetryClient(config.APPLICATIONINSIGHTS_CONNECTION_STRING)
 );
 
 const messageStatusFilterer: OutboundFilterer<RetrievedMessageStatus> = PF.create(

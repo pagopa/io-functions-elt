@@ -28,7 +28,7 @@ const retrievedServiceOnKafkaAdapter: OutboundPublisher<RetrievedService> = KA.c
 const throwAdapter: OutboundPublisher<RetrievedService> = EA.create();
 
 const telemetryAdapter = TA.create(
-  TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
+  TA.initTelemetryClient(config.APPLICATIONINSIGHTS_CONNECTION_STRING)
 );
 
 const emptyEnricherAdapter: OutboundEnricher<RetrievedService> = EEA.create();
