@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable sort-keys */
 import { EUCovidCert } from "@pagopa/io-functions-commons/dist/generated/definitions/EUCovidCert";
 import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
 import { LegalData } from "@pagopa/io-functions-commons/dist/generated/definitions/LegalData";
@@ -11,7 +9,6 @@ import {
   RetrievedMessage,
   RetrievedMessageWithContent
 } from "@pagopa/io-functions-commons/dist/src/models/message";
-/* eslint-disable @typescript-eslint/naming-convention */
 import * as avro from "avsc";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";

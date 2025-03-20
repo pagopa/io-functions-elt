@@ -1,4 +1,3 @@
-// disabled in order to use the naming convention used to flatten nested object to root ('_' char used as nested object separator)
 import { AzureNamedKeyCredential, TableClient } from "@azure/data-tables";
 import { Context } from "@azure/functions";
 import {
@@ -12,7 +11,7 @@ import {
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { createBlobService } from "azure-storage";
-/* eslint-disable @typescript-eslint/naming-convention */ import * as winston from "winston";
+import * as winston from "winston";
 
 import { exportTextToBlob } from "../utils/azure-storage";
 import {

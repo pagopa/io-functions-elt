@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */ // disabled in order to use the naming convention used to flatten nested object to root ('_' char used as nested object separator)
 import { AzureNamedKeyCredential, TableClient } from "@azure/data-tables";
 import { Context } from "@azure/functions";
 import {
