@@ -1,5 +1,3 @@
-/* eslint-disable sort-keys */
-
 /** Partially generated with ts-to-io lib */
 /** TODO: improve ts-to-io to use type-from-string decoder from ts-commons */
 

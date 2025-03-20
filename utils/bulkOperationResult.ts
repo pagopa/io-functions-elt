@@ -1,5 +1,3 @@
-/* eslint-disable sort-keys */
-
 export interface IBulkOperationResult {
   readonly isSuccess: boolean;
   readonly result: string;

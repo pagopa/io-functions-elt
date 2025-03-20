@@ -243,7 +243,9 @@ export const processMessages =
         return _;
       }),
       TE.map((_) => {
+        // eslint-disable-next-line functional/no-let
         let tot = 0;
+        // eslint-disable-next-line functional/no-let
         let withoutContent = 0;
         _.forEach((v) => {
           tot += v.sent;

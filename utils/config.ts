@@ -1,4 +1,3 @@
-/* eslint-disable sort-keys */
 import { CommaSeparatedListOf } from "@pagopa/ts-commons/lib/comma-separated-list";
 import {
   IntegerFromString,

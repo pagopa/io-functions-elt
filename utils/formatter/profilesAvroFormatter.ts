@@ -1,4 +1,3 @@
-/* eslint-disable sort-keys */
 import { PreferredLanguageEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/PreferredLanguage";
 import * as avro from "avsc";
 

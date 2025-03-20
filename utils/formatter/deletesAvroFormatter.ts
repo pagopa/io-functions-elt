@@ -1,4 +1,3 @@
-/* eslint-disable sort-keys */
 import * as avro from "avsc";
 
 import { profileDeletion } from "../../generated/avro/dto/profileDeletion";

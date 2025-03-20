@@ -1,4 +1,3 @@
-/* eslint-disable sort-keys */
 import * as avro from "avsc";
 
 import { servicePreferences } from "../../generated/avro/dto/servicePreferences";

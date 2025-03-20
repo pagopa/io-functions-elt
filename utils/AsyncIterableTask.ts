@@ -124,6 +124,7 @@ const reduceIterableArray =
   <A, B>(initialValue: B, reducer: (prev: B, curr: A) => B | Promise<B>) =>
   (asyncIterable: AsyncIterable<A>) =>
   async (): Promise<B> => {
+    // eslint-disable-next-line functional/no-let
     let p: B = initialValue;
 
     for await (const variable of asyncIterable) {

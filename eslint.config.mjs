@@ -1,10 +1,17 @@
 import pagopa from "@pagopa/eslint-config";
+import functional from "eslint-plugin-functional";
 
 export default [
   ...pagopa,
   {
+    plugins: {
+      functional: functional
+    }
+  },
+  {
     rules: {
       "comma-dangle": "off",
+      "functional/no-let": "error",
       "perfectionist/sort-classes": "off",
       "perfectionist/sort-enums": "off",
       "perfectionist/sort-interfaces": "off",
