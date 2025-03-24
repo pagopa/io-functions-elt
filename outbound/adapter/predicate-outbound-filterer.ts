@@ -1,6 +1,7 @@
+import * as RA from "fp-ts/ReadonlyArray";
 import { Predicate } from "fp-ts/lib/Predicate";
 import { flow, pipe } from "fp-ts/lib/function";
-import * as RA from "fp-ts/ReadonlyArray";
+
 import { OutboundFilterer } from "../port/outbound-filterer";
 
 export const create = <T>(predicate: Predicate<T>): OutboundFilterer<T> => {

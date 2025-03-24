@@ -1,13 +1,13 @@
-/* eslint-disable @typescript-eslint/naming-convention */ // disabled in order to use the naming convention used to flatten nested object to root ('_' char used as nested object separator)
-import * as winston from "winston";
+import { AzureNamedKeyCredential, TableClient } from "@azure/data-tables";
 import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
-import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
+import * as winston from "winston";
+
+import { IBulkOperationResult } from "../utils/bulkOperationResult";
+import { getConfigOrThrow } from "../utils/config";
+import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
-import { getConfigOrThrow } from "../utils/config";
-import { IBulkOperationResult } from "../utils/bulkOperationResult";
-import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
 import { handleServicesChange } from "./handler";
 
 // eslint-disable-next-line functional/no-let

@@ -1,10 +1,11 @@
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
+import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as ai from "applicationinsights";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
-import { pipe } from "fp-ts/lib/function";
-import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
+import { pipe } from "fp-ts/lib/function";
+
 import { OutboundTracker, SeverityLevel } from "../port/outbound-tracker";
 
 const DEFAULT_SAMPLING_PERCENTAGE = 5;
@@ -34,7 +35,7 @@ export const create = (aiClient: TelemetryClient): OutboundTracker => ({
     pipe(
       aiClient,
       O.fromNullable,
-      O.map(client =>
+      O.map((client) =>
         O.tryCatch(() =>
           client.trackException({ exception: error, severity: level })
         )

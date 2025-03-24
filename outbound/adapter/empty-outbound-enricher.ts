@@ -1,7 +1,8 @@
-import * as TE from "fp-ts/TaskEither";
-import { flow } from "fp-ts/lib/function";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as T from "fp-ts/Task";
+import * as TE from "fp-ts/TaskEither";
+import { flow } from "fp-ts/lib/function";
+
 import { OutboundEnricher } from "../port/outbound-enricher";
 import { success } from "../port/outbound-publisher";
 

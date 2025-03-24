@@ -1,6 +1,7 @@
-import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as RA from "fp-ts/ReadonlyArray";
+import * as TE from "fp-ts/TaskEither";
+import { identity, pipe } from "fp-ts/lib/function";
 import {
   Consumer,
   KafkaJSError,
@@ -8,7 +9,6 @@ import {
   Producer,
   RecordMetadata
 } from "kafkajs";
-import { identity, pipe } from "fp-ts/lib/function";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { failure, createErrorFromCode } = require("kafkajs/src/protocol/error"); // import required becouse createErrorFromRecord is not included in @types/kafkajs
@@ -34,12 +34,11 @@ export const disconnectWithoutError = (
   pipe(
     client,
     disconnect,
-    TE.orElseW(_ => TE.right(undefined))
+    TE.orElseW(() => TE.right(undefined))
   );
 
 export const processErrors = <T>(
   messages: ReadonlyArray<T>,
-  // eslint-disable-next-line functional/prefer-readonly-type
   records: ReadonlyArray<RecordMetadata>
 ): TE.TaskEither<
   ReadonlyArray<IStorableSendFailureError<T>>,
@@ -47,13 +46,13 @@ export const processErrors = <T>(
 > =>
   pipe(
     records,
-    RA.filter(r => failure(r.errorCode)),
+    RA.filter((r) => failure(r.errorCode)),
     RA.mapWithIndex((i, record) => ({
       ...(createErrorFromCode(record.errorCode) as KafkaJSProtocolError), // cast required becouse createErrorFromRecord is not included in @types/kafkajs
       body: messages[i]
     })),
-    TE.fromPredicate(rs => rs.length === 0, identity),
-    TE.map(_ => records)
+    TE.fromPredicate((rs) => rs.length === 0, identity),
+    TE.map(() => records)
   );
 
 const isKafkaJSError = (error: Error): error is KafkaJSError =>
@@ -68,8 +67,8 @@ export const storableSendFailureError = <T>(
     E.toError,
     E.fromPredicate(
       isKafkaJSError,
-      e => new kerr.KafkaJSError(e, { retriable: false })
+      (e) => new kerr.KafkaJSError(e, { retriable: false })
     ),
     E.toUnion,
-    (ke: KafkaJSError) => messages.map(message => ({ ...ke, body: message }))
+    (ke: KafkaJSError) => messages.map((message) => ({ ...ke, body: message }))
   );

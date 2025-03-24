@@ -1,21 +1,18 @@
 import { Context } from "@azure/functions";
-import { BlobService } from "azure-storage";
-
-import { pipe } from "fp-ts/lib/function";
-import * as T from "fp-ts/lib/Task";
-import * as TE from "fp-ts/lib/TaskEither";
-import * as RA from "fp-ts/ReadonlyArray";
-import * as O from "fp-ts/Option";
-import * as E from "fp-ts/Either";
-
-import * as t from "io-ts";
-
 import {
   Message,
   MessageModel,
   RetrievedMessage,
   RetrievedMessageWithContent
 } from "@pagopa/io-functions-commons/dist/src/models/message";
+import { BlobService } from "azure-storage";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
+import * as RA from "fp-ts/ReadonlyArray";
+import * as T from "fp-ts/lib/Task";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 
 import * as AI from "../utils/AsyncIterableTask";
 import {
@@ -52,37 +49,39 @@ const testUsers: ReadonlyArray<string> = [
 /**
  * Build a Cosmos query iterator for messages with a min and max timestamp.
  */
-export const buildIterator = (
-  messageModel: MessageModel,
-  cosmosChunkSize: number,
-  cosmosDegreeeOfParallelism: number
-) => (
-  rangeMin: number,
-  rangeMax: number
-): AsyncIterable<ReadonlyArray<t.Validation<RetrievedMessage>>> =>
-  messageModel.getQueryIterator(
-    {
-      parameters: [
-        {
-          name: "@min",
-          value: rangeMin
-        },
-        {
-          name: "@max",
-          value: rangeMax
-        },
-        {
-          name: "@testUsers",
-          value: testUsers
-        }
-      ],
-      query: `SELECT * FROM m WHERE m._ts > @min AND m._ts <= @max AND NOT ARRAY_CONTAINS(@testUsers, m.fiscalCode)`
-    },
-    {
-      maxDegreeOfParallelism: cosmosDegreeeOfParallelism,
-      maxItemCount: cosmosChunkSize
-    }
-  );
+export const buildIterator =
+  (
+    messageModel: MessageModel,
+    cosmosChunkSize: number,
+    cosmosDegreeeOfParallelism: number
+  ) =>
+  (
+    rangeMin: number,
+    rangeMax: number
+  ): AsyncIterable<ReadonlyArray<t.Validation<RetrievedMessage>>> =>
+    messageModel.getQueryIterator(
+      {
+        parameters: [
+          {
+            name: "@min",
+            value: rangeMin
+          },
+          {
+            name: "@max",
+            value: rangeMax
+          },
+          {
+            name: "@testUsers",
+            value: testUsers
+          }
+        ],
+        query: `SELECT * FROM m WHERE m._ts > @min AND m._ts <= @max AND NOT ARRAY_CONTAINS(@testUsers, m.fiscalCode)`
+      },
+      {
+        maxDegreeOfParallelism: cosmosDegreeeOfParallelism,
+        maxItemCount: cosmosChunkSize
+      }
+    );
 
 /**
  * Retrieve a message content from blob storage and enrich message
@@ -98,11 +97,11 @@ export const enrichMessageContent = (
     TE.chain(
       O.fold(
         () => TE.left(Error("blob not found")),
-        _ => TE.right(_)
+        (_) => TE.right(_)
       )
     ),
-    TE.map(content => ({ ...message, content })),
-    TE.orElseW(_e => {
+    TE.map((content) => ({ ...message, content })),
+    TE.orElseW((_e) => {
       context.log(`Error retrieving message ${message.id}`, _e.message);
       return TE.right(message);
     }),
@@ -123,10 +122,10 @@ const enrichMessagesContent = (
   pipe(
     messages,
     RA.chunksOf(mesageContentChunkSize),
-    RA.map(chunks =>
+    RA.map((chunks) =>
       pipe(
         chunks,
-        RA.map(m =>
+        RA.map((m) =>
           m.isPending === false
             ? enrichMessageContent(messageModel, blobService, m, context)
             : T.of(m)
@@ -147,7 +146,7 @@ const updateMessageReport = (
 ): MessageReport =>
   pipe(
     curr,
-    value =>
+    (value) =>
       value ?? {
         serviceId: message.senderServiceId,
         // eslint-disable-next-line sort-keys
@@ -157,7 +156,7 @@ const updateMessageReport = (
         delivered_payment: 0,
         with_content: 0
       },
-    value => ({
+    (value) => ({
       serviceId: value.serviceId,
       // eslint-disable-next-line sort-keys
       sent: value.sent + 1,
@@ -172,7 +171,7 @@ const updateMessageReport = (
   );
 
 const toJSONString = (map: ReadonlyMap<string, MessageReport>): string =>
-  pipe(map, m => Array.from(m.values()), JSON.stringify);
+  pipe(map, (m) => Array.from(m.values()), JSON.stringify);
 
 // ------------------
 // Process report
@@ -182,99 +181,101 @@ const toJSONString = (map: ReadonlyMap<string, MessageReport>): string =>
  * Process all messages between min and max timestamp values
  * and write a csv into blob storage
  */
-export const processMessages = (
-  messageModel: MessageModel,
-  blobService: BlobService,
-  exportToBlob: (
-    blobName: string
-  ) => (text: string) => TE.TaskEither<Error, BlobService.BlobResult>,
-  cosmosChunkSize: number,
-  cosmosDegreeeOfParallelism: number,
-  mesageContentChunkSize: number
-  // eslint-disable-next-line max-params
-) => async (
-  context: Context,
-  rangeMin: number,
-  rangeMax: number
-): Promise<IBulkOperationResultEntity> =>
-  pipe(
-    buildIterator(
-      messageModel,
-      cosmosChunkSize,
-      cosmosDegreeeOfParallelism
-    )(rangeMin, rangeMax),
-    AI.fromAsyncIterable,
-    AI.map(page => {
-      const [rights, lefts] = [RA.rights(page), RA.lefts(page)];
-      if (lefts.length > 0) {
-        context.log(`ERROR: ${lefts.length} messages metadata not loaded`);
-      }
-      return rights;
-    }),
-    AI.map(messages =>
-      enrichMessagesContent(
+export const processMessages =
+  (
+    messageModel: MessageModel,
+    blobService: BlobService,
+    exportToBlob: (
+      blobName: string
+    ) => (text: string) => TE.TaskEither<Error, BlobService.BlobResult>,
+    cosmosChunkSize: number,
+    cosmosDegreeeOfParallelism: number,
+    mesageContentChunkSize: number
+    // eslint-disable-next-line max-params
+  ) =>
+  async (
+    context: Context,
+    rangeMin: number,
+    rangeMax: number
+  ): Promise<IBulkOperationResultEntity> =>
+    pipe(
+      buildIterator(
         messageModel,
-        mesageContentChunkSize,
-        blobService,
-        messages,
-        context
-      )()
-    ),
-    T.map(_ => {
-      context.log(`[${rangeMin}] Start retrieving data.. ${Date.now()}`);
-      return _;
-    }),
-    AI.reduceTaskEither(
-      E.toError,
-      new Map<string, MessageReport>(),
-      (prev, curr) => {
-        curr.forEach(message => {
-          prev.set(
-            message.senderServiceId,
-            updateMessageReport(prev.get(message.senderServiceId), message)
-          );
+        cosmosChunkSize,
+        cosmosDegreeeOfParallelism
+      )(rangeMin, rangeMax),
+      AI.fromAsyncIterable,
+      AI.map((page) => {
+        const [rights, lefts] = [RA.rights(page), RA.lefts(page)];
+        if (lefts.length > 0) {
+          context.log(`ERROR: ${lefts.length} messages metadata not loaded`);
+        }
+        return rights;
+      }),
+      AI.map((messages) =>
+        enrichMessagesContent(
+          messageModel,
+          mesageContentChunkSize,
+          blobService,
+          messages,
+          context
+        )()
+      ),
+      T.map((_) => {
+        context.log(`[${rangeMin}] Start retrieving data.. ${Date.now()}`);
+        return _;
+      }),
+      AI.reduceTaskEither(
+        E.toError,
+        new Map<string, MessageReport>(),
+        (prev, curr) => {
+          curr.forEach((message) => {
+            prev.set(
+              message.senderServiceId,
+              updateMessageReport(prev.get(message.senderServiceId), message)
+            );
+          });
+          return prev;
+        }
+      ),
+      T.map((_) => {
+        context.log(`[${rangeMin}] End retrieving data.. ${Date.now()}`);
+        return _;
+      }),
+      TE.map((_) => {
+        // eslint-disable-next-line functional/no-let
+        let tot = 0;
+        // eslint-disable-next-line functional/no-let
+        let withoutContent = 0;
+        _.forEach((v) => {
+          tot += v.sent;
+          withoutContent += v.delivered !== v.with_content ? 1 : 0;
         });
-        return prev;
-      }
-    ),
-    T.map(_ => {
-      context.log(`[${rangeMin}] End retrieving data.. ${Date.now()}`);
-      return _;
-    }),
-    TE.map(_ => {
-      // eslint-disable-next-line functional/no-let
-      let tot = 0;
-      // eslint-disable-next-line functional/no-let
-      let withoutContent = 0;
-      _.forEach(v => {
-        tot += v.sent;
-        withoutContent += v.delivered !== v.with_content ? 1 : 0;
-      });
-      context.log(`[${rangeMin}] Total: ${tot}`);
-      context.log(`[${rangeMin}] Without content: ${withoutContent}`);
-      return _;
-    }),
-    TE.map(
-      // Create csv
-      toJSONString
-    ),
-    T.map(_ => {
-      context.log(`[${rangeMin}] End csv.. ${Date.now()}`);
-      return _;
-    }),
-    TE.chain(content => {
-      const dateStringMin = new Date(rangeMin * 1000).toJSON();
-      const dateStringMax = new Date(rangeMax * 1000).toJSON();
-      return exportToBlob(`step1_${dateStringMin} - ${dateStringMax}.json`)(
-        content
-      );
-    }),
-    T.map(_ => {
-      context.log(`[${rangeMin}] Result success:  ${E.isRight(_)}`);
-      return _;
-    }),
-    TE.map(_ => ({ isSuccess: true, result: "none" })),
-    TE.mapLeft(_ => ({ isSuccess: false, result: "none" })),
-    TE.toUnion,
-    T.map(toBulkOperationResultEntity("process-message-report"))
-  )();
+        context.log(`[${rangeMin}] Total: ${tot}`);
+        context.log(`[${rangeMin}] Without content: ${withoutContent}`);
+        return _;
+      }),
+      TE.map(
+        // Create csv
+        toJSONString
+      ),
+      T.map((_) => {
+        context.log(`[${rangeMin}] End csv.. ${Date.now()}`);
+        return _;
+      }),
+      TE.chain((content) => {
+        const dateStringMin = new Date(rangeMin * 1000).toJSON();
+        const dateStringMax = new Date(rangeMax * 1000).toJSON();
+        return exportToBlob(`step1_${dateStringMin} - ${dateStringMax}.json`)(
+          content
+        );
+      }),
+      T.map((_) => {
+        context.log(`[${rangeMin}] Result success:  ${E.isRight(_)}`);
+        return _;
+      }),
+      TE.map(() => ({ isSuccess: true, result: "none" })),
+      TE.mapLeft(() => ({ isSuccess: false, result: "none" })),
+      TE.toUnion,
+      T.map(toBulkOperationResultEntity("process-message-report"))
+    )();
