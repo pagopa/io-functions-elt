@@ -1,13 +1,12 @@
-import * as t from "io-ts";
-
-import { RetrievedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/src/models/message";
 import { PaymentData } from "@pagopa/io-functions-commons/dist/generated/definitions/PaymentData";
+import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
+import { RetrievedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/src/models/message";
 import {
   NonEmptyString,
   OrganizationFiscalCode
 } from "@pagopa/ts-commons/lib/strings";
-import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { enumType } from "@pagopa/ts-commons/lib/types";
+import * as t from "io-ts";
 
 export type MessageReport = t.TypeOf<typeof MessageReport>;
 export const MessageReport = t.interface({

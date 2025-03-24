@@ -1,13 +1,14 @@
 import * as IO from "fp-ts/IO";
 import * as TE from "fp-ts/TaskEither";
-import { Kafka, Producer, RecordMetadata } from "kafkajs";
 import { flow } from "fp-ts/lib/function";
+import { Kafka, Producer, RecordMetadata } from "kafkajs";
+
 import { IStorableSendFailureError } from "./KafkaOperation";
+import { send } from "./KafkaProducer";
 import {
   KafkaProducerTopicConfig,
   ValidableKafkaProducerConfig
 } from "./KafkaTypes";
-import { send } from "./KafkaProducer";
 
 export interface IKafkaProducerCompact<T> {
   readonly producer: Producer;
@@ -25,13 +26,15 @@ export type KafkaProducerCompact<T> = IO.IO<IKafkaProducerCompact<T>>;
  * @category: constructor
  * @since: 1.0.0
  */
-export const fromConfig = <T>(
-  config: ValidableKafkaProducerConfig,
-  topic: KafkaProducerTopicConfig<T>
-): KafkaProducerCompact<T> => (): IKafkaProducerCompact<T> => ({
-  producer: new Kafka(config).producer(config),
-  topic
-});
+export const fromConfig =
+  <T>(
+    config: ValidableKafkaProducerConfig,
+    topic: KafkaProducerTopicConfig<T>
+  ): KafkaProducerCompact<T> =>
+  (): IKafkaProducerCompact<T> => ({
+    producer: new Kafka(config).producer(config),
+    topic
+  });
 
 export const sendMessages: <T>(
   fa: KafkaProducerCompact<T>
@@ -40,4 +43,4 @@ export const sendMessages: <T>(
 ) => TE.TaskEither<
   ReadonlyArray<IStorableSendFailureError<T>>,
   ReadonlyArray<RecordMetadata>
-> = fa => flow(messages => send(fa().topic, messages, () => fa().producer));
+> = (fa) => flow((messages) => send(fa().topic, messages, () => fa().producer));

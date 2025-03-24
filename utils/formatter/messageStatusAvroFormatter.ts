@@ -1,12 +1,12 @@
-/* eslint-disable sort-keys */
-import { RetrievedMessageStatus } from "@pagopa/io-functions-commons/dist/src/models/message_status";
-import * as avro from "avsc";
 import { NotRejectedMessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotRejectedMessageStatusValue";
 import { RejectedMessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/RejectedMessageStatusValue";
-import { MessageFormatter } from "../kafka/KafkaTypes";
-import { messageStatus } from "../../generated/avro/dto/messageStatus";
+import { RetrievedMessageStatus } from "@pagopa/io-functions-commons/dist/src/models/message_status";
+import * as avro from "avsc";
+
 import { MessageStatusCrudOperation as CrudOperation } from "../../generated/avro/dto/MessageStatusCrudOperationEnum";
 import { MessageStatus as AvroMessageStatus } from "../../generated/avro/dto/MessageStatusEnum";
+import { messageStatus } from "../../generated/avro/dto/messageStatus";
+import { MessageFormatter } from "../kafka/KafkaTypes";
 
 const formatStatus = (
   status: NotRejectedMessageStatusValueEnum | RejectedMessageStatusValueEnum
@@ -31,12 +31,13 @@ export const buildAvroServiceObject = (
 });
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const messageStatusAvroFormatter = (): MessageFormatter<RetrievedMessageStatus> => message => ({
-  // messageId as Partition Key
-  key: message.messageId,
-  value: avro.Type.forSchema(
-    messageStatus.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
-  ).toBuffer(
-    Object.assign(new messageStatus(), buildAvroServiceObject(message))
-  )
-});
+export const messageStatusAvroFormatter =
+  (): MessageFormatter<RetrievedMessageStatus> => (message) => ({
+    // messageId as Partition Key
+    key: message.messageId,
+    value: avro.Type.forSchema(
+      messageStatus.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
+    ).toBuffer(
+      Object.assign(new messageStatus(), buildAvroServiceObject(message))
+    )
+  });

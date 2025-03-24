@@ -1,5 +1,6 @@
-import { AzureFunction } from "@azure/functions";
 import { AzureNamedKeyCredential, TableClient } from "@azure/data-tables";
+import { AzureFunction } from "@azure/functions";
+
 import { getConfigOrThrow } from "../utils/config";
 import { timerTrigger } from "./handler";
 

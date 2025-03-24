@@ -1,33 +1,31 @@
-import { createBlobService } from "azure-storage";
-
-// disabled in order to use the naming convention used to flatten nested object to root ('_' char used as nested object separator)
-/* eslint-disable @typescript-eslint/naming-convention */ import * as winston from "winston";
+import { AzureNamedKeyCredential, TableClient } from "@azure/data-tables";
 import { Context } from "@azure/functions";
-import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
-import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
-
 import {
-  ServiceModel,
-  SERVICE_COLLECTION_NAME
-} from "@pagopa/io-functions-commons/dist/src/models/service";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import {
-  MessageModel,
-  MESSAGE_COLLECTION_NAME
+  MESSAGE_COLLECTION_NAME,
+  MessageModel
 } from "@pagopa/io-functions-commons/dist/src/models/message";
-import * as KP from "../utils/kafka/KafkaProducerCompact";
-import { getConfigOrThrow } from "../utils/config";
-import { cosmosdbInstance, cosmosdbInstanceReplica } from "../utils/cosmosdb";
-import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
-import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
+import {
+  SERVICE_COLLECTION_NAME,
+  ServiceModel
+} from "@pagopa/io-functions-commons/dist/src/models/service";
+import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { createBlobService } from "azure-storage";
+import * as winston from "winston";
+
+import { exportTextToBlob } from "../utils/azure-storage";
 import {
   IBulkOperationResult,
   toBulkOperationResultEntity
 } from "../utils/bulkOperationResult";
-import { exportTextToBlob } from "../utils/azure-storage";
-import { importServices } from "./handler.services";
-import { processMessages } from "./handler.messages";
+import { getConfigOrThrow } from "../utils/config";
+import { cosmosdbInstance, cosmosdbInstanceReplica } from "../utils/cosmosdb";
+import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
+import * as KP from "../utils/kafka/KafkaProducerCompact";
+import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { CommandImportServices, CommandMessageReport } from "./commands";
+import { processMessages } from "./handler.messages";
+import { importServices } from "./handler.services";
 
 // eslint-disable-next-line functional/no-let
 let logger: Context["log"] | undefined;

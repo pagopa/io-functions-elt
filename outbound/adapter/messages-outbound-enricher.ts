@@ -1,13 +1,14 @@
-import * as TE from "fp-ts/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
 import {
   MessageModel,
   RetrievedMessage
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 import { BlobService } from "azure-storage";
+import * as E from "fp-ts/Either";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as T from "fp-ts/Task";
-import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
+
 import { OutboundEnricher } from "../port/outbound-enricher";
 import { failure, success } from "../port/outbound-publisher";
 
@@ -22,7 +23,7 @@ export const create = (
     pipe(
       messageModel.getContentFromBlob(blobService, message.id),
       TE.chain(TE.fromOption(() => Error(`Blob not found`))),
-      TE.map(content => ({
+      TE.map((content) => ({
         ...message,
         content,
         kind: "IRetrievedMessageWithContent"
@@ -36,12 +37,12 @@ export const create = (
       RA.chunksOf(maxParallelThrottling),
       RA.map(
         flow(
-          RA.map(message =>
+          RA.map((message) =>
             message.isPending === false
               ? pipe(
                   enrichASingleMessage(message),
                   TE.map(success),
-                  TE.mapLeft(error => failure(error, message))
+                  TE.mapLeft((error) => failure(error, message))
                 )
               : TE.of(success(message))
           ),

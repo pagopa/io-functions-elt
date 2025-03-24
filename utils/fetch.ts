@@ -1,10 +1,10 @@
+import { agent } from "@pagopa/ts-commons";
 import {
   AbortableFetch,
   setFetchTimeout,
   toFetch
 } from "@pagopa/ts-commons/lib/fetch";
 import { Millisecond } from "@pagopa/ts-commons/lib/units";
-import { agent } from "@pagopa/ts-commons";
 
 export const DEFAULT_REQUEST_TIMEOUT_MS = 10000 as Millisecond;
 

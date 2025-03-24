@@ -1,29 +1,26 @@
-/* eslint-disable @typescript-eslint/naming-convention */ // disabled in order to use the naming convention used to flatten nested object to root ('_' char used as nested object separator)
-import * as winston from "winston";
+import { AzureNamedKeyCredential, TableClient } from "@azure/data-tables";
 import { Context } from "@azure/functions";
-import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
-import { createBlobService } from "azure-storage";
-
 import {
-  MessageModel,
-  MESSAGE_COLLECTION_NAME
+  MESSAGE_COLLECTION_NAME,
+  MessageModel
 } from "@pagopa/io-functions-commons/dist/src/models/message";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
-
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { createBlobService } from "azure-storage";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
-import * as KP from "../utils/kafka/KafkaProducerCompact";
-import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
-import { getConfigOrThrow } from "../utils/config";
-import { IBulkOperationResult } from "../utils/bulkOperationResult";
-import {
-  avroMessageFormatter,
-  ThirdPartyDataWithCategoryFetcher
-} from "../utils/formatter/messagesAvroFormatter";
-import { cosmosdbInstance } from "../utils/cosmosdb";
+import * as winston from "winston";
 
 import { MessageContentType } from "../generated/avro/dto/MessageContentTypeEnum";
+import { IBulkOperationResult } from "../utils/bulkOperationResult";
+import { getConfigOrThrow } from "../utils/config";
+import { cosmosdbInstance } from "../utils/cosmosdb";
+import {
+  ThirdPartyDataWithCategoryFetcher,
+  avroMessageFormatter
+} from "../utils/formatter/messagesAvroFormatter";
+import * as KP from "../utils/kafka/KafkaProducerCompact";
+import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { handleMessageChange } from "./handler";
 
 // eslint-disable-next-line functional/no-let
@@ -44,15 +41,17 @@ const messagesConfig = {
   topic: config.MessagesKafkaTopicConfig.MESSAGES_TOPIC_NAME
 };
 
-const thirdPartyDataWithCategoryFetcher: ThirdPartyDataWithCategoryFetcher = serviceId =>
+const thirdPartyDataWithCategoryFetcher: ThirdPartyDataWithCategoryFetcher = (
+  serviceId
+) =>
   pipe(
     serviceId,
     E.fromPredicate(
-      id => id === config.PN_SERVICE_ID,
-      id => Error(`Missing third-party service configuration for ${id}`)
+      (id) => id === config.PN_SERVICE_ID,
+      (id) => Error(`Missing third-party service configuration for ${id}`)
     ),
     E.map(() => MessageContentType.PN),
-    E.mapLeft(e => logger?.error({ exception: e })),
+    E.mapLeft((e) => logger?.error({ exception: e })),
     E.mapLeft(() => MessageContentType.GENERIC),
     E.toUnion
   );

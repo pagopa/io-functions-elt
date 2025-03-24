@@ -1,12 +1,12 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import {
   RetrievedService,
   ValidService
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import * as avro from "avsc";
-import { MessageFormatter } from "../kafka/KafkaTypes";
-import { services } from "../../generated/avro/dto/services";
+
 import { CrudOperation } from "../../generated/avro/dto/CrudOperationEnum";
+import { services } from "../../generated/avro/dto/services";
+import { MessageFormatter } from "../kafka/KafkaTypes";
 
 export const buildAvroServiceObject = (
   retrievedService: RetrievedService,
@@ -55,17 +55,19 @@ export const buildAvroServiceObject = (
         : ValidService.is(retrievedService)
   });
 
-export const avroServiceFormatter = (
-  SERVICEID_EXCLUSION_LIST: ReadonlyArray<string>
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-): MessageFormatter<RetrievedService> => message => ({
-  key: message.serviceId,
-  value: avro.Type.forSchema(
-    services.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
-  ).toBuffer(
-    Object.assign(
-      new services(),
-      buildAvroServiceObject(message, SERVICEID_EXCLUSION_LIST)
+export const avroServiceFormatter =
+  (
+    SERVICEID_EXCLUSION_LIST: ReadonlyArray<string>
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  ): MessageFormatter<RetrievedService> =>
+  (message) => ({
+    key: message.serviceId,
+    value: avro.Type.forSchema(
+      services.schema as avro.Schema // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
+    ).toBuffer(
+      Object.assign(
+        new services(),
+        buildAvroServiceObject(message, SERVICEID_EXCLUSION_LIST)
+      )
     )
-  )
-});
+  });

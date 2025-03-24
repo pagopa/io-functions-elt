@@ -1,22 +1,23 @@
-import { constVoid, flow, identity, pipe } from "fp-ts/lib/function";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import * as O from "fp-ts/Option";
+import * as RA from "fp-ts/ReadonlyArray";
 import * as T from "fp-ts/Task";
 import * as TT from "fp-ts/TaskThese";
-import * as RA from "fp-ts/ReadonlyArray";
-import * as O from "fp-ts/Option";
-import * as S from "fp-ts/string";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { not } from "fp-ts/lib/Predicate";
+import { constVoid, flow, identity, pipe } from "fp-ts/lib/function";
+import * as S from "fp-ts/string";
 import * as t from "io-ts";
-import {
-  isFailure,
-  isSuccess,
-  OutboundPublisher
-} from "../outbound/port/outbound-publisher";
-import { OutboundTracker } from "../outbound/port/outbound-tracker";
+
 import { InboundDocumentsProcessor } from "../inbound/port/inbound-documents-processor";
+import * as DOF from "../outbound/adapter/allow-all-outbound-filterer";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
-import * as DOF from "../outbound/adapter/allow-all-outbound-filterer";
+import {
+  OutboundPublisher,
+  isFailure,
+  isSuccess
+} from "../outbound/port/outbound-publisher";
+import { OutboundTracker } from "../outbound/port/outbound-tracker";
 
 export const getAnalyticsProcessorForDocuments = <I>(
   decoder: t.Decoder<unknown, I>,
@@ -29,14 +30,14 @@ export const getAnalyticsProcessorForDocuments = <I>(
 ): InboundDocumentsProcessor => ({
   process: flow(
     RA.map(decoder.decode),
-    documentsOrErrors =>
+    (documentsOrErrors) =>
       TT.both(RA.lefts(documentsOrErrors), RA.rights(documentsOrErrors)),
     TT.mapLeft(
       flow(
         RA.map(
           flow(
             readableReport,
-            message => tracker.trackError(new Error(message)),
+            (message) => tracker.trackError(new Error(message)),
             T.of
           )
         ),
@@ -49,24 +50,24 @@ export const getAnalyticsProcessorForDocuments = <I>(
         dataFilterer.filterArray,
         // Enrich and publish documents with the main publisher, then return the errors
         contentEnricher.enrichs,
-        T.chain(enrichResults =>
+        T.chain((enrichResults) =>
           pipe(
             enrichResults,
             RA.filter(isSuccess),
-            RA.map(success => success.document),
+            RA.map((success) => success.document),
             mainPublisher.publishes,
             T.map(RA.concat(enrichResults)),
             T.map(RA.filter(isFailure))
           )
         ),
         // Publish documents in error with the fallback publisher: if the fallback fails, throw an error
-        T.chain(faileds =>
+        T.chain((faileds) =>
           pipe(
             faileds,
-            RA.map(failed => failed.document),
+            RA.map((failed) => failed.document),
             fallbackPublisher.publishes,
             T.map(RA.filter(isFailure)),
-            T.map(ffs =>
+            T.map((ffs) =>
               ffs.length === 0
                 ? ""
                 : pipe(
@@ -82,7 +83,7 @@ export const getAnalyticsProcessorForDocuments = <I>(
             T.map(
               flow(
                 O.fromPredicate(not(S.isEmpty)),
-                O.map(errorMessage => {
+                O.map((errorMessage) => {
                   throw new Error(errorMessage);
                 }),
                 constVoid

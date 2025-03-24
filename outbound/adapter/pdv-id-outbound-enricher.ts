@@ -1,21 +1,21 @@
-import * as TE from "fp-ts/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
-
+import { Second } from "@pagopa/ts-commons/lib/units";
+import { TelemetryClient } from "applicationinsights";
+import * as E from "fp-ts/Either";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as T from "fp-ts/Task";
-import * as E from "fp-ts/Either";
-import { TelemetryClient } from "applicationinsights";
+import * as TE from "fp-ts/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
 import { RedisClientType } from "redis";
-import { Second } from "@pagopa/ts-commons/lib/units";
-import { OutboundEnricher } from "../port/outbound-enricher";
-import { failure, success } from "../port/outbound-publisher";
+
 import { getPdvId } from "../../utils/pdv";
+import { PdvTokenizerClient } from "../../utils/pdvTokenizerClient";
 import {
   RetrievedProfileWithMaybePdvId,
   RetrievedServicePreferenceWithMaybePdvId,
   RetrievedUserDataProcessingWithMaybePdvId
 } from "../../utils/types/decoratedTypes";
-import { PdvTokenizerClient } from "../../utils/pdvTokenizerClient";
+import { OutboundEnricher } from "../port/outbound-enricher";
+import { failure, success } from "../port/outbound-publisher";
 
 export type MaybePdvDocumentsTypes =
   | RetrievedServicePreferenceWithMaybePdvId
@@ -38,7 +38,7 @@ export const create = <M extends MaybePdvDocumentsTypes>(
         redisClientTask
       },
       getPdvId(message.fiscalCode),
-      TE.map(userPDVId => ({
+      TE.map((userPDVId) => ({
         ...message,
         userPDVId
       }))
@@ -51,11 +51,11 @@ export const create = <M extends MaybePdvDocumentsTypes>(
       RA.chunksOf(maxParallelThrottling),
       RA.map(
         flow(
-          RA.map(servicePreference =>
+          RA.map((servicePreference) =>
             pipe(
               enrichASingleMessage(servicePreference),
               TE.map(success),
-              TE.mapLeft(error => failure(error, servicePreference))
+              TE.mapLeft((error) => failure(error, servicePreference))
             )
           ),
           RA.sequence(T.ApplicativePar)

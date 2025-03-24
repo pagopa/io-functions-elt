@@ -1,5 +1,6 @@
-import { Task } from "fp-ts/lib/Task";
 import * as TE from "fp-ts/TaskEither";
+import { Task } from "fp-ts/lib/Task";
+
 import { Result } from "./outbound-publisher";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
