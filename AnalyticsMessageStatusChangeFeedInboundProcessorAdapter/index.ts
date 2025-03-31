@@ -43,7 +43,7 @@ const messageStatusOnQueueAdapter: OutboundPublisher<RetrievedMessageStatus> =
   );
 
 const telemetryAdapter = TA.create(
-  TA.initTelemetryClient(config.APPINSIGHTS_INSTRUMENTATIONKEY)
+  TA.initTelemetryClient(config.APPLICATIONINSIGHTS_CONNECTION_STRING)
 );
 
 const messageStatusFilterer: OutboundFilterer<RetrievedMessageStatus> =
