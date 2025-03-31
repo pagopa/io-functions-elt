@@ -3,7 +3,7 @@
   "description": "Integration between IO data and PDND",
   "author": "IO team",
   "repository": "https://github.com/pagopa/io-functions-elt",
-  "version": "2.12.0",
+  "version": "2.13.0",
   "license": "MIT",
   "engines": {
     "node": "20.17.0"
