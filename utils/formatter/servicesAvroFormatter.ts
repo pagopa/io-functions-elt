@@ -43,7 +43,7 @@ export const buildAvroServiceObject = (
     serviceName: retrievedService.serviceName,
     version: retrievedService.version,
     // eslint-disable-next-line sort-keys, no-underscore-dangle
-    timestamp: retrievedService._ts,
+    timestamp: retrievedService._ts * 1000,
 
     // --------------------
     // Calculated values
