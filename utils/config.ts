@@ -20,6 +20,7 @@ import * as t from "io-ts";
 import { set } from "lodash";
 
 import { KafkaProducerCompactConfig } from "./IoKafkaTypes";
+import { TestUsersArrayDecoder } from "./testUser";
 
 const isRecordOfString = (i: unknown): i is Record<string, unknown> =>
   typeof i === "object" &&
@@ -201,6 +202,10 @@ export const IDecodableConfig = t.intersection([
       []
     ),
 
+    INTERNAL_TEST_FISCAL_CODES_COMPRESSED: withDefault(
+      TestUsersArrayDecoder,
+      []
+    ),
     SERVICES_LEASES_PREFIX: NonEmptyString,
     MESSAGES_LEASES_PREFIX: NonEmptyString,
     MESSAGE_STATUS_LEASES_PREFIX: NonEmptyString,

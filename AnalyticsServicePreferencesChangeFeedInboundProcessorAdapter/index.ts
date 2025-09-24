@@ -20,6 +20,7 @@ import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
 import { createRedisClientSingleton } from "../utils/redis";
+import { isTestUser } from "../utils/testUser";
 import { RetrievedServicePreferenceWithMaybePdvId } from "../utils/types/decoratedTypes";
 
 const config = getConfigOrThrow();
@@ -82,12 +83,15 @@ const pdvIdEnricherAdapter: OutboundEnricher<RetrievedServicePreferenceWithMaybe
 const telemetryAdapter = TA.create(telemetryClient);
 
 const internalTestFiscalCodeSet = new Set(
-  config.INTERNAL_TEST_FISCAL_CODES as ReadonlyArray<FiscalCode>
+  config.INTERNAL_TEST_FISCAL_CODES_COMPRESSED as ReadonlyArray<FiscalCode>
 );
 const servicePreferencesFilterer: OutboundFilterer<RetrievedServicePreference> =
   PF.create(
     (retrievedServicePreference) =>
-      !internalTestFiscalCodeSet.has(retrievedServicePreference.fiscalCode)
+      !isTestUser(
+        retrievedServicePreference.fiscalCode,
+        internalTestFiscalCodeSet
+      )
   );
 
 const run = (

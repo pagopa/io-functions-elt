@@ -22,6 +22,7 @@ import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
 import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
 import { createRedisClientSingleton } from "../utils/redis";
+import { isTestUser } from "../utils/testUser";
 import { RetrievedUserDataProcessingWithMaybePdvId } from "../utils/types/decoratedTypes";
 
 const config = getConfigOrThrow();
@@ -83,12 +84,15 @@ const pdvIdEnricherAdapter: OutboundEnricher<RetrievedUserDataProcessingWithMayb
 const telemetryAdapter = TA.create(telemetryClient);
 
 const internalTestFiscalCodeSet = new Set(
-  config.INTERNAL_TEST_FISCAL_CODES as ReadonlyArray<FiscalCode>
+  config.INTERNAL_TEST_FISCAL_CODES_COMPRESSED as ReadonlyArray<FiscalCode>
 );
 const userDataProcessingFilterer: OutboundFilterer<RetrievedUserDataProcessing> =
   PF.create(
     (retrievedUserDataProcessing) =>
-      !internalTestFiscalCodeSet.has(retrievedUserDataProcessing.fiscalCode) &&
+      !isTestUser(
+        retrievedUserDataProcessing.fiscalCode,
+        internalTestFiscalCodeSet
+      ) &&
       retrievedUserDataProcessing.choice ===
         UserDataProcessingChoiceEnum.DELETE &&
       retrievedUserDataProcessing.status === UserDataProcessingStatusEnum.WIP

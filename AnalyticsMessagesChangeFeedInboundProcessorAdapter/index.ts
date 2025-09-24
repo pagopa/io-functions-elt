@@ -5,7 +5,7 @@ import {
   MessageModel,
   RetrievedMessage
 } from "@pagopa/io-functions-commons/dist/src/models/message";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { createBlobService } from "azure-storage";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
@@ -27,6 +27,7 @@ import {
 } from "../utils/formatter/messagesAvroFormatter";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
+import { isTestUser } from "../utils/testUser";
 
 const config = getConfigOrThrow();
 
@@ -84,9 +85,13 @@ const telemetryAdapter = TA.create(
   TA.initTelemetryClient(config.APPLICATIONINSIGHTS_CONNECTION_STRING)
 );
 
+const internalTestFiscalCodeSet = new Set(
+  config.INTERNAL_TEST_FISCAL_CODES_COMPRESSED as ReadonlyArray<FiscalCode>
+);
+
 const messageFilterer: OutboundFilterer<RetrievedMessage> = PF.create(
   (retrievedMessage) =>
-    !config.INTERNAL_TEST_FISCAL_CODES.includes(retrievedMessage.fiscalCode)
+    !isTestUser(retrievedMessage.fiscalCode, internalTestFiscalCodeSet)
 );
 
 const run = (
