@@ -1,4 +1,4 @@
-import { GzipCompressedString } from "../GzipCompressedString";
+import { GzipCompressedString } from "../gzipCompressedString";
 import { gzipSync } from "zlib";
 import * as E from "fp-ts/lib/Either";
 

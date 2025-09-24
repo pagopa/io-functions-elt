@@ -1,5 +1,6 @@
 import { CommaSeparatedListOf } from "@pagopa/ts-commons/lib/comma-separated-list";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+
 import { GzipCompressedString } from "./types/gzipCompressedString";
 
 /**
