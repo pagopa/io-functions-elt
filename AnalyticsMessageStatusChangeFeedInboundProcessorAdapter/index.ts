@@ -1,6 +1,7 @@
 import { Context } from "@azure/functions";
 import { QueueClient } from "@azure/storage-queue";
 import { RetrievedMessageStatus } from "@pagopa/io-functions-commons/dist/src/models/message_status";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
 import * as EEA from "../outbound/adapter/empty-outbound-enricher";
@@ -15,6 +16,7 @@ import { getConfigOrThrow, withTopic } from "../utils/config";
 import { messageStatusAvroFormatter } from "../utils/formatter/messageStatusAvroFormatter";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
+import { isTestUser } from "../utils/testUser";
 
 const config = getConfigOrThrow();
 
@@ -46,11 +48,16 @@ const telemetryAdapter = TA.create(
   TA.initTelemetryClient(config.APPLICATIONINSIGHTS_CONNECTION_STRING)
 );
 
+const internalTestFiscalCodeSet = new Set(
+  config.INTERNAL_TEST_FISCAL_CODES_COMPRESSED as ReadonlyArray<FiscalCode>
+);
+
 const messageStatusFilterer: OutboundFilterer<RetrievedMessageStatus> =
   PF.create(
     (retrievedMessageStatus) =>
-      !config.INTERNAL_TEST_FISCAL_CODES.includes(
-        retrievedMessageStatus.fiscalCode
+      !(
+        retrievedMessageStatus.fiscalCode !== undefined &&
+        isTestUser(retrievedMessageStatus.fiscalCode, internalTestFiscalCodeSet)
       )
   );
 const emptyEnricherAdapter: OutboundEnricher<RetrievedMessageStatus> =

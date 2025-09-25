@@ -4,7 +4,7 @@ import {
   NonNegativeInteger
 } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/Either";
 import * as R from "fp-ts/Record";
@@ -20,6 +20,7 @@ import * as t from "io-ts";
 import { set } from "lodash";
 
 import { KafkaProducerCompactConfig } from "./IoKafkaTypes";
+import { TestUsersArrayDecoder } from "./testUser";
 
 const isRecordOfString = (i: unknown): i is Record<string, unknown> =>
   typeof i === "object" &&
@@ -196,11 +197,10 @@ export const IDecodableConfig = t.intersection([
       []
     ),
 
-    INTERNAL_TEST_FISCAL_CODES: withDefault(
-      CommaSeparatedListOf(FiscalCode),
+    INTERNAL_TEST_FISCAL_CODES_COMPRESSED: withDefault(
+      TestUsersArrayDecoder,
       []
     ),
-
     SERVICES_LEASES_PREFIX: NonEmptyString,
     MESSAGES_LEASES_PREFIX: NonEmptyString,
     MESSAGE_STATUS_LEASES_PREFIX: NonEmptyString,
