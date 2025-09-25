@@ -46,7 +46,7 @@ describe("GzipCompressedString decoder", () => {
   });
 
   it("should support multiline and unicode", () => {
-    const original = "Linea1\nLinea2 — αβγ\nemoji: 😄";
+    const original = "Line1\nLine2 — αβγ\nemoji: 😄";
     const gz = gzipSync(Buffer.from(original, "utf-8"));
     const b64 = gz.toString("base64");
 
