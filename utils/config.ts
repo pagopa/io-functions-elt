@@ -4,7 +4,7 @@ import {
   NonNegativeInteger
 } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/Either";
 import * as R from "fp-ts/Record";
