@@ -197,11 +197,6 @@ export const IDecodableConfig = t.intersection([
       []
     ),
 
-    INTERNAL_TEST_FISCAL_CODES: withDefault(
-      CommaSeparatedListOf(FiscalCode),
-      []
-    ),
-
     INTERNAL_TEST_FISCAL_CODES_COMPRESSED: withDefault(
       TestUsersArrayDecoder,
       []
