@@ -58,3 +58,12 @@ generated
 .eslintcache
 
 azure-functions-core-tools
+
+# Terraform
+# Local .terraform directories
+**/.terraform/*
+# .tfstate files
+*.tfstate
+*.tfstate.*
+*.tfsec
+tfplan
