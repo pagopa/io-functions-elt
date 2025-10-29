@@ -9,7 +9,7 @@ jobs:
     name: Deploy on PROD WEU
     secrets: inherit
     with:
-      environment: 'prod'
+      environment: 'app-prod'
       resource_group_name: 'io-p-elt-rg'
       app_name: 'io-p-fn-elt'
       use_staging_slot: false
