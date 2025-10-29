@@ -79,6 +79,10 @@ data "azuread_group" "developers" {
   display_name = local.adgroups.devs_name
 }
 
+data "azurerm_resource_group" "elt" {
+  name = "${local.prefix}-${local.env_short}-elt-rg"
+}
+
 module "repo" {
   source  = "pagopa-dx/azure-github-environment-bootstrap/azurerm"
   version = "~> 3.0"
@@ -90,6 +94,10 @@ module "repo" {
     domain          = local.domain
     instance_number = local.instance_number
   }
+
+  additional_resource_group_ids = [
+    data.azurerm_resource_group.elt.id
+  ]
 
   subscription_id = data.azurerm_subscription.current.id
   tenant_id       = data.azurerm_client_config.current.tenant_id
