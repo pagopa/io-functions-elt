@@ -2,9 +2,6 @@ name: Code Review
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'IOPLT-1396-add-ga-cicd-2'  # TODO: only for testing, remove before merging
   pull_request:
     types: [opened, synchronize]
     paths:
