@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@pagopa/typescript-config-node/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "strict": true,
+    "sourceMap": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "exclude": [
+    "**/__mocks__/*",
+    "dist",
+    "node_modules",
+    "**/__tests__/*",
+    "docker-compose.yml"
+  ]
+}
