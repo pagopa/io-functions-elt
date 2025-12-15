@@ -1,17 +1,25 @@
-name: Deploy Pipelines - PROD WEU
+name: Deploy Pipelines - PROD ITN
 
 on:
-  workflow_dispatch:
-      
+  workflow_dispatch: {}
+  push:
+    branches:
+      - master
+    paths:
+      - "apps/io-functions-elt/CHANGELOG.md"
+
+permissions:
+  attestations: write
+  id-token: write
+  contents: read
+
 jobs:
-  deploy_on_prod:
-    uses: pagopa/dx/.github/workflows/legacy_deploy_pipelines.yaml@main
-    name: Deploy on PROD WEU
+  deploy:
+    name: Deploy
+    uses: pagopa/dx/.github/workflows/release-azure-appsvc-v1.yaml@main
     secrets: inherit
     with:
-      environment: 'app-prod'
-      resource_group_name: 'io-p-elt-rg'
-      app_name: 'io-p-fn-elt'
-      use_staging_slot: false
-      use_private_agent: true
-      health_check_path: '/api/v1/info'
+      workspace_name: io-functions-elt
+      environment: app-prod
+      resource_group_name: io-p-itn-elt-rg-01
+      web_app_name: io-p-itn-elt-func-01
