@@ -79,8 +79,8 @@ data "azuread_group" "developers" {
   display_name = local.adgroups.devs_name
 }
 
-data "azurerm_resource_group" "elt" {
-  name = "${local.prefix}-${local.env_short}-elt-rg"
+data "azurerm_resource_group" "elt_itn" {
+  name = "${local.prefix}-${local.env_short}-itn-elt-rg-01"
 }
 
 module "repo" {
@@ -96,7 +96,7 @@ module "repo" {
   }
 
   additional_resource_group_ids = [
-    data.azurerm_resource_group.elt.id
+    data.azurerm_resource_group.elt_itn.id
   ]
 
   subscription_id = data.azurerm_subscription.current.id
