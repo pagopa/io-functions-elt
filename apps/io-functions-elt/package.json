@@ -1,5 +1,5 @@
 {
-  "name": "@pagopa/io-functions-elt",
+  "name": "io-functions-elt",
   "description": "Integration between IO data and PDND",
   "author": "IO team",
   "repository": "https://github.com/pagopa/io-functions-elt",
