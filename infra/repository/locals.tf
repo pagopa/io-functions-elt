@@ -3,7 +3,7 @@ locals {
     name                     = "io-functions-elt"
     description              = "Functions for ELT processes for PDND data exports"
     topics                   = ["io", "functions", "elt", "pdnd"]
-    reviewers_teams          = ["io-platform-admin", "io-communication-backend", "io-auth-n-identity-backend"]
+    reviewers_teams          = ["io-platform-admins", "io-communication-backend", "io-auth-n-identity-backend", "io-platform-contributors"]
     default_branch_name      = "main"
     infra_cd_policy_branches = ["main"]
     opex_cd_policy_branches  = ["main"]
