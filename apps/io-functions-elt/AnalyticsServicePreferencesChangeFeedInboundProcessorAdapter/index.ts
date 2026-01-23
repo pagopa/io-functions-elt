@@ -1,5 +1,4 @@
 import { Context } from "@azure/functions";
-import { QueueClient } from "@azure/storage-queue";
 import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
@@ -13,6 +12,7 @@ import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
+import { createQueueClientWithManagedIdentity } from "../utils/azure-identity";
 import { getConfigOrThrow, withTopic } from "../utils/config";
 import { httpOrHttpsApiFetch } from "../utils/fetch";
 import { servicePreferencesAvroFormatter } from "../utils/formatter/servicePreferencesAvroFormatter";
@@ -52,8 +52,8 @@ const servicePreferencesOnQueueAdapter: OutboundPublisher<RetrievedServicePrefer
       const { userPDVId, ...rest } = servicePreference;
       return rest;
     },
-    new QueueClient(
-      config.INTERNAL_STORAGE_CONNECTION_STRING,
+    createQueueClientWithManagedIdentity(
+      config.INTERNAL_STORAGE_ACCOUNT,
       config.SERVICE_PREFERENCES_FAILURE_QUEUE_NAME
     )
   );
