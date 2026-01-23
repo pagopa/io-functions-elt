@@ -5,7 +5,7 @@
         "direction": "in",
         "name": "messagestatusfailure",
         "queueName": "%MESSAGE_STATUS_FAILURE_QUEUE_NAME%",
-        "connection": "INTERNAL_STORAGE"
+        "connection": "INTERNAL_STORAGE_ACCOUNT"
       }
     ],
     "retry": {
