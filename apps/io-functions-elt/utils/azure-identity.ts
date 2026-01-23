@@ -5,11 +5,6 @@
  */
 import { TableClient } from "@azure/data-tables";
 import { DefaultAzureCredential, TokenCredential } from "@azure/identity";
-import {
-  BlobServiceClient,
-  ContainerClient,
-  StorageSharedKeyCredential
-} from "@azure/storage-blob";
 import { QueueClient } from "@azure/storage-queue";
 
 // Singleton credential instance for reuse across clients
@@ -64,64 +59,3 @@ export const createQueueClientWithManagedIdentity = (
     `https://${storageAccountName}.queue.core.windows.net/${queueName}`,
     getDefaultAzureCredential()
   );
-
-/**
- * Create a BlobServiceClient using RBAC authentication.
- * Requires "Storage Blob Data Contributor" role on the storage account.
- *
- * @param storageAccountName - The name of the Azure Storage account
- * @returns A BlobServiceClient instance authenticated via Managed Identity
- */
-export const createBlobServiceClientWithManagedIdentity = (
-  storageAccountName: string
-): BlobServiceClient =>
-  new BlobServiceClient(
-    `https://${storageAccountName}.blob.core.windows.net`,
-    getDefaultAzureCredential()
-  );
-
-/**
- * Create a ContainerClient using RBAC authentication.
- * Requires "Storage Blob Data Contributor" role on the storage account.
- *
- * @param storageAccountName - The name of the Azure Storage account
- * @param containerName - The name of the blob container
- * @returns A ContainerClient instance authenticated via Managed Identity
- */
-export const createContainerClientWithManagedIdentity = (
-  storageAccountName: string,
-  containerName: string
-): ContainerClient =>
-  createBlobServiceClientWithManagedIdentity(
-    storageAccountName
-  ).getContainerClient(containerName);
-
-/**
- * Extract storage account name from a connection string.
- * Useful for migrating from connection string-based auth to RBAC.
- *
- * @param connectionString - Azure Storage connection string
- * @returns The storage account name, or undefined if not found
- */
-export const extractStorageAccountNameFromConnectionString = (
-  connectionString: string
-): string | undefined => {
-  const match = connectionString.match(/AccountName=([^;]+)/i);
-  return match?.[1];
-};
-
-/**
- * Create a BlobServiceClient from a connection string.
- * This is used for backward compatibility when connection strings are still needed
- * (e.g., for local development with Azurite or when RBAC is not yet configured).
- *
- * @param connectionString - Azure Storage connection string
- * @returns A BlobServiceClient instance
- */
-export const createBlobServiceClientFromConnectionString = (
-  connectionString: string
-): BlobServiceClient =>
-  BlobServiceClient.fromConnectionString(connectionString);
-
-// Re-export for convenience
-export { StorageSharedKeyCredential, TokenCredential };
