@@ -59,9 +59,9 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@azure/cosmos": "^4.0.0",
-    "@azure/data-tables": "^13.0.0",
-    "@azure/storage-queue": "^12.10.0",
+    "@azure/cosmos": "4.2.0",
+    "@azure/data-tables": "13.3.0",
+    "@azure/storage-queue": "12.12.0",
     "@chasdevs/avro-to-typescript": "^1.4.0",
     "@pagopa/express-azure-functions": "^4.0.1",
     "@pagopa/io-functions-commons": "^29.0.0",
