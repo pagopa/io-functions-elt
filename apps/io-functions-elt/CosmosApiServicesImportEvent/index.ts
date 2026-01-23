@@ -1,4 +1,3 @@
-import { AzureNamedKeyCredential, TableClient } from "@azure/data-tables";
 import { Context } from "@azure/functions";
 import {
   MESSAGE_COLLECTION_NAME,
@@ -13,6 +12,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { createBlobService } from "azure-storage";
 import * as winston from "winston";
 
+import { createTableClientWithManagedIdentity } from "../utils/azure-identity";
 import { exportTextToBlob } from "../utils/azure-storage";
 import {
   IBulkOperationResult,
@@ -50,13 +50,9 @@ const messageContentBlobService = createBlobService(
 
 const csvFilesBlobService = createBlobService(config.BLOB_COMMAND_STORAGE);
 
-const errorStorage = new TableClient(
-  `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
-  config.ERROR_STORAGE_TABLE,
-  new AzureNamedKeyCredential(
-    config.ERROR_STORAGE_ACCOUNT,
-    config.ERROR_STORAGE_KEY
-  )
+const errorStorage = createTableClientWithManagedIdentity(
+  config.ERROR_STORAGE_ACCOUNT,
+  config.ERROR_STORAGE_TABLE
 );
 
 const servicesTopic = {

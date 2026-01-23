@@ -1,5 +1,4 @@
 import { Context } from "@azure/functions";
-import { QueueClient } from "@azure/storage-queue";
 import { RetrievedMessageStatus } from "@pagopa/io-functions-commons/dist/src/models/message_status";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
@@ -12,6 +11,7 @@ import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
+import { createQueueClientWithManagedIdentity } from "../utils/azure-identity";
 import { getConfigOrThrow, withTopic } from "../utils/config";
 import { messageStatusAvroFormatter } from "../utils/formatter/messageStatusAvroFormatter";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
@@ -38,8 +38,8 @@ const messageStatusOnKafkaAdapter: OutboundPublisher<RetrievedMessageStatus> =
 
 const messageStatusOnQueueAdapter: OutboundPublisher<RetrievedMessageStatus> =
   QA.create(
-    new QueueClient(
-      config.INTERNAL_STORAGE_CONNECTION_STRING,
+    createQueueClientWithManagedIdentity(
+      config.INTERNAL_STORAGE_ACCOUNT,
       config.MESSAGE_STATUS_FAILURE_QUEUE_NAME
     )
   );

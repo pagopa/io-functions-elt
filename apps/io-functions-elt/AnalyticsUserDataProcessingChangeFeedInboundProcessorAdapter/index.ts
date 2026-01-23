@@ -1,5 +1,4 @@
 import { Context } from "@azure/functions";
-import { QueueClient } from "@azure/storage-queue";
 import { UserDataProcessingChoiceEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 import { UserDataProcessingStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import { RetrievedUserDataProcessing } from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
@@ -15,6 +14,7 @@ import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
+import { createQueueClientWithManagedIdentity } from "../utils/azure-identity";
 import { getConfigOrThrow, withTopic } from "../utils/config";
 import { httpOrHttpsApiFetch } from "../utils/fetch";
 import { profileDeletionAvroFormatter } from "../utils/formatter/deletesAvroFormatter";
@@ -53,8 +53,8 @@ const profileDeletionsOnQueueAdapter: OutboundPublisher<RetrievedUserDataProcess
       const { userPDVId, ...rest } = profileDeletion;
       return rest;
     },
-    new QueueClient(
-      config.INTERNAL_STORAGE_CONNECTION_STRING,
+    createQueueClientWithManagedIdentity(
+      config.INTERNAL_STORAGE_ACCOUNT,
       config.DELETES_FAILURE_QUEUE_NAME
     )
   );

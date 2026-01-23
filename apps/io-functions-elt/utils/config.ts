@@ -127,6 +127,7 @@ export const IDecodableConfig = t.intersection([
   t.interface({
     APPLICATIONINSIGHTS_CONNECTION_STRING: NonEmptyString,
 
+    // Storage connection string for blob commands (key-based authentication)
     BLOB_COMMAND_STORAGE: NonEmptyString,
     COMMAND_STORAGE: NonEmptyString,
 
@@ -157,13 +158,12 @@ export const IDecodableConfig = t.intersection([
       500 as NonNegativeInteger
     ),
     ERROR_STORAGE_ACCOUNT: NonEmptyString,
-
-    ERROR_STORAGE_KEY: NonEmptyString,
     ERROR_STORAGE_TABLE: NonEmptyString,
 
     ERROR_STORAGE_TABLE_MESSAGE_STATUS: NonEmptyString,
     ERROR_STORAGE_TABLE_MESSAGES: NonEmptyString,
-    INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
+    // Storage account name for internal queues (RBAC-based authentication)
+    INTERNAL_STORAGE_ACCOUNT: NonEmptyString,
     INTERNAL_TEST_FISCAL_CODES_COMPRESSED: withDefault(
       TestUsersArrayDecoder,
       []
@@ -178,8 +178,8 @@ export const IDecodableConfig = t.intersection([
     MESSAGE_STATUS_FAILURE_QUEUE_NAME: NonEmptyString,
     MESSAGE_STATUS_LEASES_PREFIX: NonEmptyString,
 
+    // Storage connection strings for message content blob (key-based authentication)
     MessageContentPrimaryStorageConnection: NonEmptyString,
-
     MessageContentStorageConnection: NonEmptyString,
     MESSAGES_FAILURE_QUEUE_NAME: NonEmptyString,
 
@@ -204,6 +204,7 @@ export const IDecodableConfig = t.intersection([
       CommaSeparatedListOf(NonEmptyString),
       []
     ),
+    // Storage connection string for service info blob (key-based authentication)
     ServiceInfoBlobStorageConnection: NonEmptyString,
     SERVICES_FAILURE_QUEUE_NAME: NonEmptyString,
 

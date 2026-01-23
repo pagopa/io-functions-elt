@@ -5,7 +5,7 @@
       "direction": "in",
       "name": "profilesFailure",
       "queueName": "%PROFILES_FAILURE_QUEUE_NAME%",
-      "connection":"INTERNAL_STORAGE_CONNECTION_STRING"
+      "connection": "INTERNAL_STORAGE_ACCOUNT"
     }
   ],
   "retry": {

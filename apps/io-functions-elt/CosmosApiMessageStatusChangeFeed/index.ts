@@ -1,8 +1,8 @@
-import { AzureNamedKeyCredential, TableClient } from "@azure/data-tables";
 import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import * as winston from "winston";
 
+import { createTableClientWithManagedIdentity } from "../utils/azure-identity";
 import { IBulkOperationResult } from "../utils/bulkOperationResult";
 import { getConfigOrThrow, withTopic } from "../utils/config";
 import { messageStatusAvroFormatter } from "../utils/formatter/messageStatusAvroFormatter";
@@ -33,13 +33,9 @@ const kakfaClient = KP.fromConfig(
   messageStatusTopic
 );
 
-const errorStorage = new TableClient(
-  `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
-  config.ERROR_STORAGE_TABLE_MESSAGE_STATUS,
-  new AzureNamedKeyCredential(
-    config.ERROR_STORAGE_ACCOUNT,
-    config.ERROR_STORAGE_KEY
-  )
+const errorStorage = createTableClientWithManagedIdentity(
+  config.ERROR_STORAGE_ACCOUNT,
+  config.ERROR_STORAGE_TABLE_MESSAGE_STATUS
 );
 
 const run = async (

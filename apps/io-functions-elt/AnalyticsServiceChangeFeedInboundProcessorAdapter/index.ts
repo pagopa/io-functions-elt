@@ -1,5 +1,4 @@
 import { Context } from "@azure/functions";
-import { QueueClient } from "@azure/storage-queue";
 import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
 
 import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
@@ -9,6 +8,7 @@ import * as QA from "../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
+import { createQueueClientWithManagedIdentity } from "../utils/azure-identity";
 import { getConfigOrThrow } from "../utils/config";
 import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
@@ -30,8 +30,8 @@ const retrievedServiceOnKafkaAdapter: OutboundPublisher<RetrievedService> =
 
 const retrievedServiceOnQueueAdapter: OutboundPublisher<RetrievedService> =
   QA.create(
-    new QueueClient(
-      config.INTERNAL_STORAGE_CONNECTION_STRING,
+    createQueueClientWithManagedIdentity(
+      config.INTERNAL_STORAGE_ACCOUNT,
       config.SERVICES_FAILURE_QUEUE_NAME
     )
   );
