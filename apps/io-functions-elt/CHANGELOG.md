@@ -1,5 +1,11 @@
 # @pagopa/io-functions-elt
 
+## 3.0.3
+
+### Patch Changes
+
+- 2f534a4: Fix generate TableClient from connection string
+
 ## 3.0.2
 
 ### Patch Changes
