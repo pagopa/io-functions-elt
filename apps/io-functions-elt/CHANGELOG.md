@@ -1,5 +1,11 @@
 # @pagopa/io-functions-elt
 
+## 3.0.2
+
+### Patch Changes
+
+- fde75be: Use secondary storage for queues and refactory configuration ENVs
+
 ## 3.0.1
 
 ### Patch Changes
