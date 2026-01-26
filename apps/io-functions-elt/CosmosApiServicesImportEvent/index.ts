@@ -50,7 +50,7 @@ const messageContentBlobService = createBlobService(
 
 const csvFilesBlobService = createBlobService(config.BLOB_COMMAND_STORAGE);
 
-const errorStorage = new TableClient(
+const errorStorage = TableClient.fromConnectionString(
   config.BLOB_COMMAND_STORAGE,
   config.ERROR_STORAGE_TABLE_MESSAGES
 );

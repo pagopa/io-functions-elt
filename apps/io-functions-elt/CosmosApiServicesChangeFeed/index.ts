@@ -28,7 +28,7 @@ const kakfaClient = KP.fromConfig(
   servicesTopic
 );
 
-const errorStorage = new TableClient(
+const errorStorage = TableClient.fromConnectionString(
   config.BLOB_COMMAND_STORAGE,
   config.ERROR_STORAGE_TABLE_MESSAGES
 );
