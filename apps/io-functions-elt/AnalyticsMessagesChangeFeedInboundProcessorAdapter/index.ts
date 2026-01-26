@@ -1,4 +1,5 @@
 import { Context } from "@azure/functions";
+import { QueueClient } from "@azure/storage-queue";
 import {
   MESSAGE_COLLECTION_NAME,
   MessageModel,
@@ -18,7 +19,6 @@ import * as QA from "../outbound/adapter/queue-outbound-publisher";
 import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
-import { createQueueClientWithManagedIdentity } from "../utils/azure-identity";
 import { getConfigOrThrow } from "../utils/config";
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import {
@@ -75,8 +75,8 @@ const messageEnricherAdapter = MA.create(
 
 const retrievedMessageOnQueueAdapter: OutboundPublisher<RetrievedMessage> =
   QA.create(
-    createQueueClientWithManagedIdentity(
-      config.INTERNAL_STORAGE_ACCOUNT,
+    new QueueClient(
+      config.INTERNAL_STORAGE_CONNECTION_STRING,
       config.MESSAGES_FAILURE_QUEUE_NAME
     )
   );

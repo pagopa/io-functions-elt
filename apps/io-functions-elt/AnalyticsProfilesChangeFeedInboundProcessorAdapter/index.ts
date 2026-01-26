@@ -1,4 +1,5 @@
 import { Context } from "@azure/functions";
+import { QueueClient } from "@azure/storage-queue";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
@@ -12,7 +13,6 @@ import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
-import { createQueueClientWithManagedIdentity } from "../utils/azure-identity";
 import { getConfigOrThrow, withTopic } from "../utils/config";
 import { httpOrHttpsApiFetch } from "../utils/fetch";
 import { profilesAvroFormatter } from "../utils/formatter/profilesAvroFormatter";
@@ -51,8 +51,8 @@ const profilesOnQueueAdapter: OutboundPublisher<RetrievedProfileWithMaybePdvId> 
       const { userPDVId, ...rest } = profile;
       return rest;
     },
-    createQueueClientWithManagedIdentity(
-      config.INTERNAL_STORAGE_ACCOUNT,
+    new QueueClient(
+      config.INTERNAL_STORAGE_CONNECTION_STRING,
       config.PROFILES_FAILURE_QUEUE_NAME
     )
   );
