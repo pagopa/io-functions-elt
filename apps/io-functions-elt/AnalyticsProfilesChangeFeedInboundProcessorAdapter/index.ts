@@ -52,7 +52,7 @@ const profilesOnQueueAdapter: OutboundPublisher<RetrievedProfileWithMaybePdvId> 
       return rest;
     },
     new QueueClient(
-      config.INTERNAL_STORAGE_CONNECTION_STRING,
+      config.BLOB_COMMAND_STORAGE,
       config.PROFILES_FAILURE_QUEUE_NAME
     )
   );

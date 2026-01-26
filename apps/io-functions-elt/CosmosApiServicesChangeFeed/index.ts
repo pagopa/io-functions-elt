@@ -1,4 +1,4 @@
-import { AzureNamedKeyCredential, TableClient } from "@azure/data-tables";
+import { TableClient } from "@azure/data-tables";
 import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import * as winston from "winston";
@@ -29,12 +29,8 @@ const kakfaClient = KP.fromConfig(
 );
 
 const errorStorage = new TableClient(
-  `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
-  config.ERROR_STORAGE_TABLE,
-  new AzureNamedKeyCredential(
-    config.ERROR_STORAGE_ACCOUNT,
-    config.ERROR_STORAGE_KEY
-  )
+  config.BLOB_COMMAND_STORAGE,
+  config.ERROR_STORAGE_TABLE_MESSAGES
 );
 
 const run = async (

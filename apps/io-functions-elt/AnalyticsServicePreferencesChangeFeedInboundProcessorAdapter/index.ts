@@ -53,7 +53,7 @@ const servicePreferencesOnQueueAdapter: OutboundPublisher<RetrievedServicePrefer
       return rest;
     },
     new QueueClient(
-      config.INTERNAL_STORAGE_CONNECTION_STRING,
+      config.BLOB_COMMAND_STORAGE,
       config.SERVICE_PREFERENCES_FAILURE_QUEUE_NAME
     )
   );

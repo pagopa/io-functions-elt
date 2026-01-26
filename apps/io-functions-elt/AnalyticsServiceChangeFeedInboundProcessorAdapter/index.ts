@@ -31,7 +31,7 @@ const retrievedServiceOnKafkaAdapter: OutboundPublisher<RetrievedService> =
 const retrievedServiceOnQueueAdapter: OutboundPublisher<RetrievedService> =
   QA.create(
     new QueueClient(
-      config.INTERNAL_STORAGE_CONNECTION_STRING,
+      config.BLOB_COMMAND_STORAGE,
       config.SERVICES_FAILURE_QUEUE_NAME
     )
   );

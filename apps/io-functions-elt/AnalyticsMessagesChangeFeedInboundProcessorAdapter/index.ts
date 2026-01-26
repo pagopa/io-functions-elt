@@ -76,7 +76,7 @@ const messageEnricherAdapter = MA.create(
 const retrievedMessageOnQueueAdapter: OutboundPublisher<RetrievedMessage> =
   QA.create(
     new QueueClient(
-      config.INTERNAL_STORAGE_CONNECTION_STRING,
+      config.BLOB_COMMAND_STORAGE,
       config.MESSAGES_FAILURE_QUEUE_NAME
     )
   );

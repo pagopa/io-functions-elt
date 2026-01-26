@@ -39,7 +39,7 @@ const messageStatusOnKafkaAdapter: OutboundPublisher<RetrievedMessageStatus> =
 const messageStatusOnQueueAdapter: OutboundPublisher<RetrievedMessageStatus> =
   QA.create(
     new QueueClient(
-      config.INTERNAL_STORAGE_CONNECTION_STRING,
+      config.BLOB_COMMAND_STORAGE,
       config.MESSAGE_STATUS_FAILURE_QUEUE_NAME
     )
   );

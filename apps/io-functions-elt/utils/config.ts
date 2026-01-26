@@ -128,7 +128,6 @@ export const IDecodableConfig = t.intersection([
     APPLICATIONINSIGHTS_CONNECTION_STRING: NonEmptyString,
 
     BLOB_COMMAND_STORAGE: NonEmptyString,
-    COMMAND_STORAGE: NonEmptyString,
 
     COSMOS_CHUNK_SIZE: IntegerFromString,
 
@@ -156,14 +155,11 @@ export const IDecodableConfig = t.intersection([
       NonNegativeInteger,
       500 as NonNegativeInteger
     ),
-    ERROR_STORAGE_ACCOUNT: NonEmptyString,
 
-    ERROR_STORAGE_KEY: NonEmptyString,
     ERROR_STORAGE_TABLE: NonEmptyString,
 
     ERROR_STORAGE_TABLE_MESSAGE_STATUS: NonEmptyString,
     ERROR_STORAGE_TABLE_MESSAGES: NonEmptyString,
-    INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
     INTERNAL_TEST_FISCAL_CODES_COMPRESSED: withDefault(
       TestUsersArrayDecoder,
       []

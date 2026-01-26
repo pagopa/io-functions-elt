@@ -54,7 +54,7 @@ const profileDeletionsOnQueueAdapter: OutboundPublisher<RetrievedUserDataProcess
       return rest;
     },
     new QueueClient(
-      config.INTERNAL_STORAGE_CONNECTION_STRING,
+      config.BLOB_COMMAND_STORAGE,
       config.DELETES_FAILURE_QUEUE_NAME
     )
   );

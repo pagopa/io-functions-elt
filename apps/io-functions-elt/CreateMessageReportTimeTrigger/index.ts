@@ -1,4 +1,4 @@
-import { AzureNamedKeyCredential, TableClient } from "@azure/data-tables";
+import { TableClient } from "@azure/data-tables";
 import { AzureFunction } from "@azure/functions";
 
 import { getConfigOrThrow } from "../utils/config";
@@ -6,15 +6,11 @@ import { timerTrigger } from "./handler";
 
 const config = getConfigOrThrow();
 
-const tableStorage = new TableClient(
-  `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
-  config.MESSAGE_EXPORTS_COMMAND_TABLE,
-  new AzureNamedKeyCredential(
-    config.ERROR_STORAGE_ACCOUNT,
-    config.ERROR_STORAGE_KEY
-  )
+const errorStorage = new TableClient(
+  config.BLOB_COMMAND_STORAGE,
+  config.ERROR_STORAGE_TABLE_MESSAGES
 );
 
-const run: AzureFunction = timerTrigger(tableStorage);
+const run: AzureFunction = timerTrigger(errorStorage);
 
 export default run;

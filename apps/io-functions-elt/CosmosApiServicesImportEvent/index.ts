@@ -1,4 +1,4 @@
-import { AzureNamedKeyCredential, TableClient } from "@azure/data-tables";
+import { TableClient } from "@azure/data-tables";
 import { Context } from "@azure/functions";
 import {
   MESSAGE_COLLECTION_NAME,
@@ -51,12 +51,8 @@ const messageContentBlobService = createBlobService(
 const csvFilesBlobService = createBlobService(config.BLOB_COMMAND_STORAGE);
 
 const errorStorage = new TableClient(
-  `https://${config.ERROR_STORAGE_ACCOUNT}.table.core.windows.net`,
-  config.ERROR_STORAGE_TABLE,
-  new AzureNamedKeyCredential(
-    config.ERROR_STORAGE_ACCOUNT,
-    config.ERROR_STORAGE_KEY
-  )
+  config.BLOB_COMMAND_STORAGE,
+  config.ERROR_STORAGE_TABLE_MESSAGES
 );
 
 const servicesTopic = {
