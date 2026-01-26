@@ -16,7 +16,7 @@
     },
     {
       "tableName": "%COMMAND_STORAGE_TABLE%",
-      "connection": "COMMAND_STORAGE",
+      "connection": "BLOB_COMMAND_STORAGE",
       "type": "table",
       "name": "$return",
       "direction": "out"

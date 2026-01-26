@@ -1,3 +1,4 @@
+import { TableClient } from "@azure/data-tables";
 import { Context } from "@azure/functions";
 import {
   MESSAGE_COLLECTION_NAME,
@@ -11,7 +12,6 @@ import { pipe } from "fp-ts/lib/function";
 import * as winston from "winston";
 
 import { MessageContentType } from "../generated/avro/dto/MessageContentTypeEnum";
-import { createTableClientWithManagedIdentity } from "../utils/azure-identity";
 import { IBulkOperationResult } from "../utils/bulkOperationResult";
 import { getConfigOrThrow } from "../utils/config";
 import { cosmosdbInstance } from "../utils/cosmosdb";
@@ -65,8 +65,8 @@ const kakfaClient = KP.fromConfig(
   messageStatusTopic
 );
 
-const errorStorage = createTableClientWithManagedIdentity(
-  config.ERROR_STORAGE_ACCOUNT,
+const errorStorage = new TableClient(
+  config.BLOB_COMMAND_STORAGE,
   config.ERROR_STORAGE_TABLE_MESSAGES
 );
 

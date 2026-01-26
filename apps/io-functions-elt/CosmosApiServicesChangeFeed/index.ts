@@ -1,8 +1,8 @@
+import { TableClient } from "@azure/data-tables";
 import { Context } from "@azure/functions";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import * as winston from "winston";
 
-import { createTableClientWithManagedIdentity } from "../utils/azure-identity";
 import { IBulkOperationResult } from "../utils/bulkOperationResult";
 import { getConfigOrThrow } from "../utils/config";
 import { avroServiceFormatter } from "../utils/formatter/servicesAvroFormatter";
@@ -28,9 +28,9 @@ const kakfaClient = KP.fromConfig(
   servicesTopic
 );
 
-const errorStorage = createTableClientWithManagedIdentity(
-  config.ERROR_STORAGE_ACCOUNT,
-  config.ERROR_STORAGE_TABLE
+const errorStorage = new TableClient(
+  config.BLOB_COMMAND_STORAGE,
+  config.ERROR_STORAGE_TABLE_MESSAGES
 );
 
 const run = async (

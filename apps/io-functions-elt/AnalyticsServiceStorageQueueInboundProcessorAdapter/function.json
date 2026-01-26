@@ -5,7 +5,7 @@
         "direction": "in",
         "name": "serviceFailure",
         "queueName": "%SERVICES_FAILURE_QUEUE_NAME%",
-        "connection": "INTERNAL_STORAGE_ACCOUNT"
+        "connection":"BLOB_COMMAND_STORAGE"
       }
     ],
     "retry": {

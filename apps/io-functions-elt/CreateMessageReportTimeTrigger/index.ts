@@ -1,16 +1,16 @@
+import { TableClient } from "@azure/data-tables";
 import { AzureFunction } from "@azure/functions";
 
-import { createTableClientWithManagedIdentity } from "../utils/azure-identity";
 import { getConfigOrThrow } from "../utils/config";
 import { timerTrigger } from "./handler";
 
 const config = getConfigOrThrow();
 
-const tableStorage = createTableClientWithManagedIdentity(
-  config.ERROR_STORAGE_ACCOUNT,
-  config.MESSAGE_EXPORTS_COMMAND_TABLE
+const errorStorage = new TableClient(
+  config.BLOB_COMMAND_STORAGE,
+  config.ERROR_STORAGE_TABLE_MESSAGES
 );
 
-const run: AzureFunction = timerTrigger(tableStorage);
+const run: AzureFunction = timerTrigger(errorStorage);
 
 export default run;

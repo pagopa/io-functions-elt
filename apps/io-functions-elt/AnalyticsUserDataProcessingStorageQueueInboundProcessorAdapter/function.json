@@ -5,7 +5,7 @@
       "direction": "in",
       "name": "deletionsFailure",
       "queueName": "%DELETES_FAILURE_QUEUE_NAME%",
-      "connection": "INTERNAL_STORAGE_ACCOUNT"
+      "connection":"BLOB_COMMAND_STORAGE"
     }
   ],
   "retry": {
