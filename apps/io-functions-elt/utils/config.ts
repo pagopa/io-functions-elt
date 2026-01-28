@@ -177,7 +177,6 @@ export const IDecodableConfig = t.intersection([
     MessageContentPrimaryStorageConnection: NonEmptyString,
 
     MessageContentStorageConnection: NonEmptyString,
-    MESSAGES_FAILURE_QUEUE_NAME: NonEmptyString,
 
     MESSAGES_LEASES_PREFIX: NonEmptyString,
     // TTL in seconds for PDV ID key retention (defaults to 30 days)
