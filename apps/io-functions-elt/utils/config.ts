@@ -177,7 +177,6 @@ export const IDecodableConfig = t.intersection([
 
     MessageContentStorageConnection: NonEmptyString,
 
-    MESSAGES_LEASES_PREFIX: NonEmptyString,
     // TTL in seconds for PDV ID key retention (defaults to 30 days)
     PDV_IDS_TTL: withDefault(t.string, "2592000").pipe(IntegerFromString),
     // PDV Tokenizer configuration
@@ -186,8 +185,6 @@ export const IDecodableConfig = t.intersection([
     PDV_TOKENIZER_BASE_PATH: NonEmptyString,
 
     PDV_TOKENIZER_BASE_URL: NonEmptyString,
-
-    PN_SERVICE_ID: NonEmptyString,
 
     PROFILES_FAILURE_QUEUE_NAME: NonEmptyString,
     PROFILES_LEASES_PREFIX: NonEmptyString,
@@ -205,12 +202,6 @@ export const IDecodableConfig = t.intersection([
   }),
   RedisConfig
 ]);
-
-const MessagesKafkaTopicConfig = t.type({
-  MESSAGES_TOPIC_CONNECTION_STRING: NonEmptyString,
-  MESSAGES_TOPIC_NAME: NonEmptyString
-});
-type MessagesKafkaTopicConfig = t.TypeOf<typeof MessagesKafkaTopicConfig>;
 
 const MessageStatusKafkaTopicConfig = t.type({
   MESSAGE_STATUS_TOPIC_CONNECTION_STRING: NonEmptyString,
@@ -240,7 +231,6 @@ const DeletesKafkaTopicConfig = t.type({
 });
 export interface IParsableConfig {
   readonly deletesKafkaTopicConfig: DeletesKafkaTopicConfig;
-  readonly MessagesKafkaTopicConfig: MessagesKafkaTopicConfig;
 
   readonly messageStatusKafkaTopicConfig: MessageStatusKafkaTopicConfig;
   readonly profilesKafkaTopicConfig: ProfilesKafkaTopicConfig;
@@ -259,9 +249,6 @@ export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
     ),
     E.bind("targetKafkaAuth", () =>
       getKafkaProducerCompactConfigFromEnv("TARGETKAFKAAUTH").decode(input)
-    ),
-    E.bind("MessagesKafkaTopicConfig", () =>
-      MessagesKafkaTopicConfig.decode(input)
     ),
     E.bind("messageStatusKafkaTopicConfig", () =>
       MessageStatusKafkaTopicConfig.decode(input)

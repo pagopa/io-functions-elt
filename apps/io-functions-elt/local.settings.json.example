@@ -13,10 +13,6 @@
     "ERROR_STORAGE_TABLE_MESSAGES": "<Table Name>-messages",
     "ERROR_STORAGE_TABLE_MESSAGE_STATUS": "<Table Name>-message-status",
     
-    "MESSAGES_TOPIC_NAME": "pdnd-io-cosmosdb-message",
-    "MESSAGES_TOPIC_CONNECTION_STRING": "<Connection String>",
-    "MESSAGES_LEASES_PREFIX": "messages-001",
-
     "MESSAGE_STATUS_TOPIC_NAME":"pdnd-io-cosmosdb-message-status",
     "MESSAGE_STATUS_TOPIC_CONNECTION_STRING":"<Conn String>",
     "MESSAGE_STATUS_LEASES_PREFIX": "message-status-001",
