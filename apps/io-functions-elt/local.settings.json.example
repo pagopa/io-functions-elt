@@ -7,20 +7,9 @@
 
     "COSMOS_CHUNK_SIZE": "1000",
     "COSMOS_DEGREE_OF_PARALLELISM": "2",
-    "MESSAGE_CONTENT_CHUNK_SIZE": "200",
 
-    "ERROR_STORAGE_TABLE": "<Table Name>",
     "ERROR_STORAGE_TABLE_MESSAGES": "<Table Name>-messages",
-    "ERROR_STORAGE_TABLE_MESSAGE_STATUS": "<Table Name>-message-status",
     
-    "MESSAGES_TOPIC_NAME": "pdnd-io-cosmosdb-message",
-    "MESSAGES_TOPIC_CONNECTION_STRING": "<Connection String>",
-    "MESSAGES_LEASES_PREFIX": "messages-001",
-
-    "MESSAGE_STATUS_TOPIC_NAME":"pdnd-io-cosmosdb-message-status",
-    "MESSAGE_STATUS_TOPIC_CONNECTION_STRING":"<Conn String>",
-    "MESSAGE_STATUS_LEASES_PREFIX": "message-status-001",
-
     "SERVICE_PREFERENCES_TOPIC_NAME":"pdnd-io-cosmosdb-service-preferences",
     "SERVICE_PREFERENCES_TOPIC_CONNECTION_STRING":"<Conn String>",
     "SERVICE_PREFERENCES_LEASES_PREFIX": "service-preferences-001",
