@@ -6,6 +6,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { AzureContextTransport } from "@pagopa/io-functions-commons/dist/src/utils/logging";
 import * as winston from "winston";
+
 import {
   IBulkOperationResult,
   toBulkOperationResultEntity
