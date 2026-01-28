@@ -167,13 +167,6 @@ export const IDecodableConfig = t.intersection([
 
     isProduction: t.boolean,
 
-    MESSAGE_CONTENT_CHUNK_SIZE: IntegerFromString,
-    MESSAGE_EXPORT_STEP_1_CONTAINER: NonEmptyString,
-
-    MessageContentPrimaryStorageConnection: NonEmptyString,
-
-    MessageContentStorageConnection: NonEmptyString,
-
     // TTL in seconds for PDV ID key retention (defaults to 30 days)
     PDV_IDS_TTL: withDefault(t.string, "2592000").pipe(IntegerFromString),
     // PDV Tokenizer configuration
