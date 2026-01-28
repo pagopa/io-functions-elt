@@ -171,7 +171,6 @@ export const IDecodableConfig = t.intersection([
     MESSAGE_EXPORT_STEP_1_CONTAINER: NonEmptyString,
     MESSAGE_EXPORT_STEP_FINAL_CONTAINER: NonEmptyString,
     MESSAGE_EXPORTS_COMMAND_TABLE: NonEmptyString,
-    MESSAGE_STATUS_LEASES_PREFIX: NonEmptyString,
 
     MessageContentPrimaryStorageConnection: NonEmptyString,
 
@@ -203,14 +202,6 @@ export const IDecodableConfig = t.intersection([
   RedisConfig
 ]);
 
-const MessageStatusKafkaTopicConfig = t.type({
-  MESSAGE_STATUS_TOPIC_CONNECTION_STRING: NonEmptyString,
-  MESSAGE_STATUS_TOPIC_NAME: NonEmptyString
-});
-type MessageStatusKafkaTopicConfig = t.TypeOf<
-  typeof MessageStatusKafkaTopicConfig
->;
-
 const ServicePreferencesKafkaTopicConfig = t.type({
   SERVICE_PREFERENCES_TOPIC_CONNECTION_STRING: NonEmptyString,
   SERVICE_PREFERENCES_TOPIC_NAME: NonEmptyString
@@ -232,7 +223,6 @@ const DeletesKafkaTopicConfig = t.type({
 export interface IParsableConfig {
   readonly deletesKafkaTopicConfig: DeletesKafkaTopicConfig;
 
-  readonly messageStatusKafkaTopicConfig: MessageStatusKafkaTopicConfig;
   readonly profilesKafkaTopicConfig: ProfilesKafkaTopicConfig;
   readonly servicePreferencesKafkaTopicConfig: ServicePreferencesKafkaTopicConfig;
   readonly targetKafka: KafkaProducerCompactConfig;
@@ -249,9 +239,6 @@ export const parseConfig = (input: unknown): t.Validation<IParsableConfig> =>
     ),
     E.bind("targetKafkaAuth", () =>
       getKafkaProducerCompactConfigFromEnv("TARGETKAFKAAUTH").decode(input)
-    ),
-    E.bind("messageStatusKafkaTopicConfig", () =>
-      MessageStatusKafkaTopicConfig.decode(input)
     ),
     E.bind("servicePreferencesKafkaTopicConfig", () =>
       ServicePreferencesKafkaTopicConfig.decode(input)
