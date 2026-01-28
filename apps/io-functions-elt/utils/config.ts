@@ -171,7 +171,6 @@ export const IDecodableConfig = t.intersection([
     MESSAGE_EXPORT_STEP_1_CONTAINER: NonEmptyString,
     MESSAGE_EXPORT_STEP_FINAL_CONTAINER: NonEmptyString,
     MESSAGE_EXPORTS_COMMAND_TABLE: NonEmptyString,
-    MESSAGE_STATUS_FAILURE_QUEUE_NAME: NonEmptyString,
     MESSAGE_STATUS_LEASES_PREFIX: NonEmptyString,
 
     MessageContentPrimaryStorageConnection: NonEmptyString,
