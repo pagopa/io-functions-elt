@@ -1,5 +1,11 @@
 # @pagopa/io-functions-elt
 
+## 3.1.1
+
+### Patch Changes
+
+- 8bbe9f2: fix:use the right table storage for errors
+
 ## 3.1.0
 
 ### Minor Changes
