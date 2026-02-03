@@ -30,7 +30,7 @@ const kakfaClient = KP.fromConfig(
 
 const errorStorage = TableClient.fromConnectionString(
   config.BLOB_COMMAND_STORAGE,
-  config.ERROR_STORAGE_TABLE_MESSAGES
+  config.ERROR_STORAGE_TABLE
 );
 
 const run = async (

@@ -156,7 +156,7 @@ export const IDecodableConfig = t.intersection([
       500 as NonNegativeInteger
     ),
 
-    ERROR_STORAGE_TABLE_MESSAGES: NonEmptyString,
+    ERROR_STORAGE_TABLE: NonEmptyString,
     INTERNAL_TEST_FISCAL_CODES_COMPRESSED: withDefault(
       TestUsersArrayDecoder,
       []
