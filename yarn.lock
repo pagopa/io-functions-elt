@@ -5702,7 +5702,6 @@ __metadata:
     applicationinsights: "npm:^2.9.5"
     auto-changelog: "npm:2.2.1"
     avsc: "npm:^5.7.3"
-    azure-storage: "npm:^2.10.5"
     dependency-check: "npm:^4.1.0"
     dotenv-cli: "npm:^3.1.0"
     durable-functions: "npm:^1.4.4"
