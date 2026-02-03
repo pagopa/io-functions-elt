@@ -33,7 +33,7 @@ const serviceModel = new ServiceModel(
 
 const errorStorage = TableClient.fromConnectionString(
   config.BLOB_COMMAND_STORAGE,
-  config.ERROR_STORAGE_TABLE_MESSAGES
+  config.ERROR_STORAGE_TABLE
 );
 
 const servicesTopic = {
