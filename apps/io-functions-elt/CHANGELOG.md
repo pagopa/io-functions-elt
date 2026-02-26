@@ -1,5 +1,11 @@
 # @pagopa/io-functions-elt
 
+## 3.2.0
+
+### Minor Changes
+
+- 8070438: Remove unused `CosmosApiServicesChangeFeed` and `CosmosApiServicesImportEvent` triggers
+
 ## 3.1.1
 
 ### Patch Changes
