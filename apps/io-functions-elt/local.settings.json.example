@@ -8,8 +8,6 @@
     "COSMOS_CHUNK_SIZE": "1000",
     "COSMOS_DEGREE_OF_PARALLELISM": "2",
 
-    "ERROR_STORAGE_TABLE": "<Table Name>",
-    
     "SERVICE_PREFERENCES_TOPIC_NAME":"pdnd-io-cosmosdb-service-preferences",
     "SERVICE_PREFERENCES_TOPIC_CONNECTION_STRING":"<Conn String>",
     "SERVICE_PREFERENCES_LEASES_PREFIX": "service-preferences-001",
