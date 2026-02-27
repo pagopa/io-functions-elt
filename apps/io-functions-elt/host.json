@@ -18,8 +18,8 @@
       }
     },
     "queues": {
-      "maxDequeueCount": 31,
-      "visibilityTimeout": "00:00:05"
+      "maxDequeueCount": 6,
+      "visibilityTimeout": "00:00:30"
     }
   },
   "extensionBundle": {
