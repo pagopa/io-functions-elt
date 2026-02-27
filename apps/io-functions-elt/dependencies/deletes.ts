@@ -1,32 +1,42 @@
-import { Context } from "@azure/functions";
+/**
+ * User Data Processing / Deletes domain — shared adapters.
+ *
+ * Kafka publisher, queue fallback publisher, PDV enricher,
+ * combined test-user + status filterer, and empty throw adapter
+ * for queue retries.
+ */
+
 import { QueueClient } from "@azure/storage-queue";
 import { UserDataProcessingChoiceEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 import { UserDataProcessingStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import { RetrievedUserDataProcessing } from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
 
-import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
+import * as EA from "../outbound/adapter/empty-outbound-publisher";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as PDVA from "../outbound/adapter/pdv-id-outbound-enricher";
 import * as PF from "../outbound/adapter/predicate-outbound-filterer";
 import * as QA from "../outbound/adapter/queue-outbound-mapper-publisher";
-import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
-import { getConfigOrThrow, withTopic } from "../utils/config";
-import { httpOrHttpsApiFetch } from "../utils/fetch";
+import { withTopic } from "../utils/config";
 import { profileDeletionAvroFormatter } from "../utils/formatter/deletesAvroFormatter";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
-import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
-import { createRedisClientSingleton } from "../utils/redis";
 import { isTestUser } from "../utils/testUser";
 import { RetrievedUserDataProcessingWithMaybePdvId } from "../utils/types/decoratedTypes";
+import {
+  config,
+  internalTestFiscalCodeSet,
+  pdvTokenizer,
+  redisClientTask,
+  telemetryClient
+} from "./cross-cutting";
 
-const config = getConfigOrThrow();
-
+// ---------------------------------------------------------------------------
+// KAFKA & QUEUE PUBLISHERS
+// ---------------------------------------------------------------------------
 const profileDeletionConfig = withTopic(
   config.deletesKafkaTopicConfig.DELETES_TOPIC_NAME,
   config.deletesKafkaTopicConfig.DELETES_TOPIC_CONNECTION_STRING
@@ -37,18 +47,18 @@ const profileDeletionTopic = {
   messageFormatter: profileDeletionAvroFormatter()
 };
 
-const profileDeletionsOnKafkaAdapter: OutboundPublisher<RetrievedUserDataProcessingWithMaybePdvId> =
+export const profileDeletionsOnKafkaAdapter: OutboundPublisher<RetrievedUserDataProcessingWithMaybePdvId> =
   KA.create(
     KP.fromConfig(
-      profileDeletionConfig as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
+      profileDeletionConfig as ValidableKafkaProducerConfig,
       profileDeletionTopic
     )
   );
 
-const profileDeletionsOnQueueAdapter: OutboundPublisher<RetrievedUserDataProcessingWithMaybePdvId> =
+export const profileDeletionsOnQueueAdapter: OutboundPublisher<RetrievedUserDataProcessingWithMaybePdvId> =
   QA.create(
     (profileDeletion) => {
-      // void storing userPDVId it in queue
+      // void storing userPDVId in queue
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { userPDVId, ...rest } = profileDeletion;
       return rest;
@@ -59,20 +69,10 @@ const profileDeletionsOnQueueAdapter: OutboundPublisher<RetrievedUserDataProcess
     )
   );
 
-const pdvTokenizer = pdvTokenizerClient(
-  config.PDV_TOKENIZER_BASE_URL,
-  config.PDV_TOKENIZER_API_KEY,
-  httpOrHttpsApiFetch,
-  config.PDV_TOKENIZER_BASE_PATH
-);
-
-const telemetryClient = TA.initTelemetryClient(
-  config.APPLICATIONINSIGHTS_CONNECTION_STRING
-);
-
-const redisClientTask = createRedisClientSingleton(config);
-
-const pdvIdEnricherAdapter: OutboundEnricher<RetrievedUserDataProcessingWithMaybePdvId> =
+// ---------------------------------------------------------------------------
+// PDV ENRICHER
+// ---------------------------------------------------------------------------
+export const deletionsPdvIdEnricherAdapter: OutboundEnricher<RetrievedUserDataProcessingWithMaybePdvId> =
   PDVA.create<RetrievedUserDataProcessingWithMaybePdvId>(
     config.ENRICH_PDVID_THROTTLING,
     pdvTokenizer,
@@ -81,12 +81,10 @@ const pdvIdEnricherAdapter: OutboundEnricher<RetrievedUserDataProcessingWithMayb
     telemetryClient
   );
 
-const telemetryAdapter = TA.create(telemetryClient);
-
-const internalTestFiscalCodeSet = new Set(
-  config.INTERNAL_TEST_FISCAL_CODES_COMPRESSED as readonly FiscalCode[]
-);
-const userDataProcessingFilterer: OutboundFilterer<RetrievedUserDataProcessing> =
+// ---------------------------------------------------------------------------
+// FILTERER
+// ---------------------------------------------------------------------------
+export const userDataProcessingFilterer: OutboundFilterer<RetrievedUserDataProcessing> =
   PF.create(
     (retrievedUserDataProcessing) =>
       !isTestUser(
@@ -98,14 +96,8 @@ const userDataProcessingFilterer: OutboundFilterer<RetrievedUserDataProcessing> 
       retrievedUserDataProcessing.status === UserDataProcessingStatusEnum.WIP
   );
 
-const run = (_context: Context, documents: readonly unknown[]): Promise<void> =>
-  getAnalyticsProcessorForDocuments(
-    RetrievedUserDataProcessing,
-    telemetryAdapter,
-    pdvIdEnricherAdapter,
-    profileDeletionsOnKafkaAdapter,
-    profileDeletionsOnQueueAdapter,
-    userDataProcessingFilterer
-  ).process(documents)();
-
-export default run;
+// ---------------------------------------------------------------------------
+// THROW ADAPTER (queue retry fallback)
+// ---------------------------------------------------------------------------
+export const deletionsThrowAdapter: OutboundPublisher<RetrievedUserDataProcessingWithMaybePdvId> =
+  EA.create();

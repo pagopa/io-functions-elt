@@ -1,30 +1,39 @@
-import { Context } from "@azure/functions";
+/**
+ * Service Preferences domain — shared adapters.
+ *
+ * Kafka publisher, queue fallback publisher, PDV enricher,
+ * test-user filterer, and empty throw adapter for queue retries.
+ */
+
 import { QueueClient } from "@azure/storage-queue";
 import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
 
-import { getAnalyticsProcessorForDocuments } from "../businesslogic/analytics-publish-documents";
+import * as EA from "../outbound/adapter/empty-outbound-publisher";
 import * as KA from "../outbound/adapter/kafka-outbound-publisher";
 import * as PDVA from "../outbound/adapter/pdv-id-outbound-enricher";
 import * as PF from "../outbound/adapter/predicate-outbound-filterer";
 import * as QA from "../outbound/adapter/queue-outbound-mapper-publisher";
-import * as TA from "../outbound/adapter/tracker-outbound-publisher";
 import { OutboundEnricher } from "../outbound/port/outbound-enricher";
 import { OutboundFilterer } from "../outbound/port/outbound-filterer";
 import { OutboundPublisher } from "../outbound/port/outbound-publisher";
-import { getConfigOrThrow, withTopic } from "../utils/config";
-import { httpOrHttpsApiFetch } from "../utils/fetch";
+import { withTopic } from "../utils/config";
 import { servicePreferencesAvroFormatter } from "../utils/formatter/servicePreferencesAvroFormatter";
 import * as KP from "../utils/kafka/KafkaProducerCompact";
 import { ValidableKafkaProducerConfig } from "../utils/kafka/KafkaTypes";
-import { pdvTokenizerClient } from "../utils/pdvTokenizerClient";
-import { createRedisClientSingleton } from "../utils/redis";
 import { isTestUser } from "../utils/testUser";
 import { RetrievedServicePreferenceWithMaybePdvId } from "../utils/types/decoratedTypes";
+import {
+  config,
+  internalTestFiscalCodeSet,
+  pdvTokenizer,
+  redisClientTask,
+  telemetryClient
+} from "./cross-cutting";
 
-const config = getConfigOrThrow();
-
+// ---------------------------------------------------------------------------
+// KAFKA & QUEUE PUBLISHERS
+// ---------------------------------------------------------------------------
 const servicePreferencesConfig = withTopic(
   config.servicePreferencesKafkaTopicConfig.SERVICE_PREFERENCES_TOPIC_NAME,
   config.servicePreferencesKafkaTopicConfig
@@ -36,18 +45,18 @@ const servicePreferencesTopic = {
   messageFormatter: servicePreferencesAvroFormatter()
 };
 
-const servicePreferencesOnKafkaAdapter: OutboundPublisher<RetrievedServicePreferenceWithMaybePdvId> =
+export const servicePreferencesOnKafkaAdapter: OutboundPublisher<RetrievedServicePreferenceWithMaybePdvId> =
   KA.create(
     KP.fromConfig(
-      servicePreferencesConfig as ValidableKafkaProducerConfig, // cast due to wrong association between Promise<void> and t.Function ('brokers' field)
+      servicePreferencesConfig as ValidableKafkaProducerConfig,
       servicePreferencesTopic
     )
   );
 
-const servicePreferencesOnQueueAdapter: OutboundPublisher<RetrievedServicePreferenceWithMaybePdvId> =
+export const servicePreferencesOnQueueAdapter: OutboundPublisher<RetrievedServicePreferenceWithMaybePdvId> =
   QA.create(
     (servicePreference) => {
-      // void storing userPDVId it in queue
+      // void storing userPDVId in queue
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { userPDVId, ...rest } = servicePreference;
       return rest;
@@ -58,20 +67,10 @@ const servicePreferencesOnQueueAdapter: OutboundPublisher<RetrievedServicePrefer
     )
   );
 
-const pdvTokenizer = pdvTokenizerClient(
-  config.PDV_TOKENIZER_BASE_URL,
-  config.PDV_TOKENIZER_API_KEY,
-  httpOrHttpsApiFetch,
-  config.PDV_TOKENIZER_BASE_PATH
-);
-
-const redisClientTask = createRedisClientSingleton(config);
-
-const telemetryClient = TA.initTelemetryClient(
-  config.APPLICATIONINSIGHTS_CONNECTION_STRING
-);
-
-const pdvIdEnricherAdapter: OutboundEnricher<RetrievedServicePreferenceWithMaybePdvId> =
+// ---------------------------------------------------------------------------
+// PDV ENRICHER
+// ---------------------------------------------------------------------------
+export const servicePreferencesPdvIdEnricherAdapter: OutboundEnricher<RetrievedServicePreferenceWithMaybePdvId> =
   PDVA.create<RetrievedServicePreferenceWithMaybePdvId>(
     config.ENRICH_PDVID_THROTTLING,
     pdvTokenizer,
@@ -80,12 +79,10 @@ const pdvIdEnricherAdapter: OutboundEnricher<RetrievedServicePreferenceWithMaybe
     telemetryClient
   );
 
-const telemetryAdapter = TA.create(telemetryClient);
-
-const internalTestFiscalCodeSet = new Set(
-  config.INTERNAL_TEST_FISCAL_CODES_COMPRESSED as readonly FiscalCode[]
-);
-const servicePreferencesFilterer: OutboundFilterer<RetrievedServicePreference> =
+// ---------------------------------------------------------------------------
+// FILTERER
+// ---------------------------------------------------------------------------
+export const servicePreferencesFilterer: OutboundFilterer<RetrievedServicePreference> =
   PF.create(
     (retrievedServicePreference) =>
       !isTestUser(
@@ -94,14 +91,8 @@ const servicePreferencesFilterer: OutboundFilterer<RetrievedServicePreference> =
       )
   );
 
-const run = (_context: Context, documents: readonly unknown[]): Promise<void> =>
-  getAnalyticsProcessorForDocuments(
-    RetrievedServicePreference,
-    telemetryAdapter,
-    pdvIdEnricherAdapter,
-    servicePreferencesOnKafkaAdapter,
-    servicePreferencesOnQueueAdapter,
-    servicePreferencesFilterer
-  ).process(documents)();
-
-export default run;
+// ---------------------------------------------------------------------------
+// THROW ADAPTER (queue retry fallback)
+// ---------------------------------------------------------------------------
+export const servicePreferencesThrowAdapter: OutboundPublisher<RetrievedServicePreferenceWithMaybePdvId> =
+  EA.create();

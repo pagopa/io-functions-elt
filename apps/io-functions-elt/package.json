@@ -5,6 +5,7 @@
   "repository": "https://github.com/pagopa/io-functions-elt",
   "version": "3.2.0",
   "license": "MIT",
+  "main": "dist/main.js",
   "engines": {
     "node": "20.17.0"
   },
@@ -33,12 +34,10 @@
     "version": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
   },
   "devDependencies": {
-    "@azure/functions": "^3.2.0",
     "@eslint/js": "^9.39.1",
     "@pagopa/eslint-config": "^5.0.0",
     "@pagopa/openapi-codegen-ts": "^13.2.0",
     "@pagopa/typescript-config-node": "*",
-    "@types/express": "^4.17.12",
     "@types/kafkajs": "^1.9.0",
     "@types/lodash": "^4.14.173",
     "@types/node": "^20.17.0",
@@ -61,23 +60,21 @@
   "dependencies": {
     "@azure/cosmos": "4.2.0",
     "@azure/data-tables": "13.3.0",
+    "@azure/functions": "^4.0.0",
     "@azure/storage-queue": "12.12.0",
     "@chasdevs/avro-to-typescript": "^1.4.0",
-    "@pagopa/express-azure-functions": "^4.0.1",
-    "@pagopa/io-functions-commons": "^29.0.0",
+    "@pagopa/io-functions-commons": "^30.0.0",
     "@pagopa/ts-commons": "^13.1.2",
     "applicationinsights": "^2.9.5",
     "avsc": "^5.7.3",
     "durable-functions": "^1.4.4",
-    "express": "^4.15.3",
     "fp-ts": "^2.16.5",
     "io-ts": "^2.2.21",
     "kafka-node": "^5.0.0",
     "kafkajs": "^1.15.0",
     "lodash": "^4.17.21",
     "node-fetch": "^2.6.0",
-    "redis": "^4.7.0",
-    "winston": "^3.2.1"
+    "redis": "^4.7.0"
   },
   "resolutions": {
     "handlebars": "~4.5.3"
