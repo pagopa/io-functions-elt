@@ -6,6 +6,13 @@ export const getClient = vi.fn(() => ({
   startNew: mockStartNew
 }));
 
-export const orchestrator = vi.fn();
+export const app = {
+  activity: vi.fn(),
+  orchestration: vi.fn()
+};
+
+export const input = {
+  durableClient: vi.fn(() => ({}))
+};
 
 export const RetryOptions = vi.fn(() => ({}));

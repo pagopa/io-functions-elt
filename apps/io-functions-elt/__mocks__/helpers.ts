@@ -1,4 +1,4 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 
 import * as t from "io-ts";
 import * as RA from "fp-ts/ReadonlyArray";
@@ -18,10 +18,13 @@ export async function* buildServiceIterator<C extends t.Mixed>(
   }
 }
 
-export const createContext = (): Context =>
+export const createContext = (): InvocationContext =>
   ({
     bindings: {},
     executionContext: { functionName: "funcname" },
     // eslint-disable-next-line no-console
-    log: console.log
-  }) as unknown as Context;
+    log: console.log,
+    debug: console.log,
+    error: console.error,
+    warn: console.warn
+  }) as unknown as InvocationContext;

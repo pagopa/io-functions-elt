@@ -16,6 +16,10 @@
           "type": "fromEnd",
           "enqueuedTimeUtc": ""
       }
+    },
+    "queues": {
+      "maxDequeueCount": 31,
+      "visibilityTimeout": "00:00:05"
     }
   },
   "extensionBundle": {
