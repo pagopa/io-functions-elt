@@ -1,5 +1,11 @@
 # @pagopa/io-functions-elt
 
+## 4.0.0
+
+### Major Changes
+
+- 294f693: Refactory programming model v4 for Azure Functions
+
 ## 3.2.0
 
 ### Minor Changes
