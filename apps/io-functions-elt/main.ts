@@ -54,7 +54,6 @@ app.http("Info", {
 app.cosmosDB("AnalyticsProfilesChangeFeedInboundProcessorAdapter", {
   connection: "COSMOS_API_CONNECTION_STRING",
   containerName: "profiles",
-  createLeaseContainerIfNotExists: false,
   databaseName: "%COSMOSDB_NAME%",
   handler: (documents: unknown[]): Promise<void> =>
     getAnalyticsProcessorForDocuments(
@@ -74,7 +73,6 @@ app.cosmosDB("AnalyticsProfilesChangeFeedInboundProcessorAdapter", {
 app.cosmosDB("AnalyticsServiceChangeFeedInboundProcessorAdapter", {
   connection: "COSMOS_API_CONNECTION_STRING",
   containerName: "services",
-  createLeaseContainerIfNotExists: true,
   databaseName: "%COSMOSDB_NAME%",
   handler: (documents: unknown[]): Promise<void> =>
     getAnalyticsProcessorForDocuments(
@@ -99,7 +97,6 @@ app.cosmosDB("AnalyticsServiceChangeFeedInboundProcessorAdapter", {
 app.cosmosDB("AnalyticsServicePreferencesChangeFeedInboundProcessorAdapter", {
   connection: "COSMOS_API_CONNECTION_STRING",
   containerName: "services-preferences",
-  createLeaseContainerIfNotExists: false,
   databaseName: "%COSMOSDB_NAME%",
   handler: (documents: unknown[]): Promise<void> =>
     getAnalyticsProcessorForDocuments(
@@ -119,7 +116,6 @@ app.cosmosDB("AnalyticsServicePreferencesChangeFeedInboundProcessorAdapter", {
 app.cosmosDB("AnalyticsUserDataProcessingChangeFeedInboundProcessorAdapter", {
   connection: "COSMOS_API_CONNECTION_STRING",
   containerName: "user-data-processing",
-  createLeaseContainerIfNotExists: false,
   databaseName: "%COSMOSDB_NAME%",
   handler: (documents: unknown[]): Promise<void> =>
     getAnalyticsProcessorForDocuments(
