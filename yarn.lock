@@ -1893,12 +1893,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.17.0":
-  version: 20.19.30
-  resolution: "@types/node@npm:20.19.30"
+"@types/node@npm:^22.19.13":
+  version: 22.19.13
+  resolution: "@types/node@npm:22.19.13"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10c0/23dbea652727d947ea35fc1c4e8acb7e1c535e85f6c139c3a4697864a5af164655ce305ab0877ea4cca537deee0405bf56aeac714f236ae1a3dd0fa6b87cc860
+  checksum: 10c0/ad8a0b6a69dd8ef663701573eca94ef6d20ce093f54f05bed823c826374eb1ea8b06e6f2c5d7f6cfc203b82dfd60293296bf80ea987ddb77775840bc2ef9f803
   languageName: node
   linkType: hard
 
@@ -5390,7 +5390,7 @@ __metadata:
     "@pagopa/typescript-config-node": "npm:*"
     "@types/kafkajs": "npm:^1.9.0"
     "@types/lodash": "npm:^4.14.173"
-    "@types/node": "npm:^20.17.0"
+    "@types/node": "npm:^22.19.13"
     "@types/node-fetch": "npm:^2.5.7"
     "@types/vfile-message": "npm:^2.0.0"
     "@vitest/coverage-v8": "npm:~3.2.4"
