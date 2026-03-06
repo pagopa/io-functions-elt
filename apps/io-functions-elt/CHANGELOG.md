@@ -1,5 +1,11 @@
 # @pagopa/io-functions-elt
 
+## 5.0.0
+
+### Major Changes
+
+- b01329b: Bump to node 22
+
 ## 4.0.0
 
 ### Major Changes
