@@ -77,6 +77,6 @@
     "redis": "^4.7.0"
   },
   "resolutions": {
-    "handlebars": "~4.5.3"
+    "handlebars": "~4.7.0"
   }
 }
