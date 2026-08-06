@@ -5,7 +5,7 @@ resource "azurerm_resource_group" "itn_elt" {
   tags = local.tags
 }
 
-module "function_app_elt" {
+module "function_app_elt_itn" {
   source                          = "../_modules/function_app_elt"
   prefix                          = local.prefix
   env_short                       = local.env_short
