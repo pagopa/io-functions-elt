@@ -15,9 +15,9 @@ locals {
       APPLICATIONINSIGHTS_CONNECTION_STRING = data.azurerm_application_insights.application_insights.connection_string
 
       COSMOSDB_NAME                = "db"
-      COSMOSDB_URI                 = data.azurerm_cosmosdb_account.cosmos_api.endpoint
-      COSMOSDB_KEY                 = data.azurerm_cosmosdb_account.cosmos_api.primary_key
-      COSMOS_API_CONNECTION_STRING = format("AccountEndpoint=%s;AccountKey=%s;", data.azurerm_cosmosdb_account.cosmos_api.endpoint, data.azurerm_cosmosdb_account.cosmos_api.primary_key)
+      COSMOSDB_URI                 = var.cosmos_db_attributes.endpoint
+      COSMOSDB_KEY                 = var.cosmos_db_attributes.primary_key
+      COSMOS_API_CONNECTION_STRING = format("AccountEndpoint=%s;AccountKey=%s;", local.function_elt.app_settings.COSMOSDB_URI, local.function_elt.app_settings.COSMOSDB_KEY)
 
       TARGETKAFKA_clientId            = "IO_FUNCTIONS_ELT"
       TARGETKAFKA_brokers             = local.event_hub_connection
@@ -67,8 +67,8 @@ locals {
       PROFILE_TOPIC_CONNECTION_STRING = data.azurerm_eventhub_authorization_rule.evh_ns_io_cosmos_profiles_fn.primary_connection_string
 
       COSMOSDB_REPLICA_NAME     = "db"
-      COSMOSDB_REPLICA_URI      = data.azurerm_cosmosdb_account.cosmos_api.endpoint
-      COSMOSDB_REPLICA_KEY      = data.azurerm_cosmosdb_account.cosmos_api.primary_key
+      COSMOSDB_REPLICA_URI      = var.cosmos_db_attributes.endpoint
+      COSMOSDB_REPLICA_KEY      = var.cosmos_db_attributes.primary_key
       COSMOSDB_REPLICA_LOCATION = var.secondary_location_display_name
 
       COSMOS_CHUNK_SIZE            = "1000"

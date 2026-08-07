@@ -52,8 +52,13 @@ variable "common_resource_group_name_itn" {
   type = string
 }
 
-
 variable "elt_snet_cidr" {
   type        = string
   description = "ELT Services Subnet CIDR"
+}
+
+variable "cosmos_db_attributes" {
+  type        = map(any)
+  sensitive   = true
+  description = "Informations about the Cosmos DB, such as primary key and endpoint"
 }

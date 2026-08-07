@@ -16,5 +16,6 @@ module "function_app_elt_itn" {
   vnet_common_name_itn            = local.vnet_common_name_itn
   common_resource_group_name_itn  = local.common_resource_group_name_itn
   elt_snet_cidr                   = local.subnet_cidr
+  cosmos_db_attributes            = local.platform_data_platform.cosmos_api.weu
   tags                            = local.tags
 }

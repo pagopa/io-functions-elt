@@ -8,6 +8,8 @@ locals {
   project        = "${local.prefix}-${local.env_short}-${local.location_short}"
   project_legacy = "${local.prefix}-${local.env_short}"
 
+  platform_data_platform = data.terraform_remote_state.platform_data_platform.outputs
+
   secondary_location_display_name = "North Europe"
 
   vnet_common_name_itn           = "${local.project}-common-vnet-01"
