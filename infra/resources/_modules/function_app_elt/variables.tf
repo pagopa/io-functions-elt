@@ -62,3 +62,25 @@ variable "cosmos_db_attributes" {
   sensitive   = true
   description = "Informations about the Cosmos DB, such as primary key and endpoint"
 }
+
+variable "application_insights_error_action_group_id" {
+  type        = string
+  description = "Application Insights error action group id"
+}
+
+variable "application_insights_instrumentation_key" {
+  type        = string
+  sensitive   = true
+  description = "Application Insight instrumentation key"
+}
+
+variable "application_insights_connection_string" {
+  type        = string
+  sensitive   = true
+  description = "Application Insight connection string"
+}
+
+variable "law_id" {
+  type        = string
+  description = "Log Analytics Workspace id"
+}

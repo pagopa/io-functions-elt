@@ -1,7 +1,7 @@
 resource "azurerm_monitor_diagnostic_setting" "queue_diagnostic_setting" {
   name                       = "${var.project_weu_legacy}-fnelt-internal-st-queue-ds-01"
   target_resource_id         = "${module.function_elt_itn.storage_account.id}/queueServices/default"
-  log_analytics_workspace_id = data.azurerm_application_insights.application_insights.workspace_id
+  log_analytics_workspace_id = var.law_id
 
   enabled_log {
     category = "StorageWrite"
@@ -49,7 +49,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "service_preferences_f
 
   action {
     action_groups = [
-      data.azurerm_monitor_action_group.error_action_group.id,
+      var.application_insights_error_action_group_id,
     ]
   }
 
@@ -87,7 +87,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "profiles_failure_aler
 
   action {
     action_groups = [
-      data.azurerm_monitor_action_group.error_action_group.id,
+      var.application_insights_error_action_group_id,
     ]
   }
 
@@ -125,7 +125,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "profile_deletion_fail
 
   action {
     action_groups = [
-      data.azurerm_monitor_action_group.error_action_group.id,
+      var.application_insights_error_action_group_id,
     ]
   }
 

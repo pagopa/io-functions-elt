@@ -12,12 +12,12 @@ locals {
 
       NODE_ENV = "production"
 
-      APPLICATIONINSIGHTS_CONNECTION_STRING = data.azurerm_application_insights.application_insights.connection_string
+      APPLICATIONINSIGHTS_CONNECTION_STRING = var.application_insights_connection_string
 
       COSMOSDB_NAME                = "db"
       COSMOSDB_URI                 = var.cosmos_db_attributes.endpoint
       COSMOSDB_KEY                 = var.cosmos_db_attributes.primary_key
-      COSMOS_API_CONNECTION_STRING = format("AccountEndpoint=%s;AccountKey=%s;", local.function_elt.app_settings.COSMOSDB_URI, local.function_elt.app_settings.COSMOSDB_KEY)
+      COSMOS_API_CONNECTION_STRING = format("AccountEndpoint=%s;AccountKey=%s;", var.cosmos_db_attributes.endpoint, var.cosmos_db_attributes.primary_key)
 
       TARGETKAFKA_clientId            = "IO_FUNCTIONS_ELT"
       TARGETKAFKA_brokers             = local.event_hub_connection

@@ -9,6 +9,7 @@ locals {
   project_legacy = "${local.prefix}-${local.env_short}"
 
   platform_data_platform = data.terraform_remote_state.platform_data_platform.outputs
+  platform_observability = data.terraform_remote_state.platform_observability.outputs
 
   secondary_location_display_name = "North Europe"
 

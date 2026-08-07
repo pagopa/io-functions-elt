@@ -26,7 +26,7 @@ module "storage_account_itn_elt" {
     }
   }
 
-  action_group_id = data.azurerm_monitor_action_group.error_action_group.id
+  action_group_id = var.application_insights_error_action_group_id
 
   tags = var.tags
 }

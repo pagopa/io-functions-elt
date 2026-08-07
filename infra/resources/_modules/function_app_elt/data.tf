@@ -1,20 +1,5 @@
 data "azurerm_client_config" "current" {}
 
-data "azurerm_application_insights" "application_insights" {
-  name                = format("%s-ai-common", var.project_weu_legacy)
-  resource_group_name = local.resource_group_name_common
-}
-
-data "azurerm_monitor_action_group" "error_action_group" {
-  name                = "${replace("${var.project_weu_legacy}", "-", "")}error"
-  resource_group_name = local.resource_group_name_common
-}
-
-data "azurerm_monitor_action_group" "quarantine_error_action_group" {
-  name                = "${replace(var.project_weu_legacy, "-", "")}quarantineerror"
-  resource_group_name = local.resource_group_name_common
-}
-
 data "azurerm_private_dns_zone" "privatelink_blob_core" {
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = local.resource_group_name_common
@@ -28,11 +13,6 @@ data "azurerm_private_dns_zone" "privatelink_queue_core" {
 data "azurerm_private_dns_zone" "privatelink_table_core" {
   name                = "privatelink.table.core.windows.net"
   resource_group_name = local.resource_group_name_common
-}
-
-data "azurerm_cosmosdb_account" "cosmos_api" {
-  name                = format("%s-cosmos-api", var.project_weu_legacy)
-  resource_group_name = format("%s-rg-internal", var.project_weu_legacy)
 }
 
 data "azurerm_eventhub_authorization_rule" "evh_ns_io_cosmos_fn" {
