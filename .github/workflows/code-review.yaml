@@ -13,6 +13,6 @@ on:
       - .github/workflows/code-review.yaml
 jobs:
   deploy_on_prod:
-    uses: pagopa/dx/.github/workflows/js_code_review.yaml@main
+    uses: pagopa/dx/.github/workflows/js_code_review.yaml@36ff122137235d814f3dbd20068acfb521d3fd74 # main
     name: Code Review
     secrets: inherit
