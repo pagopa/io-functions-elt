@@ -63,7 +63,7 @@ services:
       - io-fn
 
   redis:
-    image: redis/redis-stack:6.2.6-v17
+    image: redis/redis-stack:6.2.6-v17@sha256:cfa07cc16735c837a665c7c4448554ba3bebf535b84bd2df87c733bfb2cba364
     env_file:
       - .env
     environment:
@@ -88,7 +88,7 @@ services:
       - io-fn
 
   traefik:
-    image: traefik:v2.0
+    image: traefik:v2.0@sha256:df0671f3cd101dad36b444e0fc586bedc05604ecda10f33b5d1f3487816d8c9f
     command: |-
       --entrypoints.web.address=:80
       --providers.docker=true
