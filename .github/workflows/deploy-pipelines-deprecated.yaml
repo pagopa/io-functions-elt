@@ -5,7 +5,7 @@ on:
       
 jobs:
   deploy_on_prod:
-    uses: pagopa/dx/.github/workflows/legacy_deploy_pipelines.yaml@main
+    uses: pagopa/dx/.github/workflows/legacy_deploy_pipelines.yaml@8ec64257f46bb8c03509d317b42fbf6a2da2c63a # main
     name: Deploy on PROD WEU
     secrets: inherit
     with:
